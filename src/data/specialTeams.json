@@ -1,0 +1,36 @@
+{
+  "kickers": [
+    { "player": "Brandon Aubrey", "team": "DAL", "rank": 1, "posTier": 1 },
+    { "player": "Ka'imi Fairbairn", "team": "HOU", "rank": 2, "posTier": 1 },
+    { "player": "Cameron Dicker", "team": "LAC", "rank": 3, "posTier": 1 },
+    { "player": "Jason Myers", "team": "SEA", "rank": 4, "posTier": 1 },
+    { "player": "Cam Little", "team": "JAC", "rank": 5, "posTier": 1 },
+    { "player": "Eddy Pineiro", "team": "SF", "rank": 6, "posTier": 2 },
+    { "player": "Tyler Loop", "team": "BAL", "rank": 7, "posTier": 2 },
+    { "player": "Evan McPherson", "team": "CIN", "rank": 8, "posTier": 2 },
+    { "player": "Jake Bates", "team": "DET", "rank": 9, "posTier": 2 },
+    { "player": "Cairo Santos", "team": "CHI", "rank": 10, "posTier": 2 },
+    { "player": "Andy Borregales", "team": "NE", "rank": 11, "posTier": 3 },
+    { "player": "Harrison Mevis", "team": "LAR", "rank": 12, "posTier": 3 },
+    { "player": "Chase McLaughlin", "team": "TB", "rank": 13, "posTier": 3 },
+    { "player": "Chris Boswell", "team": "PIT", "rank": 14, "posTier": 3 },
+    { "player": "Harrison Butker", "team": "KC", "rank": 15, "posTier": 3 }
+  ],
+  "defenses": [
+    { "player": "Texans", "team": "HOU", "rank": 1, "posTier": 1 },
+    { "player": "Broncos", "team": "DEN", "rank": 2, "posTier": 1 },
+    { "player": "Seahawks", "team": "SEA", "rank": 3, "posTier": 1 },
+    { "player": "Rams", "team": "LAR", "rank": 4, "posTier": 1 },
+    { "player": "Eagles", "team": "PHI", "rank": 5, "posTier": 2 },
+    { "player": "Vikings", "team": "MIN", "rank": 6, "posTier": 2 },
+    { "player": "Chargers", "team": "LAC", "rank": 7, "posTier": 2 },
+    { "player": "Ravens", "team": "BAL", "rank": 8, "posTier": 2 },
+    { "player": "Patriots", "team": "NE", "rank": 9, "posTier": 2 },
+    { "player": "Steelers", "team": "PIT", "rank": 10, "posTier": 3 },
+    { "player": "Jaguars", "team": "JAC", "rank": 11, "posTier": 3 },
+    { "player": "Packers", "team": "GB", "rank": 12, "posTier": 3 },
+    { "player": "Browns", "team": "CLE", "rank": 13, "posTier": 3 },
+    { "player": "Bills", "team": "BUF", "rank": 14, "posTier": 3 },
+    { "player": "Chiefs", "team": "KC", "rank": 15, "posTier": 3 }
+  ]
+}

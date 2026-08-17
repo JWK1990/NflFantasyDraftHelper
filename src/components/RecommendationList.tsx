@@ -1,0 +1,67 @@
+import { useEffect, useRef } from "react";
+import type { DraftedBy, Player, Recommendation } from "../domain/types.ts";
+import type { TierFocus } from "./TierPressureStrip.tsx";
+import { PlayerRow } from "./PlayerRow.tsx";
+
+interface ListRow {
+  player: Player;
+  recommendation?: Recommendation;
+  draftedBy?: DraftedBy;
+}
+
+interface RecommendationListProps {
+  rows: ListRow[];
+  expandedId: string | null;
+  ranks: Map<string, number>;
+  focus: TierFocus | null;
+  topVorp?: number | null;
+  onToggle: (playerId: string) => void;
+  onDraft: (playerId: string, draftedBy: DraftedBy) => void;
+}
+
+export function RecommendationList({
+  rows,
+  expandedId,
+  ranks,
+  focus,
+  topVorp = null,
+  onToggle,
+  onDraft,
+}: RecommendationListProps) {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!focus) return;
+    const match = listRef.current?.querySelector(".player-row:not(.dimmed)");
+    match?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [focus, rows]);
+
+  if (rows.length === 0) {
+    return <div className="empty">No matching players.</div>;
+  }
+
+  return (
+    <div className="list" ref={listRef}>
+      {rows.map((row) => {
+        const dimmed = Boolean(
+          focus &&
+            (row.player.pos !== focus.pos || row.player.posTier !== focus.posTier),
+        );
+        return (
+          <PlayerRow
+            key={row.player.id}
+            player={row.player}
+            rank={row.draftedBy ? undefined : ranks.get(row.player.id)}
+            recommendation={row.recommendation}
+            draftedBy={row.draftedBy}
+            expanded={expandedId === row.player.id}
+            dimmed={dimmed}
+            topVorp={topVorp}
+            onToggle={() => onToggle(row.player.id)}
+            onDraft={(draftedBy) => onDraft(row.player.id, draftedBy)}
+          />
+        );
+      })}
+    </div>
+  );
+}
