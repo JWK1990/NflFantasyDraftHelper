@@ -11,13 +11,24 @@ function named(name: string) {
 }
 
 describe("starting lineup", () => {
-  it("puts a third RB in FLEX rather than OP when a startable QB remains", () => {
+  it("puts a third RB in FLEX rather than OP", () => {
     const roster = [named("Bijan Robinson"), named("Jahmyr Gibbs"), named("Christian McCaffrey")];
-    const lineup = assignStarters(roster, named("Josh Allen").modelPts);
+    const lineup = assignStarters(roster);
     expect(lineup.RB1?.player).toBe("Bijan Robinson");
     expect(lineup.RB2?.player).toBe("Jahmyr Gibbs");
     expect(lineup.FLEX?.player).toBe("Christian McCaffrey");
     expect(lineup.OP).toBeNull();
+  });
+
+  it("lets a fourth owned skill player fill OP even if an unowned QB scores more", () => {
+    const roster = [
+      named("Bijan Robinson"),
+      named("Jahmyr Gibbs"),
+      named("Christian McCaffrey"),
+      named("De'Von Achane"),
+    ];
+    const lineup = assignStarters(roster, named("Josh Allen").modelPts);
+    expect(lineup.OP?.player).toBe("De'Von Achane");
   });
 
   it("scores McCaffrey as a FLEX upgrade after two RBs", () => {

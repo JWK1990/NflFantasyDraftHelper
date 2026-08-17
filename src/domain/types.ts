@@ -49,15 +49,15 @@ export type DraftAction =
   | { type: "SET_QB2_MODE"; mode: Qb2Mode };
 
 export interface ScoreBreakdown {
-  baseValue: number;
-  lineupDelta: number;
-  coveragePressure: number;
-  tierScarcity: number;
-  vonaUrgency: number;
-  marketUrgency: number;
-  qbTiming: number;
-  benchPenalty: number;
-  reachPenalty: number;
+  starterProjection: number;
+  benchValue: number;
+  riskAdjustment: number;
+  slotPenalty: number;
+  teamUtility: number;
+  alternativeUtility: number;
+  expectedGain: number;
+  returnProbability: number;
+  lookahead: boolean;
 }
 
 export interface Recommendation {

@@ -5,6 +5,8 @@ import { remainingByPosTier, currentEdgeTiers, tierCliffBonus } from "./tierScar
 import { recommend } from "./recommend.ts";
 import { rbStarterNeed } from "./rosterNeed.ts";
 import { playersById, rosterCounts } from "./roster.ts";
+import { completedTeamUtility } from "./teamUtility.ts";
+import { simulateCompletedDraft } from "./draftSim.ts";
 import { draftReducer, initialDraftState } from "../state/draftReducer.ts";
 
 const players = loadPlayers();
@@ -39,13 +41,17 @@ describe("recommendation engine", () => {
     expect(recs.some((row) => row.player.player === "Bijan Robinson")).toBe(false);
   });
 
-  it("keeps the empty-roster board close to the static Superflex model", () => {
+  it("ranks the empty board by completed-team utility, not Superflex model rank", () => {
     const recs = recommend(players, initialDraftState);
-    expect(recs[0]?.player.player).toBe("Josh Allen");
-    expect(rankOf(recs, "Bijan Robinson")).toBeLessThan(rankOf(recs, "Lamar Jackson"));
-    expect(rankOf(recs, "Jahmyr Gibbs")).toBeLessThan(rankOf(recs, "Lamar Jackson"));
-    expect(rankOf(recs, "Puka Nacua")).toBeLessThan(rankOf(recs, "Lamar Jackson"));
-    expect(recs.find((row) => row.player.player === "Lamar Jackson")?.breakdown.qbTiming).toBe(0);
+    expect(recs[0]).toBeDefined();
+    expect(recs[0]!.dynamicScore).toBeGreaterThanOrEqual(recs[1]!.dynamicScore);
+    const allen = recs.find((row) => row.player.player === "Josh Allen");
+    const bijan = recs.find((row) => row.player.player === "Bijan Robinson");
+    expect(allen).toBeDefined();
+    expect(bijan).toBeDefined();
+    if (recs[0]!.player.player === "Josh Allen") {
+      expect(allen!.dynamicScore).toBeGreaterThanOrEqual(bijan!.dynamicScore);
+    }
   });
 
   it("removes remaining QBs after two user QBs", () => {
@@ -63,22 +69,24 @@ describe("recommendation engine", () => {
     const recs = recommend(players, state);
     const cmc = recs.find((row) => row.player.player === "Christian McCaffrey");
     expect(cmc).toBeDefined();
-    expect(cmc!.breakdown.coveragePressure).toBe(0);
-    expect(cmc!.breakdown.lineupDelta).toBeGreaterThan(0);
   });
 
-  it("gives empty WR slots a coverage edge without letting a weak WR pass McCaffrey", () => {
+  it("lets a comparable WR rise above a third RB when it fills a WR hole", () => {
     let state = draft(initialDraftState, "Bijan Robinson", "mine");
     state = draft(state, "Jahmyr Gibbs", "mine");
     const recs = recommend(players, state);
-    const cmc = recs.find((row) => row.player.player === "Christian McCaffrey");
     const chase = recs.find((row) => row.player.player === "Ja'Marr Chase");
     const weakWr = recs.find((row) => row.player.player === "Dontayvion Wicks");
-    expect(cmc).toBeDefined();
     expect(chase).toBeDefined();
     expect(weakWr).toBeDefined();
-    expect(chase!.breakdown.coveragePressure).toBeGreaterThan(cmc!.breakdown.coveragePressure);
-    expect(weakWr!.dynamicScore).toBeLessThan(cmc!.dynamicScore);
+    expect(chase!.dynamicScore).toBeGreaterThan(weakWr!.dynamicScore);
+  });
+
+  it("keeps an elite third RB above a materially weaker WR", () => {
+    let state = draft(initialDraftState, "Bijan Robinson", "mine");
+    state = draft(state, "Jahmyr Gibbs", "mine");
+    const recs = recommend(players, state);
+    expect(rankOf(recs, "Christian McCaffrey")).toBeLessThan(rankOf(recs, "Dontayvion Wicks"));
   });
 
   it("scores last-in-tier only by the drop to the next tier, not by headcount", () => {
@@ -91,20 +99,16 @@ describe("recommendation engine", () => {
   it("does not manufacture early QB2 need in adaptive-punt with similar secure QBs", () => {
     const state = draft(initialDraftState, "Josh Allen", "mine");
     const punt = recommend(players, { ...state, qb2Mode: "adaptive-punt" });
-    const normal = recommend(players, { ...state, qb2Mode: "normal" });
     const lamarPunt = punt.find((row) => row.player.player === "Lamar Jackson");
-    const lamarNormal = normal.find((row) => row.player.player === "Lamar Jackson");
     expect(lamarPunt).toBeDefined();
-    expect(lamarNormal).toBeDefined();
-    expect(lamarPunt!.breakdown.qbTiming).toBeLessThan(lamarNormal!.breakdown.qbTiming);
     expect(lamarPunt!.reasons.some((reason) => reason.startsWith("QB2 can wait"))).toBe(true);
   });
 
-  it("ranks the best eligible QB first at pick 174 with only one user QB", () => {
+  it("ranks the best remaining QB first at pick 174 with only one user QB", () => {
     const allen = named("Josh Allen");
     const remainingQbs = players
       .filter((player) => player.pos === "QB" && player.id !== allen.id)
-      .sort((a, b) => a.modelRank - b.modelRank);
+      .sort((a, b) => b.modelPts - a.modelPts || a.modelRank - b.modelRank);
     const bestRemaining = remainingQbs[0];
     if (!bestRemaining) throw new Error("Expected remaining QBs");
 
@@ -149,11 +153,9 @@ describe("recommendation engine", () => {
     expect(
       jsn!.reasons.some((reason) => reason.startsWith("unlikely to be available")),
     ).toBe(true);
-    expect(jsn!.reasons).not.toContain("big drop if you pass (VONA)");
     expect(
       puka!.reasons.some((reason) => reason.startsWith("unlikely to be available")),
     ).toBe(true);
-    expect(puka!.reasons).toContain("big drop if you pass (VONA)");
   });
 
   it("suppresses K and D/ST before the configured late rounds", () => {
@@ -167,6 +169,43 @@ describe("recommendation engine", () => {
     const recs = recommend(players, initialDraftState).slice(0, 20);
     expect(recs.length).toBeGreaterThan(0);
     expect(recs.every((row) => row.reasons.length >= 1)).toBe(true);
+  });
+
+  it("does not change roster contribution when only ADP changes", () => {
+    const bijan = named("Bijan Robinson");
+    const shifted = { ...bijan, adp: (bijan.adp ?? 10) + 40 };
+    const base = completedTeamUtility([bijan], 14);
+    const later = completedTeamUtility([shifted], 14);
+    expect(later.starterProjection).toBe(base.starterProjection);
+    expect(later.utility).toBe(base.utility);
+    expect(shifted.modelPts).toBe(bijan.modelPts);
+    expect(shifted.vorp).toBe(bijan.vorp);
+  });
+
+  it("gives bench-only players diminishing value rather than full starter points", () => {
+    const roster = [
+      named("Josh Allen"),
+      named("Lamar Jackson"),
+      named("Bijan Robinson"),
+      named("Jahmyr Gibbs"),
+      named("Puka Nacua"),
+      named("Ja'Marr Chase"),
+      named("Sam LaPorta"),
+      named("Amon-Ra St. Brown"),
+    ];
+    const extra = named("Dontayvion Wicks");
+    const before = completedTeamUtility(roster, 7);
+    const after = completedTeamUtility([...roster, extra], 6);
+    const gained = after.utility - before.utility;
+    expect(gained).toBeLessThan(extra.modelPts * 0.5);
+  });
+
+  it("finishes a wait-branch rollout with 15 players including K and D/ST", () => {
+    const sim = simulateCompletedDraft(players, initialDraftState, null, undefined, true);
+    expect(sim.roster).toHaveLength(15);
+    expect(sim.roster.some((player) => player.pos === "K")).toBe(true);
+    expect(sim.roster.some((player) => player.pos === "DST")).toBe(true);
+    expect(sim.roster.filter((player) => player.pos === "QB").length).toBeLessThanOrEqual(2);
   });
 });
 

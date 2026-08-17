@@ -1,5 +1,5 @@
 import type { DraftedBy, Player, Recommendation } from "../domain/types.ts";
-import { formatAdp, formatVorp, formatVorpDiff, posLabel, positionColor, signed } from "./format.ts";
+import { formatAdp, formatVorp, formatVorpDiff, posLabel, positionColor } from "./format.ts";
 
 interface PlayerRowProps {
   player: Player;
@@ -13,17 +13,9 @@ interface PlayerRowProps {
   onDraft: (draftedBy: DraftedBy) => void;
 }
 
-const BREAKDOWN_LABELS: { key: keyof Recommendation["breakdown"]; label: string }[] = [
-  { key: "baseValue", label: "Base value" },
-  { key: "lineupDelta", label: "Lineup upgrade" },
-  { key: "coveragePressure", label: "Fixed-slot coverage" },
-  { key: "tierScarcity", label: "Tier cliff" },
-  { key: "vonaUrgency", label: "VONA" },
-  { key: "marketUrgency", label: "Won't return" },
-  { key: "qbTiming", label: "QB timing" },
-  { key: "benchPenalty", label: "Bench penalty" },
-  { key: "reachPenalty", label: "Reach penalty" },
-];
+function formatPts(value: number): string {
+  return Math.round(value).toLocaleString("en-US");
+}
 
 export function PlayerRow({
   player,
@@ -94,23 +86,44 @@ export function PlayerRow({
         <div className="breakdown">
           {recommendation ? (
             <>
-              {BREAKDOWN_LABELS.map((row) => {
-                const value = recommendation.breakdown[row.key];
-                const negative = row.key === "reachPenalty" || row.key === "benchPenalty";
-                const display = negative
-                  ? `−${Math.abs(value).toFixed(1)}`
-                  : signed(value);
-                return (
-                  <div className="breakdown-row" key={row.key}>
-                    <span>{row.label}</span>
-                    <span>{display}</span>
-                  </div>
-                );
-              })}
               <div className="breakdown-row">
-                <strong>Dynamic score</strong>
-                <strong>{recommendation.dynamicScore.toFixed(1)}</strong>
+                <span>Projected final starters</span>
+                <span>{formatPts(recommendation.breakdown.starterProjection)}</span>
               </div>
+              <div className="breakdown-row">
+                <span>Alternative final team</span>
+                <span>{formatPts(recommendation.breakdown.alternativeUtility)}</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Expected gain</span>
+                <span>
+                  {recommendation.breakdown.expectedGain >= 0 ? "+" : ""}
+                  {Math.round(recommendation.breakdown.expectedGain)}
+                </span>
+              </div>
+              <div className="breakdown-row">
+                <span>Likely to return at next pick</span>
+                <span>
+                  {Math.round(recommendation.breakdown.returnProbability * 100)}%
+                </span>
+              </div>
+              <div className="breakdown-row">
+                <span>Risk adjustment</span>
+                <span>−{Math.round(recommendation.breakdown.riskAdjustment)}</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Bench value</span>
+                <span>{recommendation.breakdown.benchValue.toFixed(1)}</span>
+              </div>
+              <div className="breakdown-row">
+                <strong>Completed-team utility</strong>
+                <strong>{formatPts(recommendation.breakdown.teamUtility)}</strong>
+              </div>
+              {recommendation.breakdown.lookahead ? null : (
+                <p className="breakdown-note">
+                  Approximate — not a full rest-of-draft simulation.
+                </p>
+              )}
             </>
           ) : (
             <div className="breakdown-row">

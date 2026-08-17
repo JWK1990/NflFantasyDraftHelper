@@ -34,7 +34,7 @@ describe("QB branch comparison", () => {
     expect(comparison!.securePool).toBeGreaterThanOrEqual(2);
   });
 
-  it("treats Josh Allen at pick 6 as a special QB-now exception", () => {
+  it("does not force Josh Allen at pick 6 as a special exception", () => {
     let state = initialDraftState;
     const fillers = players.filter((player) => player.player !== "Josh Allen").slice(0, 5);
     for (const player of fillers) {
@@ -46,8 +46,7 @@ describe("QB branch comparison", () => {
     }
     expect(state.picks).toHaveLength(5);
     const comparison = compareQbBranches(players, state);
-    expect(comparison?.allenException).toBe(true);
-    expect(comparison?.verdict).toBe("qb-now");
+    expect(comparison?.allenException).toBe(false);
   });
 
   it("forces the best remaining QB at pick 163 with zero user QBs", () => {
@@ -58,7 +57,7 @@ describe("QB branch comparison", () => {
     const allen = named("Josh Allen");
     const remainingQbs = players
       .filter((player) => player.pos === "QB" && player.id !== allen.id)
-      .sort((a, b) => a.modelRank - b.modelRank);
+      .sort((a, b) => b.modelPts - a.modelPts || a.modelRank - b.modelRank);
     const bestRemaining = remainingQbs[0];
     if (!bestRemaining) throw new Error("Expected remaining QBs");
 

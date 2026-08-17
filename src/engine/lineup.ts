@@ -33,6 +33,7 @@ export function assignStarters(
   const wrs = byPoints(roster.filter((player) => player.pos === "WR"));
   const tes = byPoints(roster.filter((player) => player.pos === "TE"));
   const used = new Set<string>();
+  void bestAvailableQbPts;
 
   const QB = take(qbs, used);
   const RB1 = take(rbs, used);
@@ -50,18 +51,17 @@ export function assignStarters(
   );
   const FLEX = take(leftoverSkill, used);
 
-  const secondQb = take(qbs, used);
-  const leftoverAfterFlex = leftoverSkill.find((player) => !used.has(player.id)) ?? null;
+  const leftoverAfterFlex =
+    leftoverSkill.find((player) => !used.has(player.id)) ?? null;
+  const secondQb = qbs.find((player) => !used.has(player.id)) ?? null;
   let OP: Player | null = null;
-  if (secondQb) {
-    OP = secondQb;
-  } else if (
-    leftoverAfterFlex &&
-    (bestAvailableQbPts == null || leftoverAfterFlex.modelPts > bestAvailableQbPts)
-  ) {
-    OP = leftoverAfterFlex;
-    used.add(leftoverAfterFlex.id);
+  if (secondQb && leftoverAfterFlex) {
+    OP =
+      secondQb.modelPts >= leftoverAfterFlex.modelPts ? secondQb : leftoverAfterFlex;
+  } else {
+    OP = secondQb ?? leftoverAfterFlex;
   }
+  if (OP) used.add(OP.id);
 
   return { QB, OP, RB1, RB2, WR1, WR2, TE, FLEX };
 }

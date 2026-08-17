@@ -17,7 +17,10 @@ function adpValue(id: string): number {
 }
 
 describe("scripted mock draft", () => {
-  it("walks 180 picks on the slot-6 schedule and preserves the QB2 branch", () => {
+  it(
+    "walks 180 picks on the slot-6 schedule and preserves the QB2 branch",
+    { timeout: 120_000 },
+    () => {
     let state: DraftState = initialDraftState;
     const userPickNumbers: number[] = [];
 

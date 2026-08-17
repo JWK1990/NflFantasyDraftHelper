@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickForRound, userPickSchedule } from "./snake.ts";
+import { pickForRound, slotForPick, userPickSchedule } from "./snake.ts";
 
 describe("snake draft math", () => {
   it("slot 6 produces the 15 scheduled user picks", () => {
@@ -12,5 +12,12 @@ describe("snake draft math", () => {
     expect(pickForRound(1, 12, 6)).toBe(6);
     expect(pickForRound(2, 12, 6)).toBe(19);
     expect(pickForRound(3, 12, 6)).toBe(30);
+  });
+
+  it("maps overall picks to snake slots", () => {
+    expect(slotForPick(1)).toBe(1);
+    expect(slotForPick(6)).toBe(6);
+    expect(slotForPick(13)).toBe(12);
+    expect(slotForPick(19)).toBe(6);
   });
 });

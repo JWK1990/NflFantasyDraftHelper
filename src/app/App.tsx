@@ -140,7 +140,12 @@ export default function App() {
           dispatch({ type: "SET_POSITION_FILTER", position });
         }}
       />
-      {qbBranch ? <QbBranchCard comparison={qbBranch} /> : null}
+      {qbBranch ? (
+        <QbBranchCard
+          comparison={qbBranch}
+          listLeaderName={recs[0]?.player.player}
+        />
+      ) : null}
       <TierPressureStrip
         tiers={endingTiers}
         focus={tierFocus}

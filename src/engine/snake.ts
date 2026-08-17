@@ -20,6 +20,12 @@ export function roundForPick(overallPick: number, teams: number = LEAGUE.teams):
   return Math.ceil(overallPick / teams);
 }
 
+export function slotForPick(overallPick: number, teams: number = LEAGUE.teams): number {
+  const round = roundForPick(overallPick, teams);
+  const indexInRound = (overallPick - 1) % teams;
+  return round % 2 === 1 ? indexInRound + 1 : teams - indexInRound;
+}
+
 export function isUserPick(
   overallPick: number,
   schedule: number[] = userPickSchedule(),

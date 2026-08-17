@@ -29,7 +29,7 @@ export function secureQbPool(
 ): Player[] {
   return available
     .filter((player) => isAcceptableQb(player, config))
-    .sort((a, b) => a.modelRank - b.modelRank);
+    .sort((a, b) => b.modelPts - a.modelPts || a.modelRank - b.modelRank);
 }
 
 export function qbJobSecurityPenalty(
@@ -54,6 +54,6 @@ export function bestQb(
   return (
     available
       .filter((player) => player.pos === "QB")
-      .sort((a, b) => a.modelRank - b.modelRank)[0] ?? null
+      .sort((a, b) => b.modelPts - a.modelPts || a.modelRank - b.modelRank)[0] ?? null
   );
 }
