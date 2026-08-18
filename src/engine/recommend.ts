@@ -16,7 +16,7 @@ import { compareQbBranches, forcedQbOverallPick, type QbBranchComparison } from 
 import {
   intrinsicLookaheadPool,
   returnProbability,
-  simulateCompletedDraft,
+  simulateCandidateDraft,
 } from "./draftSim.ts";
 import { completedTeamUtility } from "./teamUtility.ts";
 import { lateRoundReservation } from "./lateRound.ts";
@@ -257,7 +257,7 @@ export function recommend(
     const starts = makesStartingLineup(roster, player);
     const fullLookahead = lookahead.has(player.id);
     const sim = fullLookahead
-      ? simulateCompletedDraft(players, state, player, config)
+      ? simulateCandidateDraft(players, state, player, config)
       : null;
     const cheap = completedTeamUtility(
       [...roster, player],
@@ -275,6 +275,7 @@ export function recommend(
       nextUser,
     );
 
+    const later = sim?.laterAcquisition;
     const breakdown: ScoreBreakdown = {
       starterProjection: team.starterProjection,
       benchValue: team.benchValue,
@@ -285,6 +286,12 @@ export function recommend(
       expectedGain: 0,
       returnProbability: returnChance,
       lookahead: fullLookahead,
+      laterPlayer: later?.player.player,
+      laterPos: later?.player.pos,
+      laterOverallPick: later?.overallPick,
+      laterReturnProbability: later?.returnProbability,
+      laterFallback: later?.fallbackPlayer?.player,
+      laterQbPolicy: later?.qbPolicy ?? sim?.qbPolicy,
     };
 
     return {

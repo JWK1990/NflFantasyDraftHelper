@@ -45,7 +45,7 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
       {
         term: "Unlikely to be available at pick 19",
         definition:
-          "ADP says this player will probably be gone before your next pick. That is a timing warning, not a rank penalty — the row is still scored as if you get them.",
+          "ADP says this player will probably be gone before your next pick. That is a timing warning, not a rank penalty — this named player is still scored as if you get them. Other players the sim hopes to add later are weighted by that same chance.",
       },
       {
         term: "likely to be available at pick 19",
@@ -213,12 +213,17 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
       {
         term: "Completed-team utility",
         definition:
-          "The ranking number: your projected starters after a simulated rest of draft if you secure this row’s player, plus a little bench, minus empty-slot pain. The named player is always on that simulated roster.",
+          "The ranking number: your projected starters after a simulated rest of draft if you secure this row’s player, plus a little bench, minus empty-slot pain. The named player is always on that simulated roster. Other later additions are chance-weighted by ADP, and a non-QB row can choose take-QB-next versus waiting until pick 174.",
       },
       {
         term: "Likely to return at next pick %",
         definition:
-          "Chance this player is still there at your next turn, from ADP among remaining players.",
+          "Chance this named player is still there at your next turn, from ADP among remaining players.",
+      },
+      {
+        term: "Expected WR later / Expected QB later",
+        definition:
+          "The most important other player this row’s rest-of-draft plan hopes to add, the pick where that would happen, and the ADP chance they last that long. If the chance is low, that player is not counted at full value.",
       },
     ],
   },

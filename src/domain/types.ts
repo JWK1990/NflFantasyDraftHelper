@@ -93,6 +93,12 @@ export interface ScoreBreakdown {
   expectedGain: number;
   returnProbability: number;
   lookahead: boolean;
+  laterPlayer?: string;
+  laterPos?: Position;
+  laterOverallPick?: number;
+  laterReturnProbability?: number;
+  laterFallback?: string;
+  laterQbPolicy?: "flex" | "punt" | "qb-next";
 }
 
 export interface Recommendation {

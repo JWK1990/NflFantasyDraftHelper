@@ -146,6 +146,35 @@ export function PlayerRow({
                   {Math.round(recommendation.breakdown.returnProbability * 100)}%
                 </span>
               </div>
+              {recommendation.breakdown.laterPlayer &&
+              recommendation.breakdown.laterOverallPick != null &&
+              recommendation.breakdown.laterReturnProbability != null ? (
+                <div className="breakdown-row">
+                  <span>
+                    Expected {recommendation.breakdown.laterPos ?? "player"} later
+                  </span>
+                  <span>
+                    {recommendation.breakdown.laterPlayer} at pick{" "}
+                    {recommendation.breakdown.laterOverallPick} (
+                    {Math.round(recommendation.breakdown.laterReturnProbability * 100)}%)
+                  </span>
+                </div>
+              ) : null}
+              {recommendation.breakdown.laterQbPolicy === "punt" ? (
+                <p className="breakdown-note">
+                  This row’s rest-of-draft plan waits on QB2 until pick 174.
+                </p>
+              ) : recommendation.breakdown.laterQbPolicy === "qb-next" ? (
+                <p className="breakdown-note">
+                  This row’s rest-of-draft plan takes a QB at the next pick if one
+                  is still there.
+                </p>
+              ) : null}
+              {recommendation.breakdown.laterFallback ? (
+                <p className="breakdown-note">
+                  If gone: {recommendation.breakdown.laterFallback}.
+                </p>
+              ) : null}
               {recommendation.breakdown.riskAdjustment > 0 ? (
                 <div className="breakdown-row">
                   <span>Risk adjustment</span>

@@ -3,27 +3,15 @@ import {
   type RecommendationConfig,
 } from "../config/recommendationConfig.ts";
 import type { Player } from "../domain/types.ts";
+import { adpWindowIds } from "./draftSim.ts";
 import { interveningPicksUntilNextTurn } from "./snake.ts";
-
-function adpSortValue(player: Player): number {
-  if (player.adp == null) return 900 + player.modelRank;
-  return player.adp;
-}
 
 export function likelyGoneByNextTurn(
   available: Player[],
   currentOverallPick: number,
 ): Set<string> {
   const intervening = interveningPicksUntilNextTurn(currentOverallPick);
-  if (intervening <= 0) return new Set();
-
-  const ordered = [...available].sort((a, b) => {
-    const adpDelta = adpSortValue(a) - adpSortValue(b);
-    if (adpDelta !== 0) return adpDelta;
-    return a.modelRank - b.modelRank;
-  });
-
-  return new Set(ordered.slice(0, intervening).map((player) => player.id));
+  return adpWindowIds(available, intervening);
 }
 
 export function vonaForCandidate(

@@ -58,7 +58,7 @@ export function explainChip(label: string): ChipExplanation {
       title: label,
       definition:
         "ADP among remaining players says they will probably be gone before that pick.",
-      detail: `Your next relevant pick is ${unlikely[1]}. This is a timing warning only — the list still ranks them as if you would get them.`,
+      detail: `Your next relevant pick is ${unlikely[1]}. This named player is still ranked as if you would get them. Other later additions on this row are weighted by the same ADP chance.`,
     };
   }
 

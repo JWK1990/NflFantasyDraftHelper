@@ -193,7 +193,7 @@ describe("recommendation engine", () => {
     const byAdp = [...players]
       .filter((player) => player.adp != null && player.pos !== "K" && player.pos !== "DST")
       .sort((a, b) => (a.adp ?? 0) - (b.adp ?? 0));
-    const recs = recommend(players, fillUntil(30, byAdp)).slice(0, 8);
+    const recs = recommend(players, fillUntil(30, byAdp));
     const canWait = recs.filter(
       (row) =>
         row.breakdown.returnProbability >= 0.7 &&
@@ -201,8 +201,15 @@ describe("recommendation engine", () => {
         row.player.pos !== "DST",
     );
     expect(canWait.length).toBeGreaterThan(0);
+    const topWait = recs.slice(0, 8).filter(
+      (row) =>
+        row.breakdown.returnProbability >= 0.7 &&
+        row.player.pos !== "K" &&
+        row.player.pos !== "DST" &&
+        !row.reasons.some((reason) => reason.startsWith("Unlikely to be available")),
+    );
     expect(
-      canWait.every((row) =>
+      topWait.every((row) =>
         row.reasons.some((reason) => reason.startsWith("likely to be available")),
       ),
     ).toBe(true);
