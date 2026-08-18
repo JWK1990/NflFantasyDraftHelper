@@ -30,7 +30,27 @@
       "modelRank": 1,
       "posRank": 1,
       "posTier": 1,
-      "tier": 1
+      "tier": 1,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "rushing-qb",
+          "elite-positional-edge"
+        ],
+        "reasons": [
+          "Has repeatedly separated from the normal QB1 baseline rather than merely finishing as a top quarterback.",
+          "NFL.com reports that he has beaten the QB1 median by more than 2.0 points per game in every season since 2020, averaging a 3.35-point advantage.",
+          "That ceiling is especially valuable in this 12-team Superflex league, where the second quarterback slot and two-QB roster cap lower replacement quality."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Bijan Robinson",
@@ -55,7 +75,25 @@
       "modelRank": 2,
       "posRank": 1,
       "posTier": 1,
-      "tier": 1
+      "tier": 1,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Has finished as a top-three fantasy running back in consecutive seasons and remains in his prime with a workhorse role.",
+          "Draft Sharks describes him as one of the safest elite picks while retaining league-winning upside.",
+          "He owns the largest median-projection VORP in this league model, so a further ceiling outcome would create a major cross-positional advantage."
+        ],
+        "sources": [
+          {
+            "label": "Draft Sharks 2026 Bijan Robinson Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/bijan-robinson/13541"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Jahmyr Gibbs",
@@ -80,7 +118,25 @@
       "modelRank": 3,
       "posRank": 2,
       "posTier": 1,
-      "tier": 1
+      "tier": 1,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Has already exceeded 360 PPR points in consecutive seasons despite sharing substantial backfield work.",
+          "NFL.com identifies a plausible 2,000-scrimmage-yard and 20-touchdown outcome after Detroit's backfield change.",
+          "A first-round price does not prevent a player from being a league winner when the ceiling can separate from the entire position."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Puka Nacua",
@@ -105,7 +161,29 @@
       "modelRank": 4,
       "posRank": 1,
       "posTier": 1,
-      "tier": 1
+      "tier": 1,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Combines elite target volume with a realistic path to the overall WR1 finish in full PPR.",
+          "Current 2026 WR analysis places him in the small top tier explicitly labelled as league winners.",
+          "The upside case is based on dominant usable weekly volume rather than unpredictable spike weeks."
+        ],
+        "sources": [
+          {
+            "label": "SI 2026 Wide Receiver Tiers",
+            "url": "https://www.si.com/onsi/fantasy/news/fantasy-football-2026-wide-receiver-tiers-ja-marr-chase-ranks-with-the-best-of-the-bunch"
+          },
+          {
+            "label": "PFF 2026 Overall WR1 Contenders",
+            "url": "https://www.pff.com/news/fantasy-football-2026-3-contenders-for-the-overall-wr1-finish"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Ja'Marr Chase",
@@ -130,7 +208,29 @@
       "modelRank": 5,
       "posRank": 2,
       "posTier": 1,
-      "tier": 1
+      "tier": 1,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Owns an established elite target and touchdown profile with a credible overall WR1 outcome.",
+          "Current 2026 WR analysis places him in the small top tier explicitly labelled as league winners.",
+          "His ceiling would create an every-week starting advantage even without an ADP discount."
+        ],
+        "sources": [
+          {
+            "label": "SI 2026 Wide Receiver Tiers",
+            "url": "https://www.si.com/onsi/fantasy/news/fantasy-football-2026-wide-receiver-tiers-ja-marr-chase-ranks-with-the-best-of-the-bunch"
+          },
+          {
+            "label": "PFF 2026 Overall WR1 Contenders",
+            "url": "https://www.pff.com/news/fantasy-football-2026-3-contenders-for-the-overall-wr1-finish"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Christian McCaffrey",
@@ -155,7 +255,29 @@
       "modelRank": 6,
       "posRank": 3,
       "posTier": 1,
-      "tier": 1
+      "tier": 1,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Demonstrated the methodology directly in 2025 by creating a large PPR scoring gap when healthy.",
+          "ESPN's 2026 league-winner discussion continued to identify him as a season-defining player and defended his unique receiving-plus-rushing ceiling.",
+          "This label describes the ceiling only; his separate injury/risk chip remains the place for discretionary downside assessment."
+        ],
+        "sources": [
+          {
+            "label": "ESPN Fantasy Focus 2026 League-Winners Discussion",
+            "url": "https://podcastrex.com/shows/fantasy-focus-football/10-fantasy-football-league-winners-who-will-define-the-2026-season-fantasy-focus"
+          },
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners Methodology",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Jaxon Smith-Njigba",
@@ -180,7 +302,29 @@
       "modelRank": 7,
       "posRank": 3,
       "posTier": 1,
-      "tier": 1
+      "tier": 1,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Has already produced a top-two positional season and retains an overall WR1 path.",
+          "Current 2026 WR analysis places him in the small top tier explicitly labelled as league winners.",
+          "His target-driven PPR profile is likely to be usable weekly rather than dependent on unpredictable deep touchdowns."
+        ],
+        "sources": [
+          {
+            "label": "SI 2026 Wide Receiver Tiers",
+            "url": "https://www.si.com/onsi/fantasy/news/fantasy-football-2026-wide-receiver-tiers-ja-marr-chase-ranks-with-the-best-of-the-bunch"
+          },
+          {
+            "label": "PFF 2026 Overall WR1 Contenders",
+            "url": "https://www.pff.com/news/fantasy-football-2026-3-contenders-for-the-overall-wr1-finish"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Jonathan Taylor",
@@ -280,7 +424,30 @@
       "modelRank": 11,
       "posRank": 5,
       "posTier": 2,
-      "tier": 2
+      "tier": 2,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Has finished top six in fantasy points per game in every season of his career while combining rushing efficiency with elite receiving usage.",
+          "Scott Barrett argues that Miami's target distribution leaves a realistic path to 100-plus targets and a top-three receiving workload among running backs.",
+          "ESPN also selected him as one of the players capable of defining the 2026 fantasy season."
+        ],
+        "sources": [
+          {
+            "label": "Scott Barrett 2026 Draft Strategy Transcript",
+            "url": "https://podcastrex.com/shows/rotowire-fantasy-football-podcast/scott-barretts-fantasy-draft-strategy-must-draft-players/transcript"
+          },
+          {
+            "label": "ESPN Fantasy Focus 2026 League-Winners Discussion",
+            "url": "https://podcastrex.com/shows/fantasy-focus-football/10-fantasy-football-league-winners-who-will-define-the-2026-season-fantasy-focus"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Drake Maye",
@@ -355,7 +522,26 @@
       "modelRank": 14,
       "posRank": 5,
       "posTier": 2,
-      "tier": 2
+      "tier": 2,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "rushing-qb",
+          "elite-positional-edge"
+        ],
+        "reasons": [
+          "Ryan Heath identifies him as a 2026 league-winner candidate after league-winning seasons in 2022, 2023 and 2024.",
+          "He retained an elite designed-rushing role even in a down season, creating a ceiling that passing-only quarterbacks cannot easily match.",
+          "Superflex replacement levels make a renewed elite-QB season more valuable in this league than in the one-QB source format."
+        ],
+        "sources": [
+          {
+            "label": "Fantasy Points 2026 Draft Guide and Anatomy Roundup",
+            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "James Cook",
@@ -405,7 +591,26 @@
       "modelRank": 16,
       "posRank": 7,
       "posTier": 2,
-      "tier": 2
+      "tier": 2,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Ryan Heath explicitly includes him among the 2026 league-winner candidates.",
+          "More than half of his expected fantasy points came through receiving work, supporting an unusually valuable full-PPR workload.",
+          "He averaged approximately high-end RB1 production when Joe Burrow started and finished games."
+        ],
+        "sources": [
+          {
+            "label": "Fantasy Points 2026 Draft Guide and Anatomy Roundup",
+            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Derrick Henry",
@@ -555,7 +760,30 @@
       "modelRank": 22,
       "posRank": 2,
       "posTier": 1,
-      "tier": 3
+      "tier": 3,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "elite-positional-edge",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Multiple 2026 sources identify him as capable of recreating a prime-Travis-Kelce-style positional advantage.",
+          "NFL.com outlines a path to 150-plus targets and position-leading production as Las Vegas' unquestioned top target.",
+          "A truly elite tight-end outcome adds points without consuming an RB/WR flex slot."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Saquon Barkley",
@@ -655,7 +883,30 @@
       "modelRank": 26,
       "posRank": 11,
       "posTier": 2,
-      "tier": 3
+      "tier": 3,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "breakout-role",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Multiple sources identify a three-down bell-cow path with both rushing and receiving production.",
+          "NFL.com projects a workload capable of exceeding 300 touches behind an improved line and in a scheme suited to his explosiveness.",
+          "That combination provides a plausible top-five or better running-back outcome at a Round 2 market price."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Jaxson Dart",
@@ -1155,7 +1406,30 @@
       "modelRank": 46,
       "posRank": 13,
       "posTier": 2,
-      "tier": 4
+      "tier": 4,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "ascending-offense",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Multiple sources identify a path back to the elite receiver tier through greater passing volume and touchdown opportunity in New England.",
+          "He pairs an established high-end target-earning history with Drake Maye's downfield efficiency.",
+          "The ceiling case is a career-best season as the clear top target of an ascending offense."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Garrett Wilson",
@@ -1330,7 +1604,35 @@
       "modelRank": 53,
       "posRank": 20,
       "posTier": 4,
-      "tier": 4
+      "tier": 4,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "rushing-qb",
+          "ascending-offense",
+          "breakout-role"
+        ],
+        "reasons": [
+          "NFL.com identifies a realistic 3,600-passing-yard and 450-rushing-yard path in Kevin O'Connell's offense.",
+          "His rushing creates access to a top-three QB ceiling at a substantial discount to the early quarterback tier.",
+          "Current Superflex strategy analysis separately highlights him as an affordable rushing-upside target."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          },
+          {
+            "label": "FantasyPros 2026 Superflex Strategy",
+            "url": "https://www.fantasypros.com/2026/06/fantasy-football-draft-strategy-for-superflex-leagues-2026/"
+          },
+          {
+            "label": "Ryan Heath 2026 Anatomy Podcast",
+            "url": "https://podcastrex.com/shows/fantasy-football-today-beyond-the-box-score/anatomy-of-a-league-winner-with-ryan-heath"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Colston Loveland",
@@ -1355,7 +1657,26 @@
       "modelRank": 54,
       "posRank": 4,
       "posTier": 2,
-      "tier": 4
+      "tier": 4,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "elite-positional-edge",
+          "breakout-role"
+        ],
+        "reasons": [
+          "FantasyPros' league-winner panel identified him as a value route to elite tight-end production.",
+          "His late-2025 target share, first-read involvement and efficiency support a path to becoming Chicago's leading receiver.",
+          "The ceiling is a genuine positional advantage rather than merely a modest TE1 finish."
+        ],
+        "sources": [
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Travis Etienne Jr.",
@@ -1430,7 +1751,31 @@
       "modelRank": 57,
       "posRank": 21,
       "posTier": 4,
-      "tier": 4
+      "tier": 4,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "rushing-qb",
+          "breakout-role",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "Finished 2025 with a sustained QB1-level stretch and added useful rushing production.",
+          "Both ESPN's season-defining-player discussion and FantasyPros' Superflex analysis identify a meaningful 2026 ceiling at a QB2 price.",
+          "His affordable cost makes the upside especially relevant to the optional late-QB2 branch."
+        ],
+        "sources": [
+          {
+            "label": "ESPN Fantasy Focus 2026 League-Winners Discussion",
+            "url": "https://podcastrex.com/shows/fantasy-focus-football/10-fantasy-football-league-winners-who-will-define-the-2026-season-fantasy-focus"
+          },
+          {
+            "label": "FantasyPros 2026 Superflex QB2 Targets",
+            "url": "https://www.fantasypros.com/2026/08/superflex-fantasy-football-draft-strategy-qb2-targets-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Malik Nabers",
@@ -1455,7 +1800,30 @@
       "modelRank": 58,
       "posRank": 16,
       "posTier": 3,
-      "tier": 4
+      "tier": 4,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "breakout-role"
+        ],
+        "reasons": [
+          "His career target accumulation is historically elite, and he previously produced a WR6 season with weak quarterback play.",
+          "NFL.com explicitly projects a league-winning WR1 finish down the stretch if he returns to his established role.",
+          "ESPN also included him among the players capable of defining the 2026 fantasy season."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          },
+          {
+            "label": "ESPN Fantasy Focus 2026 League-Winners Discussion",
+            "url": "https://podcastrex.com/shows/fantasy-focus-football/10-fantasy-football-league-winners-who-will-define-the-2026-season-fantasy-focus"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Tee Higgins",
@@ -1630,7 +1998,26 @@
       "modelRank": 65,
       "posRank": 6,
       "posTier": 2,
-      "tier": 4
+      "tier": 4,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "elite-positional-edge",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Finished as the TE6 as a rookie despite unstable quarterback play and veteran target competition.",
+          "NFL.com identifies a path to Cleveland's top target share after the departure of David Njoku.",
+          "His collegiate receiving profile and potential focal-point role create a top-two tight-end ceiling."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Cam Skattebo",
@@ -1730,7 +2117,34 @@
       "modelRank": 69,
       "posRank": 20,
       "posTier": 3,
-      "tier": 5
+      "tier": 5,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "ascending-offense",
+          "breakout-role"
+        ],
+        "reasons": [
+          "NFL.com, FantasyPros and Ryan Heath independently identify his 2026 league-winning path.",
+          "His multi-year per-route efficiency has remained elite, while Denver offers substantially more projected route and dropback volume.",
+          "A true WR1 role in Sean Payton's offense could convert that efficiency into top-eight or better PPR production."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          },
+          {
+            "label": "Fantasy Points 2026 Draft Guide and Anatomy Roundup",
+            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Terry McLaurin",
@@ -1805,7 +2219,31 @@
       "modelRank": 72,
       "posRank": 23,
       "posTier": 3,
-      "tier": 5
+      "tier": 5,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "contingent-upside",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "ESPN identifies him as one of the players capable of defining the 2026 fantasy season.",
+          "His upside comes from a potentially major role in Seattle's run-focused offense.",
+          "The ceiling remains conditional on backfield allocation, making the profile valuable but not equivalent to median certainty."
+        ],
+        "sources": [
+          {
+            "label": "ESPN Fantasy Focus 2026 League-Winners Discussion",
+            "url": "https://podcastrex.com/shows/fantasy-focus-football/10-fantasy-football-league-winners-who-will-define-the-2026-season-fantasy-focus"
+          },
+          {
+            "label": "ESPN 2026 Post-Draft Fantasy Winners",
+            "url": "https://www.espn.com/fantasy/football/story/_/id/48606629/fantasy-football-winners-losers-nfl-draft"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Kyle Pitts",
@@ -1930,7 +2368,26 @@
       "modelRank": 77,
       "posRank": 7,
       "posTier": 2,
-      "tier": 5
+      "tier": 5,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "elite-positional-edge",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Has averaged approximately TE2-level scoring when running a route on at least 75% of team dropbacks.",
+          "Ryan Heath connects the 2026 coordinator change to the sustained high route participation previously given to Trey McBride.",
+          "A restored full-time route role offers a discounted path back to an elite tight-end advantage."
+        ],
+        "sources": [
+          {
+            "label": "Fantasy Points 2026 Draft Guide and Targets Roundup",
+            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Ladd McConkey",
@@ -1980,7 +2437,26 @@
       "modelRank": 79,
       "posRank": 8,
       "posTier": 2,
-      "tier": 5
+      "tier": 5,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "elite-positional-edge",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Averaged 16.2 PPR points per game through seven games in 2025 before injury.",
+          "NFL.com identifies him as a dark-horse top-two tight end and a possible leading target in Green Bay.",
+          "His draft cost leaves room for substantial surplus if that pre-injury role and efficiency return."
+        ],
+        "sources": [
+          {
+            "label": "NFL.com 2026 Top 10 League-Winners",
+            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Travis Kelce",
@@ -2080,7 +2556,27 @@
       "modelRank": 83,
       "posRank": 27,
       "posTier": 4,
-      "tier": 5
+      "tier": 5,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "contingent-upside",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "Ryan Heath highlights the Year 2 breakout profile and views him as the most talented all-around back in Jacksonville's backfield.",
+          "Liam Coen's recent offenses have created valuable backfield expected-fantasy-point volume, including through the screen game.",
+          "The ceiling requires a backfield takeover, so the label represents contingent upside rather than expected median production."
+        ],
+        "sources": [
+          {
+            "label": "Fantasy Points 2026 Draft Guide and Targets Roundup",
+            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Chuba Hubbard",
@@ -2205,7 +2701,30 @@
       "modelRank": 88,
       "posRank": 27,
       "posTier": 3,
-      "tier": 5
+      "tier": 5,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "breakout-role",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "Scott Barrett identifies him as an acquire-at-all-costs Exodia target at his ESPN price.",
+          "ESPN's 2026 breakout analysis highlights his elite ability after the catch and a large pool of vacated targets in Chicago.",
+          "A Year 2 role expansion in Ben Johnson's offense provides a plausible every-week WR1/WR2 outcome well above cost."
+        ],
+        "sources": [
+          {
+            "label": "Fantasy Points 2026 Exodia Roundup",
+            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+          },
+          {
+            "label": "ESPN 2026 Sleepers, Breakouts and Busts",
+            "url": "https://www.espn.com/fantasy/football/story/_/page/FFSleepBustBreak26-49030808/fantasy-football-2026-rankings-nfl-sleepers-breakouts-busts"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Aaron Jones Sr.",
@@ -2430,7 +2949,26 @@
       "modelRank": 97,
       "posRank": 28,
       "posTier": 3,
-      "tier": 6
+      "tier": 6,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "FantasyPros' league-winner panel highlights elite recent efficiency and a path to becoming Green Bay's primary receiver.",
+          "Reduced target competition could turn explosive per-route production into sustained weekly volume.",
+          "His separate health/risk information should remain discretionary and must not be inferred from this ceiling label."
+        ],
+        "sources": [
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Marvin Harrison Jr.",
@@ -2480,7 +3018,26 @@
       "modelRank": 99,
       "posRank": 34,
       "posTier": 4,
-      "tier": 6
+      "tier": 6,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "power-law-ceiling",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "Scott Barrett identifies him as a 2026 Exodia value relative to his WR26-30 market price.",
+          "His established touchdown and downfield ceiling offers a larger payoff than a typical receiver drafted in the same range.",
+          "The existing risk information remains separate and does not lower the display-only League Winner designation."
+        ],
+        "sources": [
+          {
+            "label": "Fantasy Points 2026 Exodia Roundup",
+            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "George Kittle",
@@ -2930,7 +3487,25 @@
       "modelRank": 117,
       "posRank": 32,
       "posTier": 4,
-      "tier": 6
+      "tier": 6,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role"
+        ],
+        "reasons": [
+          "Ryan Heath highlights a rare early-career target-per-route profile shared by players normally drafted much earlier.",
+          "Personnel changes create a plausible first full-time role after prior route limitations kept his production below his efficiency.",
+          "The ceiling is a featured PPR role at a substantially discounted market price."
+        ],
+        "sources": [
+          {
+            "label": "Fantasy Points 2026 Draft Guide and Targets Roundup",
+            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Kyle Monangai",
@@ -2955,7 +3530,27 @@
       "modelRank": 118,
       "posRank": 37,
       "posTier": 4,
-      "tier": 6
+      "tier": 6,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "contingent-upside",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "FantasyPros identifies a realistic path to a larger rushing share and the most valuable goal-line work in Chicago.",
+          "Ben Johnson's running-game design raises the value of a potential role expansion.",
+          "The ceiling is tied to gaining high-value work, not to his current median projection."
+        ],
+        "sources": [
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Parker Washington",
@@ -2980,7 +3575,30 @@
       "modelRank": 119,
       "posRank": 38,
       "posTier": 4,
-      "tier": 6
+      "tier": 6,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "Scott Barrett calls him the most mispriced player at any position and his strongest 2026 Exodia receiver.",
+          "The case combines a projected full-time role with a belief that Jacksonville's passing offense is materially undervalued.",
+          "His market price permits a significant reach while retaining surplus if the expanded role holds."
+        ],
+        "sources": [
+          {
+            "label": "Fantasy Points 2026 Exodia Roundup",
+            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+          },
+          {
+            "label": "Scott Barrett 2026 Buffalo/Jacksonville Outlook",
+            "url": "https://www.dailymotion.com/video/xavu0hy"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Michael Wilson",
@@ -3180,7 +3798,25 @@
       "modelRank": 127,
       "posRank": 45,
       "posTier": 4,
-      "tier": 6
+      "tier": 6,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role"
+        ],
+        "reasons": [
+          "FantasyPros' league-winner panel identifies him as a late-round bet on Green Bay's changing target hierarchy.",
+          "Encouraging efficiency and a clearer path to routes create room to outperform his current cost materially.",
+          "He does not need to become the team WR1 for the selection to return meaningful surplus."
+        ],
+        "sources": [
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Jayden Reed",
@@ -3280,7 +3916,26 @@
       "modelRank": 131,
       "posRank": 39,
       "posTier": 5,
-      "tier": 7
+      "tier": 7,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "contingent-upside",
+          "breakout-role"
+        ],
+        "reasons": [
+          "FantasyPros identifies him as a late-round stash with a plausible path to Carolina's lead-back role.",
+          "His pedigree and age preserve an outcome far above his current draft cost if opportunity arrives.",
+          "This is a contingent ceiling case; the existing risk chip and current projection remain unchanged."
+        ],
+        "sources": [
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-18"
+      }
     },
     {
       "player": "Khalil Shakir",
@@ -5016,5 +5671,107 @@
       "https://sports.yahoo.com/articles/jeremiyah-love-injury-updates-latest-174502760.html",
       "Breaking injury flag"
     ]
-  ]
+  ],
+  "leagueWinnerMethodology": {
+    "schemaVersion": 1,
+    "reviewedAt": "2026-08-18",
+    "mode": "display-only",
+    "rankingImpact": 0,
+    "candidateCount": 31,
+    "leagueContext": {
+      "teams": 12,
+      "scoring": "full PPR",
+      "lineup": "QB, 2 RB, 2 WR, TE, FLEX, OP/Superflex, K, D/ST",
+      "maxQuarterbacksPerRoster": 2,
+      "benchSlots": 5,
+      "management": "managed redraft with waivers"
+    },
+    "confidenceDefinitions": {
+      "high": "Multiple independent 2026 sources support the player, or an explicit 2026 candidate designation is reinforced by a demonstrated power-law profile.",
+      "medium": "At least one credible current 2026 source explicitly supports a league-winning or Exodia-style ceiling with a documented role, efficiency or positional-edge case.",
+      "low": "Reserved for speculative cases; no low-confidence candidates are included in this release to avoid diluting the pill."
+    },
+    "eligibility": [
+      "The player has a credible path to a championship-shifting advantage over this league's positional replacement level.",
+      "The upside would be usable in a managed weekly lineup rather than relying only on unpredictable spike weeks.",
+      "The ceiling case is supported by current 2026 evidence, not merely by a generic sleeper, value or risk tag.",
+      "Early-round players remain eligible when their ceiling can materially separate from the rest of the position.",
+      "Late-round players require a plausible role-expansion or contingency path to becoming an every-week starter."
+    ],
+    "interpretation": [
+      "leagueWinner is an informational ceiling profile, not a projection, guarantee or instruction to reach.",
+      "The profile complements median projections, VORP, tiers, VONA and roster construction.",
+      "Risk and injury remain separate discretionary chips and are not numerically offset by this label.",
+      "A high-confidence label means stronger evidence for the ceiling thesis, not certainty that the ceiling will occur."
+    ],
+    "implementationRules": [
+      "Do not use leagueWinner in candidate scores, sorting, tie-breaks, roster simulations, need calculations, ADP forecasts or wait-versus-now logic.",
+      "Do not infer leagueWinner automatically from tag, note, ADP, projection disagreement or player volatility.",
+      "Do not treat a missing leagueWinner field as a negative signal.",
+      "Render a compact LW pill for players with the field and expose confidence, archetypes, reasons and sources in the existing detail interaction."
+    ],
+    "caveats": [
+      "Most source lists assume one-QB home leagues; quarterback rationales were adjusted qualitatively for this league's Superflex replacement level, but source rankings were not copied.",
+      "Expert candidate lists are not calibrated probabilities and have substantial miss rates.",
+      "Projection-source disagreement is epistemic uncertainty and was not treated as a player ceiling.",
+      "The 31 candidates are a curated union of strong current cases, not a claim that 31 players will become league winners.",
+      "News, depth charts and injuries remain time-sensitive and should be reviewed again immediately before the draft."
+    ],
+    "methodologySources": [
+      {
+        "label": "Scott Barrett - Upside Wins Championships",
+        "url": "https://www.fantasypoints.com/nfl/articles/upside-wins-championships"
+      },
+      {
+        "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+        "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+      },
+      {
+        "label": "Fantasy Points 2026 Draft Guide and Anatomy Roundup",
+        "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
+      },
+      {
+        "label": "NFL.com 2026 Top 10 League-Winners",
+        "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
+      },
+      {
+        "label": "FantasyPros 2026 League-Winners",
+        "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+      },
+      {
+        "label": "FantasyPros 2026 Superflex Strategy",
+        "url": "https://www.fantasypros.com/2026/06/fantasy-football-draft-strategy-for-superflex-leagues-2026/"
+      },
+      {
+        "label": "ESPN Fantasy Focus 2026 League-Winners Discussion",
+        "url": "https://podcastrex.com/shows/fantasy-focus-football/10-fantasy-football-league-winners-who-will-define-the-2026-season-fantasy-focus"
+      },
+      {
+        "label": "Scott Barrett 2026 Draft Strategy Transcript",
+        "url": "https://podcastrex.com/shows/rotowire-fantasy-football-podcast/scott-barretts-fantasy-draft-strategy-must-draft-players/transcript"
+      },
+      {
+        "label": "Managed Redraft and Power-Law Drafting",
+        "url": "https://jakobsanderson.substack.com/p/the-2026-home-league-redraft-guide"
+      },
+      {
+        "label": "Superflex Wins Above Replacement Context",
+        "url": "https://www.thefantasyfootballers.com/articles/off-to-war-superflex-te-premium-dynasty-championships-above-replacement/"
+      }
+    ],
+    "unmatchedSourceCandidates": [
+      {
+        "player": "Demond Claiborne",
+        "pos": "RB",
+        "reason": "Explicit FantasyPros candidate but absent from the supplied 185-player projection pool; not added without compatible projections and tiers.",
+        "source": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+      },
+      {
+        "player": "Ricky Pearsall",
+        "pos": "WR",
+        "reason": "Explicit FantasyPros candidate but absent from the supplied 185-player projection pool; not added without compatible projections and tiers.",
+        "source": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+      }
+    ]
+  }
 }

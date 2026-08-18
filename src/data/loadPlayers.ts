@@ -1,6 +1,7 @@
 import type { Player, Position, QbStarterSecurity } from "../domain/types.ts";
 import draftModel from "./draft_model_data.json";
 import specialTeams from "./specialTeams.json";
+import { parseLeagueWinner } from "./leagueWinner.ts";
 
 const POSITIONS = new Set<Position>(["QB", "RB", "WR", "TE", "K", "DST"]);
 
@@ -17,6 +18,7 @@ interface RawPlayer {
   adp?: unknown;
   tag?: unknown;
   note?: unknown;
+  leagueWinner?: unknown;
 }
 
 interface RawSpecial {
@@ -78,6 +80,7 @@ function toPlayer(raw: RawPlayer): Player {
     tag,
     note: typeof raw.note === "string" ? raw.note : "",
     qbStarterSecurity: inferQbSecurity(raw.pos, posRank),
+    leagueWinner: parseLeagueWinner(raw.leagueWinner, raw.player),
   };
 }
 
@@ -127,3 +130,7 @@ export function loadPlayers(): Player[] {
 }
 
 export const DATASET_GENERATED = (draftModel as { generated?: string }).generated ?? "";
+
+export const LEAGUE_WINNER_METHODOLOGY = (
+  draftModel as { leagueWinnerMethodology?: Record<string, unknown> }
+).leagueWinnerMethodology;

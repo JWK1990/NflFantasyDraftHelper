@@ -48,7 +48,7 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
           "ADP says this player will probably be gone before your next pick. That is a timing warning, not a rank penalty — the row is still scored as if you get them.",
       },
       {
-        term: "likely available at pick 19",
+        term: "likely to be available at pick 19",
         definition:
           "This player is high on your list, and ADP says they should still be there at your next pick. You can often take someone more urgent first. Availability never swaps in a different player under this name.",
       },
@@ -152,6 +152,21 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
       {
         term: "QB1 / QB2 / RB1 / WR1 / TE1",
         definition: "Rough role label from the model (starter vs committee / second option).",
+      },
+    ],
+  },
+  {
+    title: "League Winner",
+    entries: [
+      {
+        term: "League Winner Candidate",
+        definition:
+          "A player with a credible path to producing a championship-shifting advantage over positional replacement. This may be an established early-round player with a power-law ceiling or a later selection with breakout or contingent upside. The label is informational. It does not affect the recommendation score or ranking and is not a guarantee. Consider it alongside projections, VORP, tiers, roster construction, draft cost and the separate risk/injury chips.",
+      },
+      {
+        term: "LW pill",
+        definition:
+          "League-winning players are frequently found early because early picks have the highest hit rates. Upside becomes more decisive later because safe but replaceable bench production has little value and failed late picks can usually be replaced through waivers. Tap LW to open the research on that player.",
       },
     ],
   },

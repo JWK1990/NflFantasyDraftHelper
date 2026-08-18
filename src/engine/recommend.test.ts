@@ -203,13 +203,13 @@ describe("recommendation engine", () => {
     expect(canWait.length).toBeGreaterThan(0);
     expect(
       canWait.every((row) =>
-        row.reasons.some((reason) => reason.startsWith("likely available at")),
+        row.reasons.some((reason) => reason.startsWith("likely to be available")),
       ),
     ).toBe(true);
     expect(
       recs.every((row) => {
         const likely = row.reasons.some((reason) =>
-          reason.startsWith("likely available at"),
+          reason.startsWith("likely to be available"),
         );
         const unlikely = row.reasons.some((reason) =>
           reason.startsWith("Unlikely to be available"),

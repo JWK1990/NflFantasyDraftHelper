@@ -2,6 +2,7 @@ import type { DraftedBy, Player, Recommendation } from "../domain/types.ts";
 import { formatAdp, formatVorp, formatVorpDiff, posLabel, positionColor } from "./format.ts";
 import { scoutingTag } from "../engine/tags.ts";
 import { useChipExplain } from "./ChipExplainContext.tsx";
+import { LeagueWinnerDetail } from "./LeagueWinnerDetail.tsx";
 
 interface PlayerRowProps {
   player: Player;
@@ -13,6 +14,18 @@ interface PlayerRowProps {
   topVorp?: number | null;
   onToggle: () => void;
   onDraft: (draftedBy: DraftedBy) => void;
+}
+
+function ReasonText({ reason }: { reason: string }) {
+  const match = reason.match(/^(Unlikely|likely)( to be available at pick \d+)$/);
+  if (!match) return reason;
+  const kind = match[1] === "Unlikely" ? "reason-unlikely" : "reason-likely";
+  return (
+    <>
+      <strong className={kind}>{match[1]}</strong>
+      {match[2]}
+    </>
+  );
 }
 
 function formatPts(value: number): string {
@@ -51,6 +64,19 @@ export function PlayerRow({
           >
             {posLabel(player.pos)} T{player.posTier}
           </button>
+          {player.leagueWinner ? (
+            <button
+              className="lw-chip"
+              type="button"
+              aria-label={`League Winner candidate, ${player.leagueWinner.confidence} confidence`}
+              onClick={(event) => {
+                event.stopPropagation();
+                if (!expanded) onToggle();
+              }}
+            >
+              LW
+            </button>
+          ) : null}
           <button className="player-ident" type="button" onClick={onToggle}>
             <span className="name">{player.player}</span>
             <span className="meta">
@@ -77,7 +103,7 @@ export function PlayerRow({
                 className="reason"
                 onClick={() => explain(reason)}
               >
-                {reason}
+                <ReasonText reason={reason} />
               </button>
             ))}
           </div>
@@ -146,6 +172,9 @@ export function PlayerRow({
             </div>
           )}
           {player.note ? <p className="breakdown-note">{player.note}</p> : null}
+          {player.leagueWinner ? (
+            <LeagueWinnerDetail profile={player.leagueWinner} />
+          ) : null}
         </div>
       ) : null}
     </article>

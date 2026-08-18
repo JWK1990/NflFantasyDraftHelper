@@ -7,7 +7,7 @@ describe("chip explanations", () => {
     expect(unlikely.definition.toLowerCase()).toContain("adp");
     expect(unlikely.detail).toContain("47");
 
-    const likely = explainChip("likely available at pick 30");
+    const likely = explainChip("likely to be available at pick 30");
     expect(likely.detail).toContain("30");
   });
 
@@ -22,6 +22,13 @@ describe("chip explanations", () => {
     const chip = explainChip("QB2 can wait; 8 similar options remain");
     expect(chip.detail).toMatch(/punt/i);
     expect(chip.detail).toContain("174");
+  });
+
+  it("explains the LW pill as display-only", () => {
+    const chip = explainChip("LW");
+    expect(chip.title).toBe("League Winner Candidate");
+    expect(chip.definition.toLowerCase()).toMatch(/championship-shifting/);
+    expect(chip.detail).toMatch(/does not affect recommendation score/i);
   });
 
   it("marks scouting tags as non-ranking", () => {

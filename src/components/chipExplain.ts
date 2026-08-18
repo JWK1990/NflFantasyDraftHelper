@@ -62,7 +62,7 @@ export function explainChip(label: string): ChipExplanation {
     };
   }
 
-  const likely = label.match(/^likely available at pick (\d+)$/i);
+  const likely = label.match(/^likely to be available at pick (\d+)$/i);
   if (likely) {
     return {
       title: label,
@@ -205,6 +205,16 @@ export function explainChip(label: string): ChipExplanation {
       title: label,
       definition: definitions[slot] ?? "Roster slot coverage.",
       detail: `Filled ${have} of ${need}. ${highlight}`,
+    };
+  }
+
+  if (label === "LW" || label.toLowerCase().startsWith("league winner")) {
+    return {
+      title: "League Winner Candidate",
+      definition:
+        "A player with a credible path to a championship-shifting ceiling over positional replacement.",
+      detail:
+        "Informational only. It does not affect recommendation score or ranking, and it is not a guarantee. Tap LW to open the research in the player breakdown.",
     };
   }
 

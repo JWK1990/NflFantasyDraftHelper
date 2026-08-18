@@ -178,14 +178,14 @@ describe("candidate lock", () => {
 
     const at16 = recommend(players, fillToPick(16, keepStars));
     const unlikely16 = chips(at16, "Unlikely to be available");
-    const likely16 = chips(at16, "likely available at");
+    const likely16 = chips(at16, "likely to be available");
     expect(unlikely16.length).toBeGreaterThan(0);
     expect(unlikely16.every((reason) => reason.includes("pick 19"))).toBe(true);
     expect(likely16.every((reason) => reason.includes("pick 19"))).toBe(true);
 
     const at19 = recommend(players, fillToPick(19, keepStars));
     const unlikely19 = chips(at19, "Unlikely to be available");
-    const likely19 = chips(at19, "likely available at");
+    const likely19 = chips(at19, "likely to be available");
     expect(unlikely19.length).toBeGreaterThan(0);
     expect(unlikely19.every((reason) => reason.includes("pick 30"))).toBe(true);
     expect(likely19.every((reason) => reason.includes("pick 30"))).toBe(true);

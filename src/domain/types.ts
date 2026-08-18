@@ -13,6 +13,27 @@ export type TagFilter =
   | "injury"
   | "anchor";
 export type QbStarterSecurity = "secure" | "probable" | "fragile";
+export type LeagueWinnerConfidence = "high" | "medium" | "low";
+export type LeagueWinnerArchetype =
+  | "power-law-ceiling"
+  | "breakout-role"
+  | "contingent-upside"
+  | "rushing-qb"
+  | "elite-positional-edge"
+  | "ascending-offense";
+
+export interface LeagueWinnerSource {
+  label: string;
+  url?: string;
+}
+
+export interface LeagueWinnerProfile {
+  confidence: LeagueWinnerConfidence;
+  archetypes: LeagueWinnerArchetype[];
+  reasons: string[];
+  sources: LeagueWinnerSource[];
+  reviewedAt?: string;
+}
 
 export interface Player {
   id: string;
@@ -29,6 +50,7 @@ export interface Player {
   tag: string;
   note: string;
   qbStarterSecurity?: QbStarterSecurity;
+  leagueWinner?: LeagueWinnerProfile;
 }
 
 export interface DraftPick {

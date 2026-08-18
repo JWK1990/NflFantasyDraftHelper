@@ -197,7 +197,7 @@ function addLikelyAvailableReasons(
 
   const reservedNow =
     branch?.verdict === "qb-now" ? branch.qbNow.firstPick?.id : undefined;
-  const label = `likely available at pick ${next}`;
+  const label = `likely to be available at pick ${next}`;
 
   for (const row of scored.slice(0, config.returnChip.topN)) {
     if (row.player.pos === "K" || row.player.pos === "DST") continue;
