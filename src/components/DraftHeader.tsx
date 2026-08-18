@@ -1,4 +1,5 @@
 import { LEAGUE } from "../config/leagueSettings.ts";
+import { GlossaryMenu } from "./Glossary.tsx";
 import {
   formatPickLabel,
   isUserPick,
@@ -12,6 +13,8 @@ interface DraftHeaderProps {
   canUndo: boolean;
   onUndo: () => void;
   onReset: () => void;
+  onExport: () => void;
+  onImport: () => void;
   qb2Mode: "adaptive-punt" | "normal";
   onQb2Mode: (mode: "adaptive-punt" | "normal") => void;
 }
@@ -21,6 +24,8 @@ export function DraftHeader({
   canUndo,
   onUndo,
   onReset,
+  onExport,
+  onImport,
   qb2Mode,
   onQb2Mode,
 }: DraftHeaderProps) {
@@ -34,27 +39,32 @@ export function DraftHeader({
     <header className="sticky-header">
       <div className="header-row">
         <div className="header-meta">
-          <div className="pick-line">
+          <div className={`pick-line${yourTurn && !done ? " your-turn" : ""}`}>
             {done
               ? "Draft complete"
               : `Pick ${currentOverallPick} · R${round}`}
           </div>
-          <div className="until-line">
+          <div className={`until-line${yourTurn && !done ? " your-turn" : ""}`}>
             {done
               ? `${LEAGUE.rounds} rounds · slot ${LEAGUE.userSlot}`
               : yourTurn
-                ? `Your turn · ${formatPickLabel(currentOverallPick)}`
-                : `${until} pick${until === 1 ? "" : "s"} until ${next ? formatPickLabel(next) : "done"}`}
+                ? `Your turn · pick ${currentOverallPick} (${formatPickLabel(currentOverallPick)})`
+                : next
+                  ? `${until} pick${until === 1 ? "" : "s"} until pick ${next} (${formatPickLabel(next)})`
+                  : "Draft wrapping up"}
           </div>
         </div>
         <div className="header-actions">
           <button className="icon-btn" disabled={!canUndo} onClick={onUndo}>
             Undo
           </button>
+          <GlossaryMenu />
           <ResetMenu
             qb2Mode={qb2Mode}
             onQb2Mode={onQb2Mode}
             onReset={onReset}
+            onExport={onExport}
+            onImport={onImport}
           />
         </div>
       </div>
@@ -66,10 +76,14 @@ function ResetMenu({
   qb2Mode,
   onQb2Mode,
   onReset,
+  onExport,
+  onImport,
 }: {
   qb2Mode: "adaptive-punt" | "normal";
   onQb2Mode: (mode: "adaptive-punt" | "normal") => void;
   onReset: () => void;
+  onExport: () => void;
+  onImport: () => void;
 }) {
   return (
     <details className="menu">
@@ -92,9 +106,24 @@ function ResetMenu({
             Normal
           </button>
         </div>
+        <button className="action-btn" type="button" onClick={onExport}>
+          Export draft
+        </button>
+        <button
+          className="action-btn"
+          type="button"
+          onClick={(event) => {
+            const menu = event.currentTarget.closest("details");
+            if (menu) menu.removeAttribute("open");
+            onImport();
+          }}
+        >
+          Import picks
+        </button>
         <p style={{ marginTop: 12 }}>
           Reset clears picks stored on this phone. Private/incognito windows may
-          not keep the draft.
+          not keep the draft. Paste ESPN picks to catch up, or export a JSON
+          backup if you want a second copy.
         </p>
         <ResetConfirm onReset={onReset} />
       </div>

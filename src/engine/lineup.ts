@@ -24,16 +24,12 @@ function take(players: Player[], used: Set<string>): Player | null {
   return next;
 }
 
-export function assignStarters(
-  roster: Player[],
-  bestAvailableQbPts: number | null = null,
-): StartingLineup {
+export function assignStarters(roster: Player[]): StartingLineup {
   const qbs = byPoints(roster.filter((player) => player.pos === "QB"));
   const rbs = byPoints(roster.filter((player) => player.pos === "RB"));
   const wrs = byPoints(roster.filter((player) => player.pos === "WR"));
   const tes = byPoints(roster.filter((player) => player.pos === "TE"));
   const used = new Set<string>();
-  void bestAvailableQbPts;
 
   const QB = take(qbs, used);
   const RB1 = take(rbs, used);
@@ -66,35 +62,22 @@ export function assignStarters(
   return { QB, OP, RB1, RB2, WR1, WR2, TE, FLEX };
 }
 
-export function starterPoints(
-  roster: Player[],
-  bestAvailableQbPts: number | null = null,
-): number {
-  return Object.values(assignStarters(roster, bestAvailableQbPts)).reduce(
+export function starterPoints(roster: Player[]): number {
+  return Object.values(assignStarters(roster)).reduce(
     (sum, player) => sum + (player?.modelPts ?? 0),
     0,
   );
 }
 
-export function lineupDelta(
-  roster: Player[],
-  candidate: Player,
-  bestAvailableQbPts: number | null,
-): number {
+export function lineupDelta(roster: Player[], candidate: Player): number {
   if (candidate.pos === "K" || candidate.pos === "DST") return 0;
-  const before = starterPoints(roster, bestAvailableQbPts);
-  const afterPts =
-    candidate.pos === "QB" ? null : bestAvailableQbPts;
-  const after = starterPoints([...roster, candidate], afterPts);
+  const before = starterPoints(roster);
+  const after = starterPoints([...roster, candidate]);
   return Math.max(0, after - before);
 }
 
-export function makesStartingLineup(
-  roster: Player[],
-  candidate: Player,
-  bestAvailableQbPts: number | null,
-): boolean {
+export function makesStartingLineup(roster: Player[], candidate: Player): boolean {
   if (candidate.pos === "K" || candidate.pos === "DST") return true;
-  const lineup = assignStarters([...roster, candidate], bestAvailableQbPts);
+  const lineup = assignStarters([...roster, candidate]);
   return Object.values(lineup).some((player) => player?.id === candidate.id);
 }

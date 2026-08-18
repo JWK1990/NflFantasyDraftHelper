@@ -4,6 +4,7 @@ export const LEAGUE = {
   teams: 12,
   rounds: 15,
   userSlot: 6,
+  userTeamName: "The Dan Marinehos",
   rosterSize: 15,
   timerSeconds: 60,
   benchSlots: 5,

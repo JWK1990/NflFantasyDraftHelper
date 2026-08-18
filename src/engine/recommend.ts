@@ -11,7 +11,7 @@ import type {
 } from "../domain/types.ts";
 import { eligiblePlayers } from "./eligibility.ts";
 import { makesStartingLineup } from "./lineup.ts";
-import { isAcceptableQb, hasRiskTag } from "./qb.ts";
+import { isAcceptableQb } from "./qb.ts";
 import { compareQbBranches, forcedQbOverallPick, type QbBranchComparison } from "./qbBranch.ts";
 import {
   intrinsicLookaheadPool,
@@ -19,13 +19,15 @@ import {
   simulateCompletedDraft,
 } from "./draftSim.ts";
 import { completedTeamUtility } from "./teamUtility.ts";
+import { lateRoundReservation } from "./lateRound.ts";
 import { myRosterPlayers, playersById, rosterCounts } from "./roster.ts";
-import { remainingByPosTier, tierCliffDrop } from "./tierScarcity.ts";
+import { remainingByPosTier } from "./tierScarcity.ts";
 import {
-  formatPickLabel,
+  isUserPick,
   nextUserPickAfter,
   userPickSchedule,
 } from "./snake.ts";
+import { playerMatchesTagFilter, scoutingTag } from "./tags.ts";
 import { likelyGoneByNextTurn, vonaForCandidate } from "./vona.ts";
 import { LEAGUE } from "../config/leagueSettings.ts";
 
@@ -45,8 +47,6 @@ function qbReasonChips(
   player: Player,
   counts: RosterCounts,
   available: Player[],
-  vonaUrgency: number,
-  cliffDrop: number,
   currentOverallPick: number,
   qb2Mode: DraftState["qb2Mode"],
   branch: QbBranchComparison | null,
@@ -67,20 +67,16 @@ function qbReasonChips(
   }
 
   if (counts.QB === 1 && qb2Mode === "adaptive-punt") {
-    const cliff = cliffDrop >= config.coverage.cliffVorp;
-    const strongVona = vonaUrgency >= config.qb.qb2VonaThreshold;
     const shrinking = acceptableLeft <= config.qb.shrinkingPoolThreshold;
-    if (cliff) reasons.push("QB2 tier cliff");
-    else if (strongVona) reasons.push("QB2 value now");
-    else if (shrinking) {
+    if (shrinking) {
       reasons.push(`Starter pool shrinking (${acceptableLeft} left)`);
     } else {
       reasons.push(`QB2 can wait; ${similar} similar options remain`);
     }
   }
 
-  if (hasRiskTag(player) || player.qbStarterSecurity === "fragile") {
-    reasons.push("Risky starter job");
+  if (player.qbStarterSecurity === "fragile") {
+    reasons.push("Backup / insecure job");
   }
 
   if (
@@ -97,7 +93,6 @@ function qbReasonChips(
 function collectReasons(
   player: Player,
   extras: string[],
-  cliffDrop: number,
   leftInTier: number,
   currentOverallPick: number,
   likelyGone: Set<string>,
@@ -106,8 +101,12 @@ function collectReasons(
   starts: boolean,
 ): string[] {
   const reasons: string[] = [];
-  if (leftInTier === 1 && cliffDrop > 0) {
+  const tag = scoutingTag(player);
+  if (tag) reasons.push(tag);
+  if (leftInTier === 1) {
     reasons.push(`Last in ${player.pos} T${player.posTier}`);
+  } else if (leftInTier === 2 || leftInTier === 3) {
+    reasons.push(`${player.pos} T${player.posTier}: ${leftInTier} left`);
   }
   reasons.push(...extras);
 
@@ -129,7 +128,7 @@ function collectReasons(
   if (likelyGone.has(player.id)) {
     const next = nextUserPickAfter(currentOverallPick);
     if (next != null) {
-      reasons.push(`unlikely to be available at ${formatPickLabel(next)}`);
+      reasons.push(`Unlikely to be available at pick ${next}`);
     }
   }
   if (vonaUrgency >= 6) {
@@ -141,6 +140,76 @@ function collectReasons(
     unique.push(player.tag || `Model #${player.modelRank}`);
   }
   return unique;
+}
+
+function moveToFront(
+  scored: Recommendation[],
+  playerId: string,
+): Recommendation[] {
+  const hit = scored.find((row) => row.player.id === playerId);
+  if (!hit) return scored;
+  return [hit, ...scored.filter((row) => row.player.id !== playerId)];
+}
+
+function applyLivePins(
+  scored: Recommendation[],
+  currentOverallPick: number,
+  counts: RosterCounts,
+  branch: QbBranchComparison | null,
+): Recommendation[] {
+  const reserved = lateRoundReservation(
+    currentOverallPick,
+    counts.QB,
+    counts.K >= 1,
+    counts.DST >= 1,
+  );
+  if (reserved === "K" || reserved === "DST") {
+    const special = scored
+      .filter((row) => row.player.pos === reserved)
+      .sort((a, b) => a.player.posRank - b.player.posRank)[0];
+    if (special) return moveToFront(scored, special.player.id);
+  }
+  if (reserved === "QB" || forcedQbOverallPick(currentOverallPick, counts.QB)) {
+    const forced = scored
+      .filter((row) => row.player.pos === "QB")
+      .sort((a, b) => b.player.modelPts - a.player.modelPts)[0];
+    if (forced) return moveToFront(scored, forced.player.id);
+  }
+  if (
+    isUserPick(currentOverallPick) &&
+    branch?.verdict === "qb-now" &&
+    branch.qbNow.firstPick
+  ) {
+    return moveToFront(scored, branch.qbNow.firstPick.id);
+  }
+  return scored;
+}
+
+function addLikelyAvailableReasons(
+  scored: Recommendation[],
+  currentOverallPick: number,
+  likelyGone: Set<string>,
+  branch: QbBranchComparison | null,
+  config: RecommendationConfig,
+): Recommendation[] {
+  const next = nextUserPickAfter(currentOverallPick);
+  if (next == null) return scored;
+
+  const reservedNow =
+    branch?.verdict === "qb-now" ? branch.qbNow.firstPick?.id : undefined;
+  const label = `likely available at pick ${next}`;
+
+  for (const row of scored.slice(0, config.returnChip.topN)) {
+    if (row.player.pos === "K" || row.player.pos === "DST") continue;
+    if (row.player.id === reservedNow) continue;
+    if (likelyGone.has(row.player.id)) continue;
+    if (row.breakdown.returnProbability < config.returnChip.minProbability) continue;
+    if (row.reasons.some((reason) => reason.startsWith("Unlikely to be available"))) {
+      continue;
+    }
+    if (!row.reasons.includes(label)) row.reasons.push(label);
+  }
+  return scored;
 }
 
 export function recommend(
@@ -169,25 +238,23 @@ export function recommend(
     eligible,
     roster,
     remainingUserPicks,
+    currentOverallPick,
     config,
   );
 
   const scored: Recommendation[] = eligible.map((player) => {
     const leftInTier = remaining.get(`${player.pos}-${player.posTier}`) ?? 0;
-    const cliffDrop = tierCliffDrop(player, eligible);
     const vonaUrgency = vonaForCandidate(player, eligible, likelyGone, config);
     const qbReasons = qbReasonChips(
       player,
       counts,
       eligible,
-      vonaUrgency,
-      cliffDrop,
       currentOverallPick,
       state.qb2Mode,
       branch,
       config,
     );
-    const starts = makesStartingLineup(roster, player, null);
+    const starts = makesStartingLineup(roster, player);
     const fullLookahead = lookahead.has(player.id);
     const sim = fullLookahead
       ? simulateCompletedDraft(players, state, player, config)
@@ -197,7 +264,10 @@ export function recommend(
       Math.max(0, remainingUserPicks - 1),
       config,
     );
-    const team = sim?.utility ?? cheap;
+    const simLocked = Boolean(
+      sim?.candidateLocked && sim.roster.some((row) => row.id === player.id),
+    );
+    const team = simLocked && sim ? sim.utility : cheap;
     const returnChance = returnProbability(
       player,
       eligible,
@@ -219,12 +289,11 @@ export function recommend(
 
     return {
       player,
-      dynamicScore: fullLookahead ? team.utility : team.utility - 4000,
+      dynamicScore: simLocked ? team.utility : team.utility - 4000,
       breakdown,
       reasons: collectReasons(
         player,
         qbReasons,
-        cliffDrop,
         leftInTier,
         currentOverallPick,
         likelyGone,
@@ -249,28 +318,13 @@ export function recommend(
       row.dynamicScore - row.breakdown.alternativeUtility;
   }
 
-  if (forcedQbOverallPick(currentOverallPick, counts.QB)) {
-    const forced = scored
-      .filter((row) => row.player.pos === "QB")
-      .sort((a, b) => b.player.modelPts - a.player.modelPts)[0];
-    if (forced) {
-      const rest = scored.filter((row) => row.player.id !== forced.player.id);
-      return [forced, ...rest];
-    }
-  }
-
-  if (
-    branch?.verdict === "qb-now" &&
-    branch.qbNow.firstPick &&
-    scored[0] &&
-    scored[0].player.id !== branch.qbNow.firstPick.id
-  ) {
-    scored[0].reasons.unshift(
-      `List prefers this over ${branch.qbNow.firstPick.player} because the completed-team projection is higher.`,
-    );
-  }
-
-  return scored;
+  return addLikelyAvailableReasons(
+    applyLivePins(scored, currentOverallPick, counts, branch),
+    currentOverallPick,
+    likelyGone,
+    branch,
+    config,
+  );
 }
 
 export function matchesFilters(
@@ -281,6 +335,9 @@ export function matchesFilters(
     return false;
   }
   if (state.tierFilter !== "ALL" && player.posTier !== state.tierFilter) {
+    return false;
+  }
+  if (!playerMatchesTagFilter(player, state.tagFilter)) {
     return false;
   }
   const query = state.search.trim().toLowerCase();

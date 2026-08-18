@@ -4,8 +4,8 @@ import {
 } from "../config/recommendationConfig.ts";
 import { LEAGUE } from "../config/leagueSettings.ts";
 import type { DraftState, Player } from "../domain/types.ts";
-import { simulateCompletedDraft } from "./draftSim.ts";
-import { bestQb, secureQbPool } from "./qb.ts";
+import { simulateCompletedDraft, type CompletedSim } from "./draftSim.ts";
+import { bestQb, isAcceptableQb, qbJobSecurityPenalty, secureQbPool } from "./qb.ts";
 import { draftedIds, myRosterPlayers, playersById } from "./roster.ts";
 
 export type QbBranchVerdict = "qb-now" | "double-late" | "close";
@@ -45,7 +45,7 @@ function riskFromPool(securePool: number, lateQbs: Player[]): QbBranchRisk {
 
 function sideFromSim(
   label: QbBranchSide["label"],
-  sim: ReturnType<typeof simulateCompletedDraft>,
+  sim: CompletedSim,
   securePool: number,
   config: RecommendationConfig,
 ): QbBranchSide {
@@ -58,6 +58,27 @@ function sideFromSim(
     firstPick: sim.firstPick,
     risk: riskFromPool(securePool, sim.roster.filter((player) => player.pos === "QB")),
   };
+}
+
+export function isDoubleLateViable(
+  waitSim: CompletedSim,
+  qbCount: number,
+  config: RecommendationConfig = RECOMMENDATION_CONFIG,
+): boolean {
+  if (qbCount !== 0) return false;
+  const waitQbs = waitSim.roster.filter((player) => player.pos === "QB");
+  const hasK = waitSim.roster.some((player) => player.pos === "K");
+  const hasDst = waitSim.roster.some((player) => player.pos === "DST");
+  if (waitQbs.length < 2 || !hasK || !hasDst) return false;
+  if (!waitQbs.every((player) => isAcceptableQb(player, config))) return false;
+  if (waitQbs.some((player) => player.qbStarterSecurity === "fragile")) {
+    return false;
+  }
+  const combined = waitQbs.reduce(
+    (sum, player) => sum + player.modelPts - qbJobSecurityPenalty(player, config),
+    0,
+  );
+  return combined >= config.branch.lateQbFloor;
 }
 
 export function compareQbBranches(
@@ -74,10 +95,10 @@ export function compareQbBranches(
   const taken = draftedIds(state.picks);
   const available = players.filter((player) => !taken.has(player.id));
   const secure = secureQbPool(available, config);
-  const doubleLateViable = qbCount === 0 && secure.length >= 2;
   const nowQb = bestQb(available, config);
   const nowSim = simulateCompletedDraft(players, state, nowQb, config);
   const waitSim = simulateCompletedDraft(players, state, null, config, true);
+  const doubleLateViable = isDoubleLateViable(waitSim, qbCount, config);
   const qbNow = sideFromSim("QB now", nowSim, secure.length, config);
   const wait = sideFromSim("Wait", waitSim, secure.length, config);
   const difference = wait.adjustedPoints - qbNow.adjustedPoints;
@@ -96,15 +117,20 @@ export function compareQbBranches(
   const waitQb = waitSim.roster.filter((player) => player.pos === "QB")[qbCount] ?? waitSim.roster.find((player) => player.pos === "QB");
   const waitSkill = waitSim.firstPick?.pos === "QB" ? null : waitSim.firstPick;
   const qbPtsDiff = (takenNowQb?.modelPts ?? 0) - (waitQb?.modelPts ?? 0);
+  const waitFragile = wait.qbs.some(
+    (player) => player.qbStarterSecurity === "fragile",
+  );
 
   let reason: string;
   if (verdict === "double-late") {
-    reason = `You can still wait on QBs: ${secure.length} safe starters remain. Use your next pick on a skill player.`;
+    reason = `You can still wait on QBs: the late branch still lands ${wait.qbs.length} acceptable starters. Use your next pick on a skill player.`;
   } else if (verdict === "close") {
     reason =
       "The two QB plans are within about a point per week. Follow the ranking below.";
   } else if (takenNowQb && waitSkill && qbPtsDiff > 0) {
     reason = `Taking ${takenNowQb.player} now likely means missing ${waitSkill.player}, but that QB is projected ${qbPtsDiff.toFixed(1)} points better than the late QB this sim expects.`;
+  } else if (!doubleLateViable && qbCount === 0 && waitFragile) {
+    reason = "The QBs that survive until 14.03/15.06 look too fragile to wait — take one now.";
   } else if (!doubleLateViable && qbCount === 0) {
     reason = "Not enough safe starting QBs are left to wait — take one with your next pick.";
   } else {

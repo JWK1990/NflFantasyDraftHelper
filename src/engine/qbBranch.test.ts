@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player } from "../domain/types.ts";
 import { compareQbBranches, forcedQbOverallPick } from "./qbBranch.ts";
+import { isAcceptableQb } from "./qb.ts";
 import { recommend } from "./recommend.ts";
 import { draftReducer, initialDraftState } from "../state/draftReducer.ts";
 
@@ -76,5 +77,45 @@ describe("QB branch comparison", () => {
     const recs = recommend(players, state);
     expect(recs[0]?.player.pos).toBe("QB");
     expect(recs[0]?.player.id).toBe(bestRemaining.id);
+  });
+
+  it("closes double-late when the wait branch cannot land two acceptable QBs", () => {
+    const acceptable = players.filter((player) => isAcceptableQb(player));
+    let state = initialDraftState;
+    for (const qb of acceptable) {
+      state = draft(state, qb.player, "other");
+    }
+    const comparison = compareQbBranches(players, state);
+    expect(comparison?.doubleLateViable).toBe(false);
+    expect(comparison?.verdict).toBe("qb-now");
+  });
+
+  it("pins the qb-now first pick to the top of the live list", () => {
+    const acceptable = players.filter((player) => isAcceptableQb(player));
+    let state = initialDraftState;
+    const used = new Set<string>();
+    for (const qb of acceptable) {
+      state = draft(state, qb.player, "other");
+      used.add(qb.id);
+    }
+    const fillers = players.filter(
+      (player) =>
+        player.pos !== "K" &&
+        player.pos !== "DST" &&
+        !used.has(player.id),
+    );
+    let index = 0;
+    while (state.picks.length < 29) {
+      const filler = fillers[index];
+      index += 1;
+      if (!filler) throw new Error("Ran out of fillers before pick 30");
+      state = draft(state, filler.player, "other");
+    }
+    expect(state.picks).toHaveLength(29);
+    const comparison = compareQbBranches(players, state);
+    expect(comparison?.verdict).toBe("qb-now");
+    expect(comparison?.qbNow.firstPick?.pos).toBe("QB");
+    const recs = recommend(players, state);
+    expect(recs[0]?.player.id).toBe(comparison!.qbNow.firstPick!.id);
   });
 });

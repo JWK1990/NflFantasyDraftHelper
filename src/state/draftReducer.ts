@@ -7,6 +7,7 @@ export const initialDraftState: DraftState = {
   search: "",
   positionFilter: "ALL",
   tierFilter: "ALL",
+  tagFilter: "ALL",
   qb2Mode: "adaptive-punt",
 };
 
@@ -42,12 +43,22 @@ export function draftReducer(state: DraftState, action: DraftAction): DraftState
         qb2Mode: state.qb2Mode,
       };
     }
+    case "LOAD_STATE":
+      return action.state;
+    case "REPLACE_PICKS":
+      return {
+        ...state,
+        picks: action.picks,
+        search: "",
+      };
     case "SET_SEARCH":
       return { ...state, search: action.search };
     case "SET_POSITION_FILTER":
       return { ...state, positionFilter: action.position };
     case "SET_TIER_FILTER":
       return { ...state, tierFilter: action.tier };
+    case "SET_TAG_FILTER":
+      return { ...state, tagFilter: action.tag };
     case "SET_QB2_MODE":
       return { ...state, qb2Mode: action.mode };
     default:

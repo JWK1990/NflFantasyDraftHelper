@@ -3,7 +3,9 @@ import { initialDraftState } from "./draftReducer.ts";
 import {
   loadState,
   memoryStorage,
+  parseDraftState,
   saveState,
+  serializeDraftState,
   STORAGE_KEY,
 } from "./persistence.ts";
 
@@ -43,5 +45,23 @@ describe("persistence", () => {
     const loaded = loadState(storage);
     expect(loaded.state).toEqual(initialDraftState);
     expect(loaded.resetReason).toMatch(/older format|reset/i);
+  });
+
+  it("round-trips a draft backup through JSON", () => {
+    const state = {
+      ...initialDraftState,
+      picks: [
+        {
+          playerId: "bijan-robinson-atl-rb",
+          draftedBy: "mine" as const,
+          overallPick: 1,
+          round: 1,
+          timestamp: "2026-08-17T00:00:00.000Z",
+        },
+      ],
+    };
+    const parsed = parseDraftState(JSON.parse(serializeDraftState(state)) as unknown);
+    expect(parsed).toEqual(state);
+    expect(parseDraftState({ schemaVersion: 1 })).toBeNull();
   });
 });

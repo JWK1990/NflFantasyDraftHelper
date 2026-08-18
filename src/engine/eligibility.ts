@@ -6,6 +6,7 @@ import {
 import type { Player, RosterCounts } from "../domain/types.ts";
 import { draftedIds, offensiveGoalsMet } from "./roster.ts";
 import { roundForPick } from "./snake.ts";
+import { specialTeamsWindowOpen } from "./lateRound.ts";
 import type { DraftPick } from "../domain/types.ts";
 
 export function isEligible(
@@ -23,12 +24,14 @@ export function isEligible(
   if (player.pos === "DST" && counts.DST >= 1) return false;
 
   const round = roundForPick(currentOverallPick);
-  if (
-    (player.pos === "K" || player.pos === "DST") &&
-    round < config.specialTeams.suppressBeforeRound &&
-    !offensiveGoalsMet(counts)
-  ) {
-    return false;
+  if (player.pos === "K" || player.pos === "DST") {
+    if (
+      round < config.specialTeams.suppressBeforeRound &&
+      !offensiveGoalsMet(counts) &&
+      !specialTeamsWindowOpen(currentOverallPick, counts)
+    ) {
+      return false;
+    }
   }
 
   return true;

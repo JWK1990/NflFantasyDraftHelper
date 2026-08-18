@@ -3,19 +3,22 @@ import { LEAGUE } from "../config/leagueSettings.ts";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftedBy } from "../domain/types.ts";
 import { matchesFilters, recommend } from "../engine/recommend.ts";
-import { draftedIds, playersById, rosterCounts, rosterCoverage } from "../engine/roster.ts";
+import { draftedIds, myRosterPlayers, playersById, rosterCounts, rosterCoverageFromPlayers } from "../engine/roster.ts";
 import { remainingByPosTier, currentEdgeTiers } from "../engine/tierScarcity.ts";
 import { isUserPick } from "../engine/snake.ts";
 import { compareQbBranches } from "../engine/qbBranch.ts";
 import { QbBranchCard } from "../components/QbBranchCard.tsx";
 import { DraftHeader } from "../components/DraftHeader.tsx";
 import { DraftLogDrawer } from "../components/DraftLogDrawer.tsx";
+import { ImportPicksModal } from "../components/ImportPicksModal.tsx";
+import { ChipExplainProvider } from "../components/ChipExplainContext.tsx";
 import { RecommendationList } from "../components/RecommendationList.tsx";
 import { RosterStrip } from "../components/RosterStrip.tsx";
-import { TierPressureStrip, type TierFocus } from "../components/TierPressureStrip.tsx";
+import { TierPressureStrip, type ListFocus } from "../components/TierPressureStrip.tsx";
 import { Toast } from "../components/Toast.tsx";
+import { importEspnPicks } from "../engine/espnPaste.ts";
 import { draftReducer } from "../state/draftReducer.ts";
-import { loadState, saveState } from "../state/persistence.ts";
+import { loadState, saveState, serializeDraftState } from "../state/persistence.ts";
 
 const players = loadPlayers();
 const byId = playersById(players);
@@ -36,7 +39,9 @@ export default function App() {
     hydrated.resetReason ? { message: hydrated.resetReason, warning: true } : null,
   );
   const [resetBanner] = useState(hydrated.resetReason);
-  const [tierFocus, setTierFocus] = useState<TierFocus | null>(null);
+  const [listFocus, setListFocus] = useState<ListFocus | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
 
   useEffect(() => {
     saveState(state);
@@ -50,7 +55,8 @@ export default function App() {
 
   const currentOverallPick = state.picks.length + 1;
   const counts = useMemo(() => rosterCounts(state.picks, byId), [state.picks]);
-  const coverage = useMemo(() => rosterCoverage(counts), [counts]);
+  const roster = useMemo(() => myRosterPlayers(state.picks, byId), [state.picks]);
+  const coverage = useMemo(() => rosterCoverageFromPlayers(roster), [roster]);
   const recs = useMemo(() => recommend(players, state), [state]);
   const qbBranch = useMemo(() => compareQbBranches(players, state), [state]);
   const recById = useMemo(
@@ -73,17 +79,18 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (!tierFocus) return;
+    if (!listFocus || listFocus.kind !== "tier") return;
     const stillExists = endingTiers.some(
-      (tier) => tier.pos === tierFocus.pos && tier.posTier === tierFocus.posTier,
+      (tier) => tier.pos === listFocus.pos && tier.posTier === listFocus.posTier,
     );
-    if (!stillExists) setTierFocus(null);
-  }, [endingTiers, tierFocus]);
+    if (!stillExists) setListFocus(null);
+  }, [endingTiers, listFocus]);
 
   const filtering =
     state.search.trim() !== "" ||
     state.positionFilter !== "ALL" ||
-    state.tierFilter !== "ALL";
+    state.tierFilter !== "ALL" ||
+    state.tagFilter !== "ALL";
 
   const rows = useMemo(() => {
     if (state.search.trim()) {
@@ -116,7 +123,23 @@ export default function App() {
     });
   }
 
+  function handleImportPicks(paste: string, teamName: string) {
+    const result = importEspnPicks(paste, players, teamName);
+    if (!result.ok) {
+      setImportError(result.error);
+      return;
+    }
+    dispatch({ type: "REPLACE_PICKS", picks: result.picks });
+    setImportOpen(false);
+    setImportError(null);
+    setExpandedId(null);
+    setToast({
+      message: `Imported ${result.picks.length} pick${result.picks.length === 1 ? "" : "s"} (${result.mineCount} yours).`,
+    });
+  }
+
   return (
+    <ChipExplainProvider>
     <div className={`app-shell${drawerOpen ? " drawer-open" : ""}`}>
       <DraftHeader
         currentOverallPick={currentOverallPick}
@@ -126,6 +149,21 @@ export default function App() {
           dispatch({ type: "RESET_DRAFT" });
           setToast({ message: "Draft reset.", warning: true });
         }}
+        onExport={() => {
+          const blob = new Blob([serializeDraftState(state)], {
+            type: "application/json",
+          });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `draft-helper-pick-${currentOverallPick}.json`;
+          link.click();
+          URL.revokeObjectURL(url);
+        }}
+        onImport={() => {
+          setImportError(null);
+          setImportOpen(true);
+        }}
         qb2Mode={state.qb2Mode}
         onQb2Mode={(mode) => dispatch({ type: "SET_QB2_MODE", mode })}
       />
@@ -134,24 +172,26 @@ export default function App() {
         coverage={coverage}
         qbCount={counts.QB}
         qbCap={LEAGUE.hardCaps.QB}
-        positionFilter={state.positionFilter}
-        onPosition={(position) => {
-          setTierFocus(null);
-          dispatch({ type: "SET_POSITION_FILTER", position });
+        focusPos={listFocus?.kind === "pos" ? listFocus.pos : null}
+        onFocus={(position) => {
+          setListFocus((current) =>
+            current?.kind === "pos" && current.pos === position
+              ? null
+              : { kind: "pos", pos: position },
+          );
         }}
       />
-      {qbBranch ? (
-        <QbBranchCard
-          comparison={qbBranch}
-          listLeaderName={recs[0]?.player.player}
-        />
-      ) : null}
+      {qbBranch ? <QbBranchCard comparison={qbBranch} /> : null}
       <TierPressureStrip
         tiers={endingTiers}
-        focus={tierFocus}
+        focus={listFocus?.kind === "tier" ? listFocus : null}
         onSelect={(tier) =>
-          setTierFocus((current) =>
-            current?.pos === tier.pos && current.posTier === tier.posTier ? null : tier,
+          setListFocus((current) =>
+            current?.kind === "tier" &&
+            current.pos === tier.pos &&
+            current.posTier === tier.posTier
+              ? null
+              : { kind: "tier", pos: tier.pos, posTier: tier.posTier },
           )
         }
       />
@@ -159,7 +199,7 @@ export default function App() {
         rows={rows}
         expandedId={expandedId}
         ranks={rankById}
-        focus={tierFocus}
+        focus={listFocus}
         topVorp={recs[0]?.player.vorp ?? null}
         onToggle={(playerId) =>
           setExpandedId((current) => (current === playerId ? null : playerId))
@@ -192,6 +232,7 @@ export default function App() {
         search={state.search}
         positionFilter={state.positionFilter}
         tierFilter={state.tierFilter}
+        tagFilter={state.tagFilter}
         picks={state.picks}
         playersById={byId}
         onClose={() => setDrawerOpen(false)}
@@ -199,7 +240,17 @@ export default function App() {
         onSearch={(search) => dispatch({ type: "SET_SEARCH", search })}
         onPosition={(position) => dispatch({ type: "SET_POSITION_FILTER", position })}
         onTier={(tier) => dispatch({ type: "SET_TIER_FILTER", tier })}
+        onTag={(tag) => dispatch({ type: "SET_TAG_FILTER", tag })}
         onUndo={() => dispatch({ type: "UNDO_LAST_PICK" })}
+      />
+      <ImportPicksModal
+        open={importOpen}
+        error={importError}
+        onClose={() => {
+          setImportOpen(false);
+          setImportError(null);
+        }}
+        onImport={handleImportPicks}
       />
       {toast ? (
         <Toast
@@ -216,5 +267,6 @@ export default function App() {
         />
       ) : null}
     </div>
+    </ChipExplainProvider>
   );
 }

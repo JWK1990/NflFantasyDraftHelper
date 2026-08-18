@@ -1,5 +1,6 @@
-import type { DraftState } from "../domain/types.ts";
+import type { DraftState, TagFilter } from "../domain/types.ts";
 import { initialDraftState } from "./draftReducer.ts";
+import { TAG_FILTER_IDS } from "../engine/tags.ts";
 
 export const STORAGE_KEY = "nfl-draft-assistant:v1";
 
@@ -26,6 +27,12 @@ function isDraftState(value: unknown): value is DraftState {
   if (record.qb2Mode !== "adaptive-punt" && record.qb2Mode !== "normal") {
     return false;
   }
+  if (
+    record.tagFilter !== undefined &&
+    (typeof record.tagFilter !== "string" || !TAG_FILTER_IDS.has(record.tagFilter))
+  ) {
+    return false;
+  }
   return record.picks.every((pick) => {
     if (!pick || typeof pick !== "object") return false;
     const row = pick as Record<string, unknown>;
@@ -37,6 +44,18 @@ function isDraftState(value: unknown): value is DraftState {
       typeof row.timestamp === "string"
     );
   });
+}
+
+export function parseDraftState(value: unknown): DraftState | null {
+  if (!isDraftState(value)) return null;
+  return {
+    ...value,
+    tagFilter: (value.tagFilter as TagFilter | undefined) ?? "ALL",
+  };
+}
+
+export function serializeDraftState(state: DraftState): string {
+  return JSON.stringify(state, null, 2);
 }
 
 export function saveState(
@@ -75,7 +94,7 @@ export function loadState(
         resetReason: "Saved draft data was corrupt, so the board was reset.",
       };
     }
-    return { state: parsed };
+    return { state: parseDraftState(parsed) ?? initialDraftState };
   } catch {
     return {
       state: initialDraftState,

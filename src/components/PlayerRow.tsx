@@ -1,5 +1,7 @@
 import type { DraftedBy, Player, Recommendation } from "../domain/types.ts";
 import { formatAdp, formatVorp, formatVorpDiff, posLabel, positionColor } from "./format.ts";
+import { scoutingTag } from "../engine/tags.ts";
+import { useChipExplain } from "./ChipExplainContext.tsx";
 
 interface PlayerRowProps {
   player: Player;
@@ -28,28 +30,35 @@ export function PlayerRow({
   onToggle,
   onDraft,
 }: PlayerRowProps) {
+  const explain = useChipExplain();
   const colors = positionColor(player.pos);
   const vorpVsTop =
     topVorp != null && rank != null && rank !== 1 && !draftedBy
       ? player.vorp - topVorp
       : null;
+  const tag = scoutingTag(player);
+  const reasons = recommendation?.reasons ?? (tag ? [tag] : []);
   return (
     <article className={`player-row${dimmed ? " dimmed" : ""}`}>
-      <button className="player-main" onClick={onToggle} type="button">
+      <div className="player-main">
         <div className="player-top">
           {rank != null ? <span className="rank">{rank}</span> : null}
-          <span
+          <button
             className="pos-chip"
+            type="button"
             style={{ background: colors.bg, color: colors.text }}
+            onClick={() => explain(`${posLabel(player.pos)} T${player.posTier}`)}
           >
             {posLabel(player.pos)} T{player.posTier}
-          </span>
-          <span className="name">{player.player}</span>
-          <span className="meta">
-            {player.team} · {posLabel(player.pos)}
-          </span>
+          </button>
+          <button className="player-ident" type="button" onClick={onToggle}>
+            <span className="name">{player.player}</span>
+            <span className="meta">
+              {player.team} · {posLabel(player.pos)}
+            </span>
+          </button>
         </div>
-        <div className="stats">
+        <button className="stats" type="button" onClick={onToggle}>
           <strong>VORP {formatVorp(player.vorp)}</strong>
           {vorpVsTop != null ? (
             <span className={Math.abs(vorpVsTop) < 4 ? "quiet" : undefined}>
@@ -58,18 +67,22 @@ export function PlayerRow({
           ) : null}
           {", "}
           <strong>ADP {formatAdp(player.adp)}</strong>
-          {player.tag ? `, ${player.tag}` : null}
-        </div>
-        {recommendation && recommendation.reasons.length > 0 ? (
+        </button>
+        {reasons.length > 0 ? (
           <div className="reasons">
-            {recommendation.reasons.map((reason) => (
-              <span key={reason} className="reason">
+            {reasons.map((reason) => (
+              <button
+                key={reason}
+                type="button"
+                className="reason"
+                onClick={() => explain(reason)}
+              >
                 {reason}
-              </span>
+              </button>
             ))}
           </div>
         ) : null}
-      </button>
+      </div>
       {draftedBy ? (
         <div className="taken-label">{draftedBy === "mine" ? "MINE" : "TAKEN"}</div>
       ) : (
@@ -107,10 +120,12 @@ export function PlayerRow({
                   {Math.round(recommendation.breakdown.returnProbability * 100)}%
                 </span>
               </div>
-              <div className="breakdown-row">
-                <span>Risk adjustment</span>
-                <span>−{Math.round(recommendation.breakdown.riskAdjustment)}</span>
-              </div>
+              {recommendation.breakdown.riskAdjustment > 0 ? (
+                <div className="breakdown-row">
+                  <span>Risk adjustment</span>
+                  <span>−{Math.round(recommendation.breakdown.riskAdjustment)}</span>
+                </div>
+              ) : null}
               <div className="breakdown-row">
                 <span>Bench value</span>
                 <span>{recommendation.breakdown.benchValue.toFixed(1)}</span>

@@ -4,8 +4,10 @@ import type {
   Player,
   Position,
   PositionFilter,
+  TagFilter,
   TierFilter,
 } from "../domain/types.ts";
+import { TAG_FILTERS } from "../engine/tags.ts";
 import { posLabel } from "./format.ts";
 
 interface DraftLogDrawerProps {
@@ -14,6 +16,7 @@ interface DraftLogDrawerProps {
   search: string;
   positionFilter: PositionFilter;
   tierFilter: TierFilter;
+  tagFilter: TagFilter;
   picks: DraftPick[];
   playersById: Map<string, Player>;
   onClose: () => void;
@@ -21,6 +24,7 @@ interface DraftLogDrawerProps {
   onSearch: (search: string) => void;
   onPosition: (position: PositionFilter) => void;
   onTier: (tier: TierFilter) => void;
+  onTag: (tag: TagFilter) => void;
   onUndo: () => void;
 }
 
@@ -32,6 +36,7 @@ export function DraftLogDrawer({
   search,
   positionFilter,
   tierFilter,
+  tagFilter,
   picks,
   playersById,
   onClose,
@@ -39,6 +44,7 @@ export function DraftLogDrawer({
   onSearch,
   onPosition,
   onTier,
+  onTag,
   onUndo,
 }: DraftLogDrawerProps) {
   if (!open) return null;
@@ -106,6 +112,23 @@ export function DraftLogDrawer({
                   onClick={() => onTier(tier)}
                 >
                   {tier === "ALL" ? "All tiers" : `T${tier}`}
+                </button>
+              ))}
+            </div>
+            <div className="filters">
+              <button
+                className={`filter-chip ${tagFilter === "ALL" ? "active" : ""}`}
+                onClick={() => onTag("ALL")}
+              >
+                All tags
+              </button>
+              {TAG_FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  className={`filter-chip ${tagFilter === filter.id ? "active" : ""}`}
+                  onClick={() => onTag(tagFilter === filter.id ? "ALL" : filter.id)}
+                >
+                  {filter.label}
                 </button>
               ))}
             </div>

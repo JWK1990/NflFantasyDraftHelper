@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { DraftedBy, Player, Recommendation } from "../domain/types.ts";
-import type { TierFocus } from "./TierPressureStrip.tsx";
+import type { ListFocus } from "./TierPressureStrip.tsx";
 import { PlayerRow } from "./PlayerRow.tsx";
 
 interface ListRow {
@@ -13,7 +13,7 @@ interface RecommendationListProps {
   rows: ListRow[];
   expandedId: string | null;
   ranks: Map<string, number>;
-  focus: TierFocus | null;
+  focus: ListFocus | null;
   topVorp?: number | null;
   onToggle: (playerId: string) => void;
   onDraft: (playerId: string, draftedBy: DraftedBy) => void;
@@ -45,7 +45,9 @@ export function RecommendationList({
       {rows.map((row) => {
         const dimmed = Boolean(
           focus &&
-            (row.player.pos !== focus.pos || row.player.posTier !== focus.posTier),
+            (focus.kind === "pos"
+              ? row.player.pos !== focus.pos
+              : row.player.pos !== focus.pos || row.player.posTier !== focus.posTier),
         );
         return (
           <PlayerRow

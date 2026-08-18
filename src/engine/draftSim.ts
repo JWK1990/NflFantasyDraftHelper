@@ -3,11 +3,17 @@ import {
   type RecommendationConfig,
 } from "../config/recommendationConfig.ts";
 import { LEAGUE } from "../config/leagueSettings.ts";
-import type { DraftState, Player, Qb2Mode } from "../domain/types.ts";
+import type { DraftState, Player, Position, Qb2Mode } from "../domain/types.ts";
 import { completedTeamUtility, type TeamUtility } from "./teamUtility.ts";
+import { lateRoundReservation } from "./lateRound.ts";
 import { bestQb } from "./qb.ts";
 import { draftedIds, myRosterPlayers, playersById } from "./roster.ts";
-import { roundForPick, slotForPick, userPickSchedule } from "./snake.ts";
+import {
+  roundForPick,
+  slotForPick,
+  upcomingUserPick,
+  userPickSchedule,
+} from "./snake.ts";
 
 export function adpSortValue(player: Player): number {
   return player.adp ?? 900 + player.posRank;
@@ -17,14 +23,15 @@ function byAdp(a: Player, b: Player): number {
   return adpSortValue(a) - adpSortValue(b) || b.modelPts - a.modelPts;
 }
 
-export function qbCountsBySlot(
+function slotPosCounts(
   picks: DraftState["picks"],
   byId: Map<string, Player>,
+  pos: Player["pos"],
 ): number[] {
   const counts = Array.from({ length: LEAGUE.teams + 1 }, () => 0);
   for (const pick of picks) {
     const player = byId.get(pick.playerId);
-    if (player?.pos !== "QB") continue;
+    if (player?.pos !== pos) continue;
     counts[slotForPick(pick.overallPick)] += 1;
   }
   return counts;
@@ -52,14 +59,46 @@ function simEligible(available: Player[], roster: Player[]): Player[] {
   });
 }
 
+function bestByPos(eligible: Player[], pos: Position): Player | null {
+  return (
+    eligible
+      .filter((player) => player.pos === pos)
+      .sort((a, b) => a.posRank - b.posRank || b.modelPts - a.modelPts)[0] ?? null
+  );
+}
+
 function chooseOpponentPlayer(
   available: Player[],
+  overallPick: number,
   slot: number,
   qbBySlot: number[],
+  kBySlot: number[],
+  dstBySlot: number[],
   cap: number,
 ): Player | null {
+  const round = roundForPick(overallPick);
+  const remainingRounds = LEAGUE.rounds - round + 1;
+  const needK = kBySlot[slot] === 0;
+  const needDst = dstBySlot[slot] === 0;
+  const specialsNeeded = Number(needK) + Number(needDst);
+  const takeSpecials =
+    specialsNeeded > 0 && (round >= 13 || remainingRounds <= specialsNeeded);
+
+  if (takeSpecials) {
+    if (needK) {
+      const kicker = bestByPos(available, "K");
+      if (kicker) return kicker;
+    }
+    if (needDst) {
+      const dst = bestByPos(available, "DST");
+      if (dst) return dst;
+    }
+  }
+
   for (const player of available) {
     if (player.pos === "QB" && qbBySlot[slot] >= cap) continue;
+    if (player.pos === "K" && (kBySlot[slot] >= 1 || round < 13)) continue;
+    if (player.pos === "DST" && (dstBySlot[slot] >= 1 || round < 13)) continue;
     return player;
   }
   return available[0] ?? null;
@@ -102,26 +141,28 @@ export function chooseGreedyUserPlayer(
   if (eligible.length === 0) return null;
 
   const qbCount = countPos(roster, "QB");
-  if ((overallPick === 163 && qbCount === 0) || (overallPick === 174 && qbCount < 2)) {
+  const hasK = rosterHas(roster, "K");
+  const hasDst = rosterHas(roster, "DST");
+  const reserved = lateRoundReservation(overallPick, qbCount, hasK, hasDst);
+  if (reserved === "QB") {
     return bestQb(eligible, config) ?? eligible[0] ?? null;
+  }
+  if (reserved === "K") {
+    return bestByPos(eligible, "K") ?? eligible[0] ?? null;
+  }
+  if (reserved === "DST") {
+    return bestByPos(eligible, "DST") ?? eligible[0] ?? null;
   }
 
   const remaining = LEAGUE.rosterSize - roster.length;
-  const needK = !rosterHas(roster, "K");
-  const needDst = !rosterHas(roster, "DST");
-  const specials = Number(needK) + Number(needDst);
-  const round = roundForPick(overallPick);
-  if (specials > 0 && (round >= 12 || remaining <= specials)) {
-    if (needK) {
-      const kicker = eligible
-        .filter((player) => player.pos === "K")
-        .sort((a, b) => a.posRank - b.posRank)[0];
+  const specials = Number(!hasK) + Number(!hasDst);
+  if (specials > 0 && remaining <= specials) {
+    if (!hasK) {
+      const kicker = bestByPos(eligible, "K");
       if (kicker) return kicker;
     }
-    if (needDst) {
-      const dst = eligible
-        .filter((player) => player.pos === "DST")
-        .sort((a, b) => a.posRank - b.posRank)[0];
+    if (!hasDst) {
+      const dst = bestByPos(eligible, "DST");
       if (dst) return dst;
     }
   }
@@ -152,6 +193,18 @@ export interface CompletedSim {
   roster: Player[];
   firstPick: Player | null;
   utility: TeamUtility;
+  qbBySlot: number[];
+  kBySlot: number[];
+  dstBySlot: number[];
+  candidateLocked: boolean;
+}
+
+function poolWithoutReserved(
+  available: Player[],
+  reservedId: string | null,
+): Player[] {
+  if (reservedId == null) return available;
+  return available.filter((player) => player.id !== reservedId);
 }
 
 export function simulateCompletedDraft(
@@ -165,39 +218,49 @@ export function simulateCompletedDraft(
   const taken = draftedIds(state.picks);
   let available = players.filter((player) => !taken.has(player.id)).sort(byAdp);
   const roster = [...myRosterPlayers(state.picks, byId)];
-  const qbBySlot = qbCountsBySlot(state.picks, byId);
+  const qbBySlot = slotPosCounts(state.picks, byId, "QB");
+  const kBySlot = slotPosCounts(state.picks, byId, "K");
+  const dstBySlot = slotPosCounts(state.picks, byId, "DST");
   const userPicks = new Set(userPickSchedule());
   const start = state.picks.length + 1;
   const last = LEAGUE.teams * LEAGUE.rounds;
+  const reservedId = openingUserPick?.id ?? null;
+  const decisionPick =
+    reservedId == null ? null : upcomingUserPick(start);
   let firstPick: Player | null = null;
+  let candidateLocked = reservedId == null;
   const cap = config.branch.opponentQbCap;
 
   for (let overall = start; overall <= last; overall += 1) {
     const isUser = userPicks.has(overall);
+    const slot = slotForPick(overall);
     let pick: Player | null = null;
     if (isUser) {
       if (roster.length >= LEAGUE.rosterSize) continue;
-      const qbCount = countPos(roster, "QB");
-      const forceQb =
-        (overall === 163 && qbCount === 0) || (overall === 174 && qbCount < 2);
-      const pool =
-        waitOnQb && !forceQb
-          ? available.filter((player) => player.pos !== "QB")
-          : available;
-      if (firstPick == null && openingUserPick) {
-        pick =
-          available.find((player) => player.id === openingUserPick.id) ??
-          (openingUserPick.pos === "QB" ? bestQb(pool.length > 0 ? pool : available, config) : null);
+      const shouldLock =
+        reservedId != null &&
+        firstPick == null &&
+        decisionPick != null &&
+        overall === decisionPick;
+      if (shouldLock) {
+        pick = available.find((player) => player.id === reservedId) ?? null;
         if (!pick) {
-          pick = chooseGreedyUserPlayer(
-            pool.length > 0 ? pool : available,
-            roster,
-            overall,
-            state.qb2Mode,
-            config,
-          );
+          break;
         }
+        candidateLocked = true;
       } else {
+        const qbCount = countPos(roster, "QB");
+        const forceQb =
+          lateRoundReservation(
+            overall,
+            qbCount,
+            rosterHas(roster, "K"),
+            rosterHas(roster, "DST"),
+          ) === "QB";
+        const pool =
+          waitOnQb && !forceQb
+            ? available.filter((player) => player.pos !== "QB")
+            : available;
         pick = chooseGreedyUserPlayer(
           pool.length > 0 ? pool : available,
           roster,
@@ -207,16 +270,30 @@ export function simulateCompletedDraft(
         );
       }
     } else {
-      pick = chooseOpponentPlayer(available, slotForPick(overall), qbBySlot, cap);
+      const stillReserved = reservedId != null && firstPick == null;
+      pick = chooseOpponentPlayer(
+        stillReserved ? poolWithoutReserved(available, reservedId) : available,
+        overall,
+        slot,
+        qbBySlot,
+        kBySlot,
+        dstBySlot,
+        cap,
+      );
     }
     if (!pick) continue;
     available = removePlayer(available, pick.id);
+    if (pick.pos === "QB") qbBySlot[slot] += 1;
+    if (pick.pos === "K") kBySlot[slot] += 1;
+    if (pick.pos === "DST") dstBySlot[slot] += 1;
     if (isUser) {
       roster.push(pick);
       if (!firstPick) firstPick = pick;
-    } else if (pick.pos === "QB") {
-      qbBySlot[slotForPick(overall)] += 1;
     }
+  }
+
+  if (reservedId != null) {
+    candidateLocked = roster.some((player) => player.id === reservedId);
   }
 
   const remaining = Math.max(0, LEAGUE.rosterSize - roster.length);
@@ -224,6 +301,10 @@ export function simulateCompletedDraft(
     roster,
     firstPick,
     utility: completedTeamUtility(roster, remaining, config),
+    qbBySlot,
+    kBySlot,
+    dstBySlot,
+    candidateLocked,
   };
 }
 
@@ -248,6 +329,7 @@ export function intrinsicLookaheadPool(
   eligible: Player[],
   roster: Player[],
   remainingUserPicks: number,
+  currentOverallPick: number,
   config: RecommendationConfig,
 ): Set<string> {
   const scored = eligible
@@ -269,6 +351,32 @@ export function intrinsicLookaheadPool(
       .filter((player) => player.pos === "QB")
       .sort((a, b) => b.modelPts - a.modelPts)
       .slice(0, 8)
+      .forEach((player) => ids.add(player.id));
+  }
+  const needExtras: Array<[Position, number]> = [
+    ["TE", countPos(roster, "TE") < 1 ? 4 : 0],
+    ["RB", countPos(roster, "RB") < 2 ? 4 : 0],
+    ["WR", countPos(roster, "WR") < 2 ? 4 : 0],
+  ];
+  for (const [pos, extra] of needExtras) {
+    if (extra === 0) continue;
+    eligible
+      .filter((player) => player.pos === pos)
+      .sort((a, b) => b.modelPts - a.modelPts)
+      .slice(0, extra)
+      .forEach((player) => ids.add(player.id));
+  }
+  const reserved = lateRoundReservation(
+    currentOverallPick,
+    countPos(roster, "QB"),
+    rosterHas(roster, "K"),
+    rosterHas(roster, "DST"),
+  );
+  if (reserved === "K" || reserved === "DST") {
+    eligible
+      .filter((player) => player.pos === reserved)
+      .sort((a, b) => a.posRank - b.posRank)
+      .slice(0, 4)
       .forEach((player) => ids.add(player.id));
   }
   return ids;

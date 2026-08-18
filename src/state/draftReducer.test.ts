@@ -77,4 +77,44 @@ describe("draftReducer", () => {
     expect(second.picks).toHaveLength(1);
     expect(second.picks[0]?.draftedBy).toBe("other");
   });
+
+  it("replaces the board from a loaded backup", () => {
+    const bijan = playerId("Bijan Robinson");
+    const drafted = draftReducer(initialDraftState, {
+      type: "DRAFT_PLAYER",
+      playerId: bijan,
+      draftedBy: "mine",
+    });
+    const loaded = draftReducer(initialDraftState, {
+      type: "LOAD_STATE",
+      state: drafted,
+    });
+    expect(loaded.picks).toHaveLength(1);
+    expect(loaded.picks[0]?.playerId).toBe(bijan);
+  });
+
+  it("overwrites the pick list from REPLACE_PICKS", () => {
+    const bijan = playerId("Bijan Robinson");
+    const chase = playerId("Ja'Marr Chase");
+    const started = draftReducer(initialDraftState, {
+      type: "DRAFT_PLAYER",
+      playerId: bijan,
+      draftedBy: "mine",
+    });
+    const replaced = draftReducer(started, {
+      type: "REPLACE_PICKS",
+      picks: [
+        {
+          playerId: chase,
+          draftedBy: "mine",
+          overallPick: 6,
+          round: 1,
+          timestamp: "2026-08-18T00:00:00.000Z",
+        },
+      ],
+    });
+    expect(replaced.picks).toHaveLength(1);
+    expect(replaced.picks[0]?.playerId).toBe(chase);
+    expect(replaced.qb2Mode).toBe(started.qb2Mode);
+  });
 });

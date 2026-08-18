@@ -4,7 +4,6 @@ import {
 } from "../config/recommendationConfig.ts";
 import type { Player } from "../domain/types.ts";
 import { assignStarters, starterPoints } from "./lineup.ts";
-import { hasRiskTag, qbJobSecurityPenalty } from "./qb.ts";
 
 export interface TeamUtility {
   starterProjection: number;
@@ -49,32 +48,14 @@ export function completedTeamUtility(
   );
   const rawBench = bench.reduce((sum, player) => sum + player.modelPts, 0);
   const benchValue = Math.min(config.benchCap, rawBench * config.benchScale);
-
-  const upsideAdjustment = roster.filter((player) =>
-    player.tag.toUpperCase().includes("UPSIDE"),
-  ).length * config.upsideTagBonus;
-
-  const starterRisk = starters.reduce((sum, player) => {
-    if (!player) return sum;
-    let penalty = qbJobSecurityPenalty(player, config);
-    if (hasRiskTag(player) && player.pos !== "QB") penalty += 12;
-    return sum + penalty;
-  }, 0);
-  const benchRisk = bench.reduce((sum, player) => {
-    if (hasRiskTag(player) || player.qbStarterSecurity === "fragile") return sum + 4;
-    return sum;
-  }, 0);
-
-  const riskAdjustment = starterRisk + benchRisk;
   const slotPenalty = emptySlotPenalty(emptySlots, remainingUserPicks, config);
-  const utility =
-    starterProjection + benchValue + upsideAdjustment - riskAdjustment - slotPenalty;
+  const utility = starterProjection + benchValue - slotPenalty;
 
   return {
     starterProjection,
     benchValue,
-    upsideAdjustment,
-    riskAdjustment,
+    upsideAdjustment: 0,
+    riskAdjustment: 0,
     slotPenalty,
     utility,
   };

@@ -56,6 +56,7 @@ export const RECOMMENDATION_CONFIG = {
     weeks: 17,
     qbNowPpwLead: 1.5,
     waitPpwLead: 1.0,
+    lateQbFloor: 430,
     opponentQbCap: 2,
     probablePenalty: 10,
     fragilePenalty: 28,
@@ -71,6 +72,10 @@ export const RECOMMENDATION_CONFIG = {
   specialTeams: {
     suppressBeforeRound: 13,
     lateRoundBoost: 22,
+  },
+  returnChip: {
+    topN: 8,
+    minProbability: 0.7,
   },
 };
 

@@ -6,6 +6,10 @@ export interface TierFocus {
   posTier: number;
 }
 
+export type ListFocus =
+  | { kind: "tier"; pos: Position; posTier: number }
+  | { kind: "pos"; pos: Position };
+
 interface TierPressureStripProps {
   tiers: { pos: Position; posTier: number; left: number }[];
   focus: TierFocus | null;

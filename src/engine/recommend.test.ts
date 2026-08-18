@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player } from "../domain/types.ts";
 import { remainingByPosTier, currentEdgeTiers, tierCliffBonus } from "./tierScarcity.ts";
-import { recommend } from "./recommend.ts";
+import { matchesFilters, recommend } from "./recommend.ts";
 import { rbStarterNeed } from "./rosterNeed.ts";
 import { playersById, rosterCounts } from "./roster.ts";
 import { completedTeamUtility } from "./teamUtility.ts";
@@ -32,6 +32,37 @@ function draft(
 
 function rankOf(recs: ReturnType<typeof recommend>, name: string): number {
   return recs.findIndex((row) => row.player.player === name);
+}
+
+function fillUntil(
+  targetPick: number,
+  prefer: Player[] = [],
+  keepIds: string[] = [],
+  includeSpecials = false,
+): DraftState {
+  let state = initialDraftState;
+  const used = new Set<string>();
+  const keep = new Set(keepIds);
+  const queue = [
+    ...prefer,
+    ...players.filter((player) => {
+      if (keep.has(player.id)) return false;
+      if (prefer.some((row) => row.id === player.id)) return false;
+      if (!includeSpecials && (player.pos === "K" || player.pos === "DST")) return false;
+      return true;
+    }),
+  ];
+  for (let overall = 1; overall < targetPick; overall += 1) {
+    const next = queue.find((player) => !used.has(player.id) && !keep.has(player.id));
+    if (!next) throw new Error(`Ran out of players before pick ${targetPick}`);
+    used.add(next.id);
+    state = draftReducer(state, {
+      type: "DRAFT_PLAYER",
+      playerId: next.id,
+      draftedBy: "other",
+    });
+  }
+  return state;
 }
 
 describe("recommendation engine", () => {
@@ -151,10 +182,40 @@ describe("recommendation engine", () => {
     expect(jsn).toBeDefined();
     expect(puka).toBeDefined();
     expect(
-      jsn!.reasons.some((reason) => reason.startsWith("unlikely to be available")),
+      jsn!.reasons.some((reason) => reason.startsWith("Unlikely to be available")),
     ).toBe(true);
     expect(
-      puka!.reasons.some((reason) => reason.startsWith("unlikely to be available")),
+      puka!.reasons.some((reason) => reason.startsWith("Unlikely to be available")),
+    ).toBe(true);
+  });
+
+  it("flags a top-ranked player ADP says should last until the next pick", () => {
+    const byAdp = [...players]
+      .filter((player) => player.adp != null && player.pos !== "K" && player.pos !== "DST")
+      .sort((a, b) => (a.adp ?? 0) - (b.adp ?? 0));
+    const recs = recommend(players, fillUntil(30, byAdp)).slice(0, 8);
+    const canWait = recs.filter(
+      (row) =>
+        row.breakdown.returnProbability >= 0.7 &&
+        row.player.pos !== "K" &&
+        row.player.pos !== "DST",
+    );
+    expect(canWait.length).toBeGreaterThan(0);
+    expect(
+      canWait.every((row) =>
+        row.reasons.some((reason) => reason.startsWith("likely available at")),
+      ),
+    ).toBe(true);
+    expect(
+      recs.every((row) => {
+        const likely = row.reasons.some((reason) =>
+          reason.startsWith("likely available at"),
+        );
+        const unlikely = row.reasons.some((reason) =>
+          reason.startsWith("Unlikely to be available"),
+        );
+        return !(likely && unlikely);
+      }),
     ).toBe(true);
   });
 
@@ -171,6 +232,43 @@ describe("recommendation engine", () => {
     expect(recs.every((row) => row.reasons.length >= 1)).toBe(true);
   });
 
+  it("makes K and D/ST eligible at picks 139 and 150 with zero QBs", () => {
+    const at139 = fillUntil(139);
+    const recs139 = recommend(players, at139);
+    expect(recs139.some((row) => row.player.pos === "K")).toBe(true);
+    expect(recs139.some((row) => row.player.pos === "DST")).toBe(true);
+    expect(recs139[0]?.player.pos).toBe("K");
+
+    const at150 = fillUntil(150);
+    const recs150 = recommend(players, at150);
+    expect(recs150.some((row) => row.player.pos === "K")).toBe(true);
+    expect(recs150.some((row) => row.player.pos === "DST")).toBe(true);
+    expect(recs150[0]?.player.pos).toBe("DST");
+  });
+
+  it("still forces the best remaining QB at pick 174 with zero user QBs", () => {
+    const remainingQbs = players
+      .filter((player) => player.pos === "QB")
+      .sort((a, b) => b.modelPts - a.modelPts || a.modelRank - b.modelRank);
+    const bestRemaining = remainingQbs[0];
+    if (!bestRemaining) throw new Error("Expected remaining QBs");
+    const recs = recommend(players, fillUntil(174, [], [bestRemaining.id], true));
+    expect(recs[0]?.player.pos).toBe("QB");
+    expect(recs[0]?.player.id).toBe(bestRemaining.id);
+  });
+
+  it("warns when two or three players remain in a tier", () => {
+    const wrT1 = players.filter((player) => player.pos === "WR" && player.posTier === 1);
+    expect(wrT1.length).toBeGreaterThanOrEqual(3);
+    let state = initialDraftState;
+    for (const wr of wrT1.slice(3)) {
+      state = draft(state, wr.player, "other");
+    }
+    const recs = recommend(players, state);
+    const kept = recs.find((row) => row.player.id === wrT1[0]?.id);
+    expect(kept?.reasons.some((reason) => /WR T1: 3 left/.test(reason))).toBe(true);
+  });
+
   it("does not change roster contribution when only ADP changes", () => {
     const bijan = named("Bijan Robinson");
     const shifted = { ...bijan, adp: (bijan.adp ?? 10) + 40 };
@@ -180,6 +278,42 @@ describe("recommendation engine", () => {
     expect(later.utility).toBe(base.utility);
     expect(shifted.modelPts).toBe(bijan.modelPts);
     expect(shifted.vorp).toBe(bijan.vorp);
+  });
+
+  it("does not change completed-team utility when only the scouting tag changes", () => {
+    const cmc = named("Christian McCaffrey");
+    const clean = { ...cmc, tag: "RB1" };
+    const risky = { ...cmc, tag: "ELITE/RISK" };
+    const upside = { ...cmc, tag: "UPSIDE" };
+    expect(completedTeamUtility([risky], 14).utility).toBe(
+      completedTeamUtility([clean], 14).utility,
+    );
+    expect(completedTeamUtility([upside], 14).utility).toBe(
+      completedTeamUtility([clean], 14).utility,
+    );
+    expect(completedTeamUtility([risky], 14).riskAdjustment).toBe(0);
+  });
+
+  it("surfaces scouting tags as chips without using them as the only rank signal", () => {
+    const recs = recommend(players, initialDraftState);
+    const cmc = recs.find((row) => row.player.player === "Christian McCaffrey");
+    expect(cmc?.reasons).toContain("ELITE/RISK");
+    const taylor = recs.find((row) => row.player.player === "Jonathan Taylor");
+    expect(cmc).toBeDefined();
+    expect(taylor).toBeDefined();
+    expect(cmc!.dynamicScore).toBeGreaterThan(taylor!.dynamicScore);
+  });
+
+  it("filters the board by scouting tag", () => {
+    const sleeperState = { ...initialDraftState, tagFilter: "sleeper" as const };
+    const sleepers = players.filter((player) => matchesFilters(player, sleeperState));
+    expect(sleepers.length).toBeGreaterThan(0);
+    expect(
+      sleepers.every((player) => player.tag.toUpperCase().includes("SLEEPER")),
+    ).toBe(true);
+    expect(
+      sleepers.every((player) => !player.tag.toUpperCase().includes("DEEP SLEEPER")),
+    ).toBe(true);
   });
 
   it("gives bench-only players diminishing value rather than full starter points", () => {
@@ -200,12 +334,12 @@ describe("recommendation engine", () => {
     expect(gained).toBeLessThan(extra.modelPts * 0.5);
   });
 
-  it("finishes a wait-branch rollout with 15 players including K and D/ST", () => {
+  it("finishes a wait-branch rollout with 15 players including two QBs, K and D/ST", () => {
     const sim = simulateCompletedDraft(players, initialDraftState, null, undefined, true);
     expect(sim.roster).toHaveLength(15);
     expect(sim.roster.some((player) => player.pos === "K")).toBe(true);
     expect(sim.roster.some((player) => player.pos === "DST")).toBe(true);
-    expect(sim.roster.filter((player) => player.pos === "QB").length).toBeLessThanOrEqual(2);
+    expect(sim.roster.filter((player) => player.pos === "QB")).toHaveLength(2);
   });
 });
 

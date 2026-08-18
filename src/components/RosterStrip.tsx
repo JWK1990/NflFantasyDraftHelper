@@ -1,21 +1,23 @@
 import { POSITION_COLORS } from "../config/leagueSettings.ts";
-import type { Position, PositionFilter, RosterCoverage } from "../domain/types.ts";
+import type { Position, RosterCoverage } from "../domain/types.ts";
+import { useChipExplain } from "./ChipExplainContext.tsx";
 
 interface RosterStripProps {
   coverage: RosterCoverage;
   qbCount: number;
   qbCap: number;
-  positionFilter: PositionFilter;
-  onPosition: (position: PositionFilter) => void;
+  focusPos: Position | null;
+  onFocus: (position: Position) => void;
 }
 
 export function RosterStrip({
   coverage,
   qbCount,
   qbCap,
-  positionFilter,
-  onPosition,
+  focusPos,
+  onFocus,
 }: RosterStripProps) {
+  const explain = useChipExplain();
   const chips: {
     key: string;
     label: string;
@@ -38,7 +40,7 @@ export function RosterStrip({
     <div className="roster-strip" aria-label="Roster coverage">
       {chips.map((chip) => {
         const colors = chip.pos ? POSITION_COLORS[chip.pos] : null;
-        const selected = Boolean(chip.pos && positionFilter === chip.pos);
+        const selected = Boolean(chip.pos && focusPos === chip.pos);
         const style = colors
           ? {
               background: colors.bg,
@@ -49,12 +51,14 @@ export function RosterStrip({
 
         if (!chip.pos) {
           return (
-            <span
+            <button
               key={chip.key}
+              type="button"
               className={`roster-chip${chip.filled ? " filled" : ""}`}
+              onClick={() => explain(chip.label)}
             >
               {chip.label}
-            </span>
+            </button>
           );
         }
 
@@ -66,7 +70,7 @@ export function RosterStrip({
             className={`roster-chip${chip.filled ? " filled" : ""}${chip.prominent ? " qb" : ""}${selected ? " selected" : ""}`}
             style={style}
             aria-pressed={selected}
-            onClick={() => onPosition(selected ? "ALL" : pos)}
+            onClick={() => onFocus(pos)}
           >
             {chip.label}
           </button>

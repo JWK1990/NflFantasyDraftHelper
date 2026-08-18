@@ -10,6 +10,8 @@
 
 .sticky-header {
   flex: 0 0 auto;
+  position: relative;
+  z-index: 40;
   background: var(--bg);
   border-bottom: 1px solid var(--line);
   padding: 8px 10px 6px;
@@ -35,6 +37,11 @@
 .until-line {
   color: var(--text-muted);
   font-size: 0.78rem;
+}
+
+.pick-line.your-turn,
+.until-line.your-turn {
+  color: var(--mine);
 }
 
 .header-actions {
@@ -81,6 +88,56 @@
   padding: 8px;
   z-index: 30;
   box-shadow: 0 10px 30px rgb(0 0 0 / 35%);
+}
+
+.glossary-panel {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(360px, calc(100vw - 24px));
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 12px 14px;
+}
+
+.glossary-lead {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.glossary-section {
+  margin-top: 12px;
+}
+
+.glossary-section h3 {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.glossary-section dl {
+  margin: 0;
+}
+
+.glossary-item {
+  margin: 0 0 8px;
+}
+
+.glossary-item dt {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.glossary-item dd {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text-muted);
 }
 
 .menu-panel p,
@@ -268,11 +325,27 @@ button.roster-chip {
 }
 
 .player-main {
+  min-height: var(--tap);
+}
+
+.player-ident,
+.stats {
   appearance: none;
   border: 0;
   background: transparent;
+  color: inherit;
+  font: inherit;
   text-align: left;
   padding: 0;
+}
+
+.player-ident {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
   min-height: var(--tap);
 }
 
@@ -306,13 +379,16 @@ button.roster-chip {
 }
 
 .pos-chip {
+  border: 0;
   border-radius: 6px;
   padding: 1px 6px;
   font-size: 0.68rem;
   font-weight: 800;
+  min-height: 24px;
 }
 
 .stats {
+  width: 100%;
   margin-top: 2px;
   color: var(--text-muted);
   font-size: 0.75rem;
@@ -336,10 +412,13 @@ button.roster-chip {
 }
 
 .reason {
+  appearance: none;
+  border: 0;
   background: #243246;
   color: #d5deea;
   border-radius: 999px;
-  padding: 2px 7px;
+  padding: 4px 8px;
+  font: inherit;
   font-size: 0.68rem;
 }
 
@@ -564,4 +643,113 @@ button.roster-chip {
 
 .mode-toggle button {
   flex: 1;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgb(8 12 18 / 72%);
+  display: grid;
+  place-items: end center;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+}
+
+.import-modal {
+  width: min(520px, 100%);
+  max-height: min(88svh, 720px);
+  overflow: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.import-modal h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.import-modal p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.import-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.import-paste {
+  width: 100%;
+  min-height: 220px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  padding: 10px 12px;
+  resize: vertical;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.import-error {
+  color: #f3ddb0 !important;
+  background: #3a2e16;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.import-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.import-actions .action-btn {
+  margin-top: 0;
+}
+
+.confirm-import {
+  background: var(--mine) !important;
+  color: white;
+  font-weight: 800;
+}
+
+.chip-modal {
+  width: min(520px, 100%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chip-modal h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.chip-modal p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.chip-modal-detail {
+  color: var(--text) !important;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.chip-modal .action-btn {
+  margin-top: 4px;
 }

@@ -44,16 +44,8 @@ function requireNumber(value: unknown, field: string, player: string): number {
   return value;
 }
 
-function inferQbSecurity(pos: Position, posRank: number, tag: string): QbStarterSecurity | undefined {
+function inferQbSecurity(pos: Position, posRank: number): QbStarterSecurity | undefined {
   if (pos !== "QB") return undefined;
-  const upper = tag.toUpperCase();
-  if (
-    upper.includes("RISK") ||
-    upper.includes("RED WATCH") ||
-    upper.includes("INJURY WATCH")
-  ) {
-    return "fragile";
-  }
   if (posRank <= 12) return "secure";
   if (posRank <= 24) return "probable";
   return "fragile";
@@ -85,7 +77,7 @@ function toPlayer(raw: RawPlayer): Player {
     adp: raw.adp == null ? null : requireNumber(raw.adp, "adp", raw.player),
     tag,
     note: typeof raw.note === "string" ? raw.note : "",
-    qbStarterSecurity: inferQbSecurity(raw.pos, posRank, tag),
+    qbStarterSecurity: inferQbSecurity(raw.pos, posRank),
   };
 }
 

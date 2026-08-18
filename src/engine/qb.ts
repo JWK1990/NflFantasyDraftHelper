@@ -4,21 +4,11 @@ import {
 } from "../config/recommendationConfig.ts";
 import type { Player } from "../domain/types.ts";
 
-export function hasRiskTag(player: Player): boolean {
-  const tag = player.tag.toUpperCase();
-  return (
-    tag.includes("RISK") ||
-    tag.includes("RED WATCH") ||
-    tag.includes("INJURY WATCH")
-  );
-}
-
 export function isAcceptableQb(
   player: Player,
   config: RecommendationConfig = RECOMMENDATION_CONFIG,
 ): boolean {
   if (player.pos !== "QB") return false;
-  if (hasRiskTag(player)) return false;
   if (player.qbStarterSecurity === "fragile") return false;
   return player.posRank <= config.qb.acceptablePosRank;
 }
@@ -36,7 +26,8 @@ export function qbJobSecurityPenalty(
   player: Player,
   config: RecommendationConfig = RECOMMENDATION_CONFIG,
 ): number {
-  if (hasRiskTag(player) || player.qbStarterSecurity === "fragile") {
+  if (player.pos !== "QB") return 0;
+  if (player.qbStarterSecurity === "fragile") {
     return config.branch.fragilePenalty;
   }
   if (player.qbStarterSecurity === "probable") {

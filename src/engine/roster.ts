@@ -1,3 +1,4 @@
+import { assignStarters } from "./lineup.ts";
 import type {
   DraftPick,
   Player,
@@ -80,6 +81,34 @@ export function rosterCoverage(counts: RosterCounts): RosterCoverage {
   const bench = Math.max(0, counts.total - assigned);
 
   return { qb, rb, wr, te, flex, op, k, dst, bench };
+}
+
+export function rosterCoverageFromPlayers(roster: Player[]): RosterCoverage {
+  const lineup = assignStarters(roster);
+  const k = roster.some((player) => player.pos === "K") ? 1 : 0;
+  const dst = roster.some((player) => player.pos === "DST") ? 1 : 0;
+  const assigned =
+    Number(Boolean(lineup.QB)) +
+    Number(Boolean(lineup.RB1)) +
+    Number(Boolean(lineup.RB2)) +
+    Number(Boolean(lineup.WR1)) +
+    Number(Boolean(lineup.WR2)) +
+    Number(Boolean(lineup.TE)) +
+    Number(Boolean(lineup.FLEX)) +
+    Number(Boolean(lineup.OP)) +
+    k +
+    dst;
+  return {
+    qb: lineup.QB ? 1 : 0,
+    rb: Number(Boolean(lineup.RB1)) + Number(Boolean(lineup.RB2)),
+    wr: Number(Boolean(lineup.WR1)) + Number(Boolean(lineup.WR2)),
+    te: lineup.TE ? 1 : 0,
+    flex: lineup.FLEX ? 1 : 0,
+    op: lineup.OP ? 1 : 0,
+    k,
+    dst,
+    bench: Math.max(0, roster.length - assigned),
+  };
 }
 
 export function offensiveGoalsMet(counts: RosterCounts): boolean {

@@ -3,6 +3,15 @@ export type DraftedBy = "mine" | "other";
 export type Qb2Mode = "adaptive-punt" | "normal";
 export type PositionFilter = Position | "ALL";
 export type TierFilter = number | "ALL";
+export type TagFilter =
+  | "ALL"
+  | "sleeper"
+  | "deep-sleeper"
+  | "value"
+  | "upside"
+  | "risk"
+  | "injury"
+  | "anchor";
 export type QbStarterSecurity = "secure" | "probable" | "fragile";
 
 export interface Player {
@@ -36,6 +45,7 @@ export interface DraftState {
   search: string;
   positionFilter: PositionFilter;
   tierFilter: TierFilter;
+  tagFilter: TagFilter;
   qb2Mode: Qb2Mode;
 }
 
@@ -43,9 +53,12 @@ export type DraftAction =
   | { type: "DRAFT_PLAYER"; playerId: string; draftedBy: DraftedBy }
   | { type: "UNDO_LAST_PICK" }
   | { type: "RESET_DRAFT" }
+  | { type: "LOAD_STATE"; state: DraftState }
+  | { type: "REPLACE_PICKS"; picks: DraftPick[] }
   | { type: "SET_SEARCH"; search: string }
   | { type: "SET_POSITION_FILTER"; position: PositionFilter }
   | { type: "SET_TIER_FILTER"; tier: TierFilter }
+  | { type: "SET_TAG_FILTER"; tag: TagFilter }
   | { type: "SET_QB2_MODE"; mode: Qb2Mode };
 
 export interface ScoreBreakdown {

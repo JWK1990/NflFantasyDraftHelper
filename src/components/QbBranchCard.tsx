@@ -2,14 +2,13 @@ import type { QbBranchComparison } from "../engine/qbBranch.ts";
 
 interface QbBranchCardProps {
   comparison: QbBranchComparison;
-  listLeaderName?: string;
 }
 
 function formatPts(value: number): string {
   return Math.round(value).toLocaleString("en-US");
 }
 
-export function QbBranchCard({ comparison, listLeaderName }: QbBranchCardProps) {
+export function QbBranchCard({ comparison }: QbBranchCardProps) {
   const waitLeads = comparison.ppwDifference >= 0;
   const leadPts = Math.abs(comparison.difference);
   const leadPpw = Math.abs(comparison.ppwDifference);
@@ -51,15 +50,6 @@ export function QbBranchCard({ comparison, listLeaderName }: QbBranchCardProps) 
           </span>
         </div>
         <p className="qb-card-reason">{comparison.reason}</p>
-        {comparison.verdict === "qb-now" &&
-        listLeaderName &&
-        comparison.qbNow.firstPick &&
-        listLeaderName !== comparison.qbNow.firstPick.player ? (
-          <p className="qb-card-risk">
-            The list ranks {listLeaderName} first because that pick projects a
-            stronger completed team than taking {comparison.qbNow.firstPick.player}.
-          </p>
-        ) : null}
         <p className="qb-card-risk">{comparison.riskLabel}</p>
       </div>
     </details>
