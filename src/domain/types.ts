@@ -84,6 +84,21 @@ export type DraftAction =
   | { type: "SET_TAG_FILTER"; tag: TagFilter }
   | { type: "SET_QB2_MODE"; mode: Qb2Mode };
 
+export type Qb2PolicyLabel = "flex" | "punt" | "qb-next" | "cliff" | "middle";
+
+export interface LaterPosBreakdown {
+  player: string;
+  overallPick: number;
+  returnProbability: number;
+}
+
+export interface SamePositionInversion {
+  otherPlayer: string;
+  directEdge: number;
+  continuationEdge: number;
+  netEdge: number;
+}
+
 export interface ScoreBreakdown {
   starterProjection: number;
   benchValue: number;
@@ -94,12 +109,24 @@ export interface ScoreBreakdown {
   expectedGain: number;
   returnProbability: number;
   lookahead: boolean;
+  preSelectionStateHash: string;
+  candidateSecuredNow: string;
+  directProjection: number;
+  continuationEffect: number;
+  expectedPassLoss: number;
+  waitPick: number | null;
   laterPlayer?: string;
   laterPos?: Position;
   laterOverallPick?: number;
   laterReturnProbability?: number;
   laterFallback?: string;
-  laterQbPolicy?: "flex" | "punt" | "qb-next";
+  laterQbPolicy?: Qb2PolicyLabel;
+  laterQb?: LaterPosBreakdown;
+  laterWr?: LaterPosBreakdown;
+  laterTe?: LaterPosBreakdown;
+  alternativePlayer?: string;
+  scenarioUtilities?: number[];
+  samePositionInversion?: SamePositionInversion;
 }
 
 export interface Recommendation {

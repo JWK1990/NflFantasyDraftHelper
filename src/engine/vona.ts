@@ -3,15 +3,19 @@ import {
   type RecommendationConfig,
 } from "../config/recommendationConfig.ts";
 import type { Player } from "../domain/types.ts";
-import { adpWindowIds } from "./draftSim.ts";
-import { interveningPicksUntilNextTurn } from "./snake.ts";
+import { adpWindowIds, remainingOpponentPicks } from "./draftSim.ts";
+import { nextUserPickAfter } from "./snake.ts";
 
 export function likelyGoneByNextTurn(
   available: Player[],
   currentOverallPick: number,
 ): Set<string> {
-  const intervening = interveningPicksUntilNextTurn(currentOverallPick);
-  return adpWindowIds(available, intervening);
+  const next = nextUserPickAfter(currentOverallPick);
+  if (next == null) return new Set();
+  return adpWindowIds(
+    available,
+    remainingOpponentPicks(currentOverallPick, next),
+  );
 }
 
 export function vonaForCandidate(

@@ -499,6 +499,11 @@ button.roster-chip {
   margin: 6px 0 0;
 }
 
+.breakdown-hash {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text-muted);
+}
+
 .lw-detail {
   margin-top: 10px;
   padding-top: 8px;

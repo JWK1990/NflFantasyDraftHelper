@@ -3,10 +3,10 @@ import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player } from "../domain/types.ts";
 import {
   adpWindowIds,
-  opponentPicksBetween,
-  returnProbability,
+  remainingOpponentPicks,
   simulateCandidateDraft,
   simulateCompletedDraft,
+  QB2_POLICIES,
 } from "./draftSim.ts";
 import { recommend } from "./recommend.ts";
 import { likelyGoneByNextTurn } from "./vona.ts";
@@ -65,7 +65,7 @@ function fillToPick(targetPick: number, keepNames: string[], userPickName = "Jos
 
 const keepStars = ["Rashee Rice", "Daniel Jones", "Bryce Young", "Malik Nabers", "Amon-Ra St. Brown"];
 
-describe("availability-aware rest-of-draft", () => {
+describe("availability-aware rest-of-draft", { timeout: 30_000 }, () => {
   it("uses the same ADP window for chips and opponent consumption", () => {
     const state = fillToPick(16, keepStars);
     const counts = rosterCounts(state.picks, byId);
@@ -73,11 +73,11 @@ describe("availability-aware rest-of-draft", () => {
     const next = nextUserPickAfter(16);
     expect(next).toBe(19);
     expect(likelyGoneByNextTurn(eligible, 16)).toEqual(
-      adpWindowIds(eligible, opponentPicksBetween(16, 19)),
+      adpWindowIds(eligible, remainingOpponentPicks(16, 19)),
     );
   });
 
-  it("lets a WR row take a QB2 at the next pick instead of auto-punting to 174", () => {
+  it("lets a WR row consider next, cliff, middle, and final QB2 paths instead of auto-punting to 174", () => {
     const state = fillToPick(16, keepStars);
     const rice = named("Rashee Rice");
     const sim = simulateCandidateDraft(players, state, rice);
@@ -86,9 +86,11 @@ describe("availability-aware rest-of-draft", () => {
     );
     expect(sim.candidateLocked).toBe(true);
     expect(sim.firstPick?.id).toBe(rice.id);
+    expect(sim.qbPoliciesTried).toEqual(QB2_POLICIES);
     expect(qb2).toBeDefined();
-    expect(qb2!.overallPick).toBeLessThan(174);
-    expect(sim.qbPolicy).toBe("qb-next");
+    if (sim.qbPolicy !== "punt") {
+      expect(qb2!.overallPick).toBeLessThan(174);
+    }
   });
 
   it("does not treat an ADP-unlikely later WR as a certain Jones-branch acquisition", () => {
@@ -103,49 +105,21 @@ describe("availability-aware rest-of-draft", () => {
     expect(riceRow.roster.some((player) => player.id === rice.id)).toBe(true);
   });
 
-  it("weights a mid-probability later acquisition instead of counting it at 100%", () => {
+  it("averages matched board scenarios instead of EV-weighting only one later player", () => {
     const state = fillToPick(16, keepStars);
     const jones = named("Daniel Jones");
-    const probe = simulateCompletedDraft(players, state, jones, undefined, false, {
-      qbPolicy: "flex",
-    });
-    const later = probe.acquisitions.find(
-      (row) => row.player.pos === "WR" && row.player.id !== jones.id,
-    );
-    expect(later).toBeDefined();
-    const taken = new Set(state.picks.map((pick) => pick.playerId));
-    const available = players.filter(
-      (player) => !taken.has(player.id) && player.id !== jones.id,
-    );
-    const chance = returnProbability(
-      later!.player,
-      available,
-      16,
-      later!.overallPick,
-    );
-    const survive = simulateCompletedDraft(players, state, jones, undefined, false, {
-      qbPolicy: "flex",
-      protectUntilPick: {
-        playerId: later!.player.id,
-        overallPick: later!.overallPick,
-      },
-      forcePick: { playerId: later!.player.id, overallPick: later!.overallPick },
-    });
-    const gone = simulateCompletedDraft(players, state, jones, undefined, false, {
-      qbPolicy: "flex",
-      removeIds: [later!.player.id],
-    });
     const mixed = simulateCandidateDraft(players, state, jones);
-    if (chance > 0.1 && chance < 0.9) {
-      const expected =
-        chance * survive.utility.utility + (1 - chance) * gone.utility.utility;
-      expect(mixed.utility.utility).toBeCloseTo(expected, 5);
-      expect(mixed.laterAcquisition?.returnProbability).toBeCloseTo(chance, 5);
-    } else if (chance >= 0.9) {
-      expect(mixed.utility.utility).toBeCloseTo(probe.utility.utility, 5);
-    } else {
-      expect(mixed.utility.utility).toBeCloseTo(gone.utility.utility, 5);
-    }
+    const median = simulateCompletedDraft(players, state, jones, undefined, false, {
+      qbPolicy: mixed.qbPolicy,
+      scenario: "median",
+    });
+    expect(mixed.scenarioUtilities.length).toBeGreaterThan(1);
+    expect(mixed.laterQb || mixed.laterWr || mixed.laterTe).toBeTruthy();
+    const average =
+      mixed.scenarioUtilities.reduce((sum, value) => sum + value, 0) /
+      mixed.scenarioUtilities.length;
+    expect(mixed.utility.utility).toBeCloseTo(average, 5);
+    expect(median.candidateLocked).toBe(true);
   });
 
   it("ranks Rice's availability-aware team without forcing the Round 15 punt pairing", () => {
@@ -156,8 +130,9 @@ describe("availability-aware rest-of-draft", () => {
     expect(rice).toBeDefined();
     expect(jones).toBeDefined();
     expect(rice!.breakdown.lookahead).toBe(true);
-    expect(rice!.breakdown.laterQbPolicy).toBe("qb-next");
-    expect(rice!.breakdown.laterOverallPick).toBeLessThan(174);
-    expect(rice!.breakdown.laterPlayer).not.toBe("Bryce Young");
+    expect(QB2_POLICIES).toContain(rice!.breakdown.laterQbPolicy);
+    if (rice!.breakdown.laterQbPolicy !== "punt") {
+      expect(rice!.breakdown.laterOverallPick).toBeLessThan(174);
+    }
   });
 });

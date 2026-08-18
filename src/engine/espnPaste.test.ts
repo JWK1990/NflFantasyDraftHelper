@@ -284,4 +284,127 @@ Lamb On The Skip
     if (result.ok) return;
     expect(result.error).toMatch(/start at 1/);
   });
+
+  it("skips ESPN injury status letters and dash stats so later picks stay in order", () => {
+    const rows = parseEspnPasteRows(`43
+Josh Jacobs
+GB
+RB
+The Dan Marinehos
+237.1
+259.1
+43
+44
+Patrick Mahomes
+Q
+KC
+QB
+The Situation
+285.7
+291.3
+44
+45
+Travis Etienne Jr.
+NO
+RB
+Hurts So Good
+253.9
+243.7
+46
+48
+Malik Nabers
+Q
+NYG
+WR
+!!! Fire Sale
+57.1
+245.9
+47
+28
+Jeremiyah Love
+ARI
+RB
+Hurts So Good
+-
+278.5
+28
+82
+Alec Pierce
+O
+IND
+WR
+Mahomes Magic
+183.3
+203.9
+84
+90
+Travis Hunter
+JAX
+WRCB
+Darwin Dishlickers
+63.8
+113.1
+91
+`);
+    expect(rows.find((row) => row.overallPick === 44)).toMatchObject({
+      player: "Patrick Mahomes",
+      team: "KC",
+      pos: "QB",
+      fantasyTeam: "The Situation",
+    });
+    expect(rows.find((row) => row.overallPick === 48)).toMatchObject({
+      player: "Malik Nabers",
+      team: "NYG",
+      pos: "WR",
+    });
+    expect(rows.find((row) => row.overallPick === 28)).toMatchObject({
+      player: "Jeremiyah Love",
+      team: "ARI",
+      pos: "RB",
+    });
+    expect(rows.find((row) => row.overallPick === 82)).toMatchObject({
+      player: "Alec Pierce",
+      team: "IND",
+      pos: "WR",
+    });
+    expect(rows.find((row) => row.overallPick === 90)).toMatchObject({
+      player: "Travis Hunter",
+      team: "JAX",
+      pos: "WRCB",
+    });
+  });
+
+  it("imports a status-marked pick onto the player pool", () => {
+    const result = importEspnPicks(
+      `1
+Patrick Mahomes
+Q
+KC
+QB
+The Situation
+285.7
+291.3
+1
+`,
+      players,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.picks[0]?.draftedBy).toBe("other");
+    expect(players.find((player) => player.id === result.picks[0]?.playerId)?.player).toBe(
+      "Patrick Mahomes",
+    );
+  });
+
+  it("matches Kenny Gainwell to Kenneth Gainwell", () => {
+    expect(
+      matchEspnPlayer(players, {
+        overallPick: 104,
+        player: "Kenny Gainwell",
+        team: "TB",
+        pos: "RB",
+        fantasyTeam: "Fentasy Football",
+      })?.player,
+    ).toBe("Kenneth Gainwell");
+  });
 });

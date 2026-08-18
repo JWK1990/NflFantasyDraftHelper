@@ -32,6 +32,43 @@ function formatPts(value: number): string {
   return Math.round(value).toLocaleString("en-US");
 }
 
+function formatSigned(value: number): string {
+  const rounded = Math.round(value * 10) / 10;
+  return `${rounded >= 0 ? "+" : ""}${rounded.toFixed(1)}`;
+}
+
+function policyLabel(policy: Recommendation["breakdown"]["laterQbPolicy"]): string {
+  switch (policy) {
+    case "qb-next":
+      return "next";
+    case "cliff":
+      return "tier cliff";
+    case "middle":
+      return "middle";
+    case "punt":
+      return "final";
+    case "flex":
+      return "flex";
+    default:
+      return "—";
+  }
+}
+
+function laterLine(
+  label: string,
+  row: Recommendation["breakdown"]["laterQb"],
+) {
+  if (!row) return null;
+  return (
+    <div className="breakdown-row">
+      <span>{label}</span>
+      <span>
+        {row.player}, pick {row.overallPick} ({Math.round(row.returnProbability * 100)}%)
+      </span>
+    </div>
+  );
+}
+
 export function PlayerRow({
   player,
   rank,
@@ -126,39 +163,77 @@ export function PlayerRow({
           {recommendation ? (
             <>
               <div className="breakdown-row">
-                <span>Projected final starters</span>
+                <span>Candidate secured now</span>
+                <span>{recommendation.breakdown.candidateSecuredNow}</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Pre-selection state hash</span>
+                <span className="breakdown-hash">
+                  {recommendation.breakdown.preSelectionStateHash}
+                </span>
+              </div>
+              <div className="breakdown-row">
+                <span>Expected completed starters</span>
                 <span>{formatPts(recommendation.breakdown.starterProjection)}</span>
               </div>
               <div className="breakdown-row">
-                <span>Alternative final team</span>
-                <span>{formatPts(recommendation.breakdown.alternativeUtility)}</span>
-              </div>
-              <div className="breakdown-row">
-                <span>Expected gain</span>
+                <span>Best same-board alternative</span>
                 <span>
-                  {recommendation.breakdown.expectedGain >= 0 ? "+" : ""}
-                  {Math.round(recommendation.breakdown.expectedGain)}
+                  {recommendation.breakdown.alternativePlayer
+                    ? `${recommendation.breakdown.alternativePlayer}, `
+                    : ""}
+                  {formatPts(recommendation.breakdown.alternativeUtility)}
                 </span>
               </div>
               <div className="breakdown-row">
-                <span>Likely to return at next pick</span>
+                <span>Recommendation edge</span>
+                <span>{formatSigned(recommendation.breakdown.expectedGain)}</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Candidate direct projection</span>
+                <span>{recommendation.breakdown.directProjection.toFixed(1)}</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Continuation / timing effect</span>
+                <span>{formatSigned(recommendation.breakdown.continuationEffect)}</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Chance candidate returns if passed</span>
                 <span>
                   {Math.round(recommendation.breakdown.returnProbability * 100)}%
+                  {recommendation.breakdown.waitPick != null
+                    ? ` at pick ${recommendation.breakdown.waitPick}`
+                    : ""}
                 </span>
               </div>
-              {recommendation.breakdown.laterPlayer &&
-              recommendation.breakdown.laterOverallPick != null &&
-              recommendation.breakdown.laterReturnProbability != null ? (
-                <div className="breakdown-row">
-                  <span>
-                    Expected {recommendation.breakdown.laterPos ?? "player"} later
-                  </span>
-                  <span>
-                    {recommendation.breakdown.laterPlayer} at pick{" "}
-                    {recommendation.breakdown.laterOverallPick} (
-                    {Math.round(recommendation.breakdown.laterReturnProbability * 100)}%)
-                  </span>
-                </div>
+              <div className="breakdown-row">
+                <span>Expected pass loss</span>
+                <span>{formatSigned(recommendation.breakdown.expectedPassLoss)}</span>
+              </div>
+              {laterLine("Later QB", recommendation.breakdown.laterQb)}
+              {laterLine("Later WR", recommendation.breakdown.laterWr)}
+              {laterLine("Later TE", recommendation.breakdown.laterTe)}
+              <div className="breakdown-row">
+                <span>QB2 policy</span>
+                <span>{policyLabel(recommendation.breakdown.laterQbPolicy)}</span>
+              </div>
+              {recommendation.breakdown.samePositionInversion ? (
+                <p className="breakdown-note">
+                  {recommendation.breakdown.samePositionInversion.otherPlayer}{" "}
+                  direct edge:{" "}
+                  {formatSigned(
+                    recommendation.breakdown.samePositionInversion.directEdge,
+                  )}
+                  . Continuation/timing:{" "}
+                  {formatSigned(
+                    recommendation.breakdown.samePositionInversion.continuationEdge,
+                  )}
+                  . Net completed-team edge:{" "}
+                  {formatSigned(
+                    recommendation.breakdown.samePositionInversion.netEdge,
+                  )}
+                  .
+                </p>
               ) : null}
               {recommendation.breakdown.laterQbPolicy === "punt" ? (
                 <p className="breakdown-note">
@@ -169,10 +244,15 @@ export function PlayerRow({
                   This row’s rest-of-draft plan takes a QB at the next pick if one
                   is still there.
                 </p>
-              ) : null}
-              {recommendation.breakdown.laterFallback ? (
+              ) : recommendation.breakdown.laterQbPolicy === "cliff" ? (
                 <p className="breakdown-note">
-                  If gone: {recommendation.breakdown.laterFallback}.
+                  This row’s rest-of-draft plan takes QB2 before the current
+                  starter tier runs out.
+                </p>
+              ) : recommendation.breakdown.laterQbPolicy === "middle" ? (
+                <p className="breakdown-note">
+                  This row’s rest-of-draft plan looks for QB2 in the middle-round
+                  window.
                 </p>
               ) : null}
               {recommendation.breakdown.riskAdjustment > 0 ? (

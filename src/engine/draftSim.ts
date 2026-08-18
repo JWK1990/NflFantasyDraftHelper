@@ -6,17 +6,28 @@ import { LEAGUE } from "../config/leagueSettings.ts";
 import type { DraftState, Player, Position } from "../domain/types.ts";
 import { completedTeamUtility, type TeamUtility } from "./teamUtility.ts";
 import { lateRoundReservation } from "./lateRound.ts";
-import { bestQb } from "./qb.ts";
+import { bestQb, isAcceptableQb } from "./qb.ts";
 import { draftedIds, myRosterPlayers, playersById } from "./roster.ts";
 import {
   isUserPick,
+  nextUserPickAfter,
   roundForPick,
   slotForPick,
   upcomingUserPick,
   userPickSchedule,
 } from "./snake.ts";
 
-export type QbSimPolicy = "flex" | "punt" | "qb-next";
+export type QbSimPolicy = "flex" | "punt" | "qb-next" | "cliff" | "middle";
+export type BoardScenario = "median" | "early-qb" | "late-qb" | "early-wr" | "tier-cliff";
+
+export const BOARD_SCENARIOS: BoardScenario[] = [
+  "median",
+  "early-qb",
+  "late-qb",
+  "early-wr",
+];
+
+export const QB2_POLICIES: QbSimPolicy[] = ["qb-next", "cliff", "middle", "punt"];
 
 export interface SimAcquisition {
   player: Player;
@@ -25,6 +36,7 @@ export interface SimAcquisition {
 
 export interface SimulateExtras {
   qbPolicy?: QbSimPolicy;
+  scenario?: BoardScenario;
   protectUntilPick?: { playerId: string; overallPick: number };
   forcePick?: { playerId: string; overallPick: number };
   removeIds?: Iterable<string>;
@@ -42,8 +54,32 @@ export function adpSortValue(player: Player): number {
   return player.adp ?? 900 + player.posRank;
 }
 
+export function scenarioAdp(player: Player, scenario: BoardScenario): number {
+  const base = adpSortValue(player);
+  switch (scenario) {
+    case "median":
+      return base;
+    case "early-qb":
+      return player.pos === "QB" ? base * 0.7 : base;
+    case "late-qb":
+      return player.pos === "QB" ? base * 1.35 : base;
+    case "early-wr":
+      return player.pos === "WR" ? base * 0.7 : base;
+    case "tier-cliff":
+      return player.posTier <= 2 ? base * 0.82 : base;
+  }
+}
+
 export function compareByAdp(a: Player, b: Player): number {
   return adpSortValue(a) - adpSortValue(b) || b.modelPts - a.modelPts;
+}
+
+export function compareByScenario(
+  a: Player,
+  b: Player,
+  scenario: BoardScenario,
+): number {
+  return scenarioAdp(a, scenario) - scenarioAdp(b, scenario) || b.modelPts - a.modelPts;
 }
 
 export function opponentPicksBetween(startPick: number, endPick: number): number {
@@ -54,14 +90,24 @@ export function opponentPicksBetween(startPick: number, endPick: number): number
   return count;
 }
 
+export function remainingOpponentPicks(
+  currentOverallPick: number,
+  targetPick: number,
+): number {
+  return opponentPicksBetween(currentOverallPick - 1, targetPick);
+}
+
 export function adpWindowIds(
   available: Player[],
   count: number,
   reservedId: string | null = null,
+  scenario: BoardScenario = "median",
 ): Set<string> {
   const ids = new Set<string>();
   if (count <= 0) return ids;
-  for (const player of [...available].sort(compareByAdp)) {
+  for (const player of [...available].sort((left, right) =>
+    compareByScenario(left, right, scenario),
+  )) {
     if (player.id === reservedId) continue;
     ids.add(player.id);
     if (ids.size >= count) break;
@@ -69,8 +115,16 @@ export function adpWindowIds(
   return ids;
 }
 
-function byAdp(a: Player, b: Player): number {
-  return compareByAdp(a, b);
+export function preSelectionStateHash(state: DraftState): string {
+  const raw = `${state.picks
+    .map((pick) => `${pick.overallPick}:${pick.playerId}:${pick.draftedBy}`)
+    .join(",")}|${state.picks.length + 1}|${state.qb2Mode}`;
+  let hash = 2166136261;
+  for (let index = 0; index < raw.length; index += 1) {
+    hash ^= raw.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
 }
 
 function slotPosCounts(
@@ -179,6 +233,34 @@ function greedyPool(eligible: Player[], roster: Player[]): Player[] {
   });
 }
 
+export function qb2PolicyDue(
+  policy: QbSimPolicy,
+  overallPick: number,
+  qbCount: number,
+  available: Player[],
+  config: RecommendationConfig,
+  alreadyForced = false,
+): boolean {
+  if (qbCount >= 2) return false;
+  if (policy === "flex") return false;
+  if (policy === "punt") {
+    return overallPick === 174 || (overallPick === 163 && qbCount === 0);
+  }
+  if (policy === "qb-next") return !alreadyForced && qbCount < 2;
+  if (policy === "middle") {
+    const round = roundForPick(overallPick);
+    return qbCount < 2 && round >= 6 && round <= 9;
+  }
+  if (policy === "cliff") {
+    const acceptable = available.filter((player) => isAcceptableQb(player, config));
+    if (acceptable.length === 0) return false;
+    if (acceptable.length <= config.qb.shrinkingPoolThreshold) return true;
+    const minTier = Math.min(...acceptable.map((player) => player.posTier));
+    return acceptable.filter((player) => player.posTier === minTier).length <= 2;
+  }
+  return false;
+}
+
 export function chooseGreedyUserPlayer(
   available: Player[],
   roster: Player[],
@@ -217,7 +299,13 @@ export function chooseGreedyUserPlayer(
     }
   }
 
-  if (qbPolicy === "punt" && qbCount >= 1 && overallPick !== 174) {
+  const due = qb2PolicyDue(qbPolicy, overallPick, qbCount, eligible, config);
+  const suppressQb =
+    qbCount >= 1 &&
+    (qbPolicy === "punt" || qbPolicy === "cliff" || qbPolicy === "middle") &&
+    !due &&
+    overallPick !== 174;
+  if (suppressQb) {
     eligible = eligible.filter((player) => player.pos !== "QB");
     if (eligible.length === 0) eligible = simEligible(available, roster);
   }
@@ -249,27 +337,50 @@ export interface CompletedSim {
   candidateLocked: boolean;
   acquisitions: SimAcquisition[];
   qbPolicy: QbSimPolicy;
+  qbPoliciesTried: QbSimPolicy[];
   laterAcquisition: LaterAcquisition | null;
+  laterQb: LaterAcquisition | null;
+  laterWr: LaterAcquisition | null;
+  laterTe: LaterAcquisition | null;
+  skippedUserPick: number | null;
+  securedBeforeOpponents: boolean;
+  scenarioUtilities: number[];
 }
 
-function poolWithoutReserved(
-  available: Player[],
-  reservedId: string | null,
-): Player[] {
-  if (reservedId == null) return available;
-  return available.filter((player) => player.id !== reservedId);
-}
-
-function mixUtility(a: TeamUtility, b: TeamUtility, weight: number): TeamUtility {
-  const mix = (left: number, right: number) => weight * left + (1 - weight) * right;
+function emptyLater(): Pick<
+  CompletedSim,
+  "laterAcquisition" | "laterQb" | "laterWr" | "laterTe" | "qbPoliciesTried" | "scenarioUtilities"
+> {
   return {
-    starterProjection: mix(a.starterProjection, b.starterProjection),
-    benchValue: mix(a.benchValue, b.benchValue),
-    upsideAdjustment: mix(a.upsideAdjustment, b.upsideAdjustment),
-    riskAdjustment: mix(a.riskAdjustment, b.riskAdjustment),
-    slotPenalty: mix(a.slotPenalty, b.slotPenalty),
-    utility: mix(a.utility, b.utility),
+    laterAcquisition: null,
+    laterQb: null,
+    laterWr: null,
+    laterTe: null,
+    qbPoliciesTried: [],
+    scenarioUtilities: [],
   };
+}
+
+function mixUtility(parts: TeamUtility[]): TeamUtility {
+  const count = Math.max(1, parts.length);
+  const mix = (key: keyof TeamUtility) =>
+    parts.reduce((sum, part) => sum + part[key], 0) / count;
+  return {
+    starterProjection: mix("starterProjection"),
+    benchValue: mix("benchValue"),
+    upsideAdjustment: mix("upsideAdjustment"),
+    riskAdjustment: mix("riskAdjustment"),
+    slotPenalty: mix("slotPenalty"),
+    utility: mix("utility"),
+  };
+}
+
+function nextUnskippedUserPick(overall: number, skipUserPick: number | null): number | null {
+  let next = upcomingUserPick(overall);
+  if (next != null && next === skipUserPick) {
+    next = nextUserPickAfter(next);
+  }
+  return next;
 }
 
 export function simulateCompletedDraft(
@@ -283,9 +394,10 @@ export function simulateCompletedDraft(
   const byId = playersById(players);
   const taken = draftedIds(state.picks);
   const remove = new Set(extras.removeIds ?? []);
+  const scenario = extras.scenario ?? "median";
   let available = players
     .filter((player) => !taken.has(player.id) && !remove.has(player.id))
-    .sort(byAdp);
+    .sort((left, right) => compareByScenario(left, right, scenario));
   const roster = [...myRosterPlayers(state.picks, byId)];
   const qbBySlot = slotPosCounts(state.picks, byId, "QB");
   const kBySlot = slotPosCounts(state.picks, byId, "K");
@@ -294,21 +406,37 @@ export function simulateCompletedDraft(
   const start = state.picks.length + 1;
   const last = LEAGUE.teams * LEAGUE.rounds;
   const reservedId = openingUserPick?.id ?? null;
-  const decisionPick = reservedId == null ? null : upcomingUserPick(start);
+  const skipUserPick = reservedId == null ? null : upcomingUserPick(start);
   const qbPolicy = extras.qbPolicy ?? (waitOnQb ? "punt" : "flex");
   const protect = extras.protectUntilPick;
   const forcePick = extras.forcePick;
   let firstPick: Player | null = null;
   let candidateLocked = reservedId == null;
-  let tookQbNext = false;
+  let tookForcedQb = false;
   let consumeIds: Set<string> | null = null;
   const acquisitions: SimAcquisition[] = [];
   const cap = config.branch.opponentQbCap;
+  let securedBeforeOpponents = reservedId == null;
+
+  if (openingUserPick) {
+    const locked = available.find((player) => player.id === openingUserPick.id) ?? null;
+    if (locked) {
+      roster.push(locked);
+      available = removePlayer(available, locked.id);
+      firstPick = locked;
+      candidateLocked = true;
+      securedBeforeOpponents = true;
+      acquisitions.push({ player: locked, overallPick: start });
+    }
+  }
 
   for (let overall = start; overall <= last; overall += 1) {
     const isUser = userPicks.has(overall);
+    if (isUser && skipUserPick != null && overall === skipUserPick) {
+      consumeIds = null;
+      continue;
+    }
     const slot = slotForPick(overall);
-    const stillReserved = reservedId != null && firstPick == null;
     const protectNow =
       protect != null && overall < protect.overallPick ? protect.playerId : null;
     let pick: Player | null = null;
@@ -317,27 +445,11 @@ export function simulateCompletedDraft(
         consumeIds = null;
         continue;
       }
-      const shouldLock =
-        reservedId != null &&
-        firstPick == null &&
-        decisionPick != null &&
-        overall === decisionPick;
       const blocked = consumeIds ?? new Set<string>();
-      const userPool = shouldLock
-        ? available
-        : available.filter(
-            (player) =>
-              player.id === reservedId ||
-              player.id === forcePick?.playerId ||
-              !blocked.has(player.id),
-          );
-      if (shouldLock) {
-        pick = available.find((player) => player.id === reservedId) ?? null;
-        if (!pick) {
-          break;
-        }
-        candidateLocked = true;
-      } else if (
+      const userPool = available.filter(
+        (player) => player.id === forcePick?.playerId || !blocked.has(player.id),
+      );
+      if (
         forcePick != null &&
         overall === forcePick.overallPick &&
         available.some((player) => player.id === forcePick.playerId)
@@ -351,23 +463,15 @@ export function simulateCompletedDraft(
           rosterHas(roster, "K"),
           rosterHas(roster, "DST"),
         );
-        const takeQbNext =
-          qbPolicy === "qb-next" &&
-          !tookQbNext &&
-          qbCount < 2 &&
-          reserved == null;
-        if (takeQbNext) {
+        const takeQbNow =
+          reserved !== "K" &&
+          reserved !== "DST" &&
+          qb2PolicyDue(qbPolicy, overall, qbCount, available, config, tookForcedQb);
+        if (takeQbNow && (qbPolicy === "qb-next" || qbPolicy === "cliff" || qbPolicy === "middle")) {
           pick = bestQb(userPool.length > 0 ? userPool : available, config);
-          tookQbNext = true;
+          tookForcedQb = true;
         } else {
-          const qbCountNow = countPos(roster, "QB");
-          const forceQb =
-            lateRoundReservation(
-              overall,
-              qbCountNow,
-              rosterHas(roster, "K"),
-              rosterHas(roster, "DST"),
-            ) === "QB";
+          const forceQb = reserved === "QB";
           const waitPool =
             waitOnQb && !forceQb
               ? (userPool.length > 0 ? userPool : available).filter(
@@ -388,24 +492,17 @@ export function simulateCompletedDraft(
       consumeIds = null;
     } else {
       if (consumeIds == null) {
-        const nextUser = upcomingUserPick(overall);
+        const nextUser = nextUnskippedUserPick(overall, skipUserPick);
         const remainingOpponents =
           nextUser == null ? 0 : opponentPicksBetween(overall - 1, nextUser);
-        consumeIds = adpWindowIds(
-          available,
-          remainingOpponents,
-          stillReserved ? reservedId : null,
-        );
+        consumeIds = adpWindowIds(available, remainingOpponents, null, scenario);
         if (protectNow) consumeIds.delete(protectNow);
       }
-      const opponentPool = stillReserved
-        ? poolWithoutReserved(available, reservedId)
-        : available;
       const protectedPool = protectNow
-        ? opponentPool.filter((player) => player.id !== protectNow)
-        : opponentPool;
+        ? available.filter((player) => player.id !== protectNow)
+        : available;
       pick = chooseOpponentPlayer(
-        protectedPool.length > 0 ? protectedPool : opponentPool,
+        protectedPool.length > 0 ? protectedPool : available,
         overall,
         slot,
         qbBySlot,
@@ -441,7 +538,9 @@ export function simulateCompletedDraft(
     candidateLocked,
     acquisitions,
     qbPolicy,
-    laterAcquisition: null,
+    skippedUserPick: skipUserPick,
+    securedBeforeOpponents,
+    ...emptyLater(),
   };
 }
 
@@ -450,102 +549,64 @@ export function returnProbability(
   available: Player[],
   currentOverallPick: number,
   nextUserPick: number | null,
+  scenarios: readonly BoardScenario[] = BOARD_SCENARIOS,
 ): number {
   if (nextUserPick == null) return 0;
-  const intervening = opponentPicksBetween(currentOverallPick, nextUserPick);
-  const ordered = [...available].sort(byAdp);
-  const index = ordered.findIndex((row) => row.id === player.id);
-  if (index < 0) return 0;
+  const intervening = remainingOpponentPicks(currentOverallPick, nextUserPick);
   if (intervening <= 0) return 1;
-  if (index < intervening) {
-    return Math.max(0.04, 0.18 - (intervening - 1 - index) * 0.012);
-  }
-  return Math.min(0.94, 0.52 + (index - intervening) * 0.025);
-}
-
-function laterFromSim(sim: CompletedSim, candidate: Player): SimAcquisition | null {
-  const rest = sim.acquisitions.filter((row) => row.player.id !== candidate.id);
-  if (candidate.pos === "QB") {
-    return (
-      rest.find((row) => row.player.pos === "WR") ??
-      rest.find(
-        (row) =>
-          row.player.pos !== "QB" &&
-          row.player.pos !== "K" &&
-          row.player.pos !== "DST",
-      ) ??
-      rest[0] ??
-      null
+  let survived = 0;
+  for (const scenario of scenarios) {
+    const ordered = [...available].sort((left, right) =>
+      compareByScenario(left, right, scenario),
     );
+    const index = ordered.findIndex((row) => row.id === player.id);
+    if (index < 0) return 0;
+    if (index >= intervening) survived += 1;
   }
-  return rest.find((row) => row.player.pos === "QB") ?? rest[0] ?? null;
+  return survived / scenarios.length;
 }
 
-function policiesForCandidate(
-  state: DraftState,
-  roster: Player[],
+function laterByPos(
+  sim: CompletedSim,
   candidate: Player,
-): QbSimPolicy[] {
-  const after = countPos(roster, "QB") + (candidate.pos === "QB" ? 1 : 0);
-  if (after >= 2) return ["flex"];
-  if (state.qb2Mode === "adaptive-punt") return ["qb-next", "punt"];
-  return ["flex"];
+  pos: Position,
+): SimAcquisition | null {
+  return (
+    sim.acquisitions.find(
+      (row) => row.player.id !== candidate.id && row.player.pos === pos,
+    ) ?? null
+  );
 }
 
-function simulatePolicyWithAvailability(
+function annotateLater(
+  row: SimAcquisition | null,
+  candidate: Player,
   players: Player[],
   state: DraftState,
-  candidate: Player,
-  config: RecommendationConfig,
   qbPolicy: QbSimPolicy,
-): CompletedSim {
-  const probe = simulateCompletedDraft(players, state, candidate, config, false, {
-    qbPolicy,
-  });
-  const later = laterFromSim(probe, candidate);
-  if (!later) return probe;
-
+): LaterAcquisition | null {
+  if (!row) return null;
   const taken = draftedIds(state.picks);
   const current = state.picks.length + 1;
   const available = players.filter(
     (player) => !taken.has(player.id) && player.id !== candidate.id,
   );
-  const chance = returnProbability(
-    later.player,
-    available,
-    current,
-    later.overallPick,
-  );
-  const gone = simulateCompletedDraft(players, state, candidate, config, false, {
+  return {
+    player: row.player,
+    overallPick: row.overallPick,
+    returnProbability: returnProbability(row.player, available, current, row.overallPick),
+    fallbackPlayer: null,
     qbPolicy,
-    removeIds: [later.player.id],
-  });
-  const fallback =
-    laterFromSim(gone, candidate)?.player ??
-    gone.roster.find((player) => player.id !== candidate.id) ??
-    null;
+  };
+}
 
-  const annotate = (sim: CompletedSim, utility = sim.utility): CompletedSim => ({
-    ...sim,
-    utility,
-    laterAcquisition: {
-      player: later.player,
-      overallPick: later.overallPick,
-      returnProbability: chance,
-      fallbackPlayer: fallback?.id === later.player.id ? null : fallback,
-      qbPolicy,
-    },
-  });
-
-  if (chance >= 0.9) return annotate(probe);
-  if (chance <= 0.1) return annotate(gone);
-
-  const survive = simulateCompletedDraft(players, state, candidate, config, false, {
-    qbPolicy,
-    protectUntilPick: { playerId: later.player.id, overallPick: later.overallPick },
-    forcePick: { playerId: later.player.id, overallPick: later.overallPick },
-  });
-  return annotate(survive, mixUtility(survive.utility, gone.utility, chance));
+function policiesForCandidate(
+  roster: Player[],
+  candidate: Player,
+): QbSimPolicy[] {
+  const after = countPos(roster, "QB") + (candidate.pos === "QB" ? 1 : 0);
+  if (after >= 2) return ["flex"];
+  return [...QB2_POLICIES];
 }
 
 export function simulateCandidateDraft(
@@ -556,21 +617,51 @@ export function simulateCandidateDraft(
 ): CompletedSim {
   const byId = playersById(players);
   const roster = myRosterPlayers(state.picks, byId);
-  const policies = policiesForCandidate(state, roster, candidate);
-  let best: CompletedSim | null = null;
+  const policies = policiesForCandidate(roster, candidate);
+  let bestPolicy = policies[0] ?? "flex";
+  let bestMedian: CompletedSim | null = null;
   for (const policy of policies) {
-    const sim = simulatePolicyWithAvailability(
-      players,
-      state,
-      candidate,
-      config,
-      policy,
-    );
-    if (!best || sim.utility.utility > best.utility.utility) {
-      best = sim;
+    const sim = simulateCompletedDraft(players, state, candidate, config, false, {
+      qbPolicy: policy,
+      scenario: "median",
+    });
+    if (!bestMedian || sim.utility.utility > bestMedian.utility.utility) {
+      bestMedian = sim;
+      bestPolicy = policy;
     }
   }
-  return best ?? simulateCompletedDraft(players, state, candidate, config);
+
+  const scenarioSims = BOARD_SCENARIOS.map((scenario) => {
+    if (scenario === "median" && bestMedian) return bestMedian;
+    return simulateCompletedDraft(players, state, candidate, config, false, {
+      qbPolicy: bestPolicy,
+      scenario,
+    });
+  });
+  const median = scenarioSims[0] ?? bestMedian;
+  if (!median) {
+    return simulateCompletedDraft(players, state, candidate, config);
+  }
+
+  const laterQb = annotateLater(laterByPos(median, candidate, "QB"), candidate, players, state, bestPolicy);
+  const laterWr = annotateLater(laterByPos(median, candidate, "WR"), candidate, players, state, bestPolicy);
+  const laterTe = annotateLater(laterByPos(median, candidate, "TE"), candidate, players, state, bestPolicy);
+  const primary = candidate.pos === "QB" ? laterWr ?? laterTe ?? laterQb : laterQb ?? laterWr ?? laterTe;
+
+  return {
+    ...median,
+    utility: mixUtility(scenarioSims.map((sim) => sim.utility)),
+    qbPolicy: bestPolicy,
+    qbPoliciesTried: policies,
+    laterAcquisition: primary,
+    laterQb,
+    laterWr,
+    laterTe,
+    candidateLocked: scenarioSims.every(
+      (sim) => sim.candidateLocked && sim.roster.some((player) => player.id === candidate.id),
+    ),
+    scenarioUtilities: scenarioSims.map((sim) => sim.utility.utility),
+  };
 }
 
 export function intrinsicLookaheadPool(

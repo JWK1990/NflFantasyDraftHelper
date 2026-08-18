@@ -30,6 +30,7 @@ const ROUND = /^round\s+\d+$/i;
 const PICK_NUMBER = /^\d{1,3}$/;
 const NUMERIC = /^-?\d[\d,]*\.?\d*$/;
 const TEAM_CODE = /^[A-Z]{2,4}$/;
+const INJURY_STATUS = /^(Q|O|D|P|S|IR|IR-R|PUP|NFI|SUSP|OUT)$/i;
 
 const TEAM_ALIASES: Record<string, string> = {
   WSH: "WAS",
@@ -57,10 +58,26 @@ export function parseEspnPosition(token: string): Position | null {
   if (compact === "QB" || compact === "RB" || compact === "WR" || compact === "TE" || compact === "K") {
     return compact;
   }
+  if (compact.startsWith("WR")) return "WR";
+  if (compact.startsWith("RB")) return "RB";
+  if (compact.startsWith("TE")) return "TE";
   if (compact === "D/ST" || compact === "DST" || compact === "DEF") {
     return "DST";
   }
   return null;
+}
+
+function isTeamToken(token: string): boolean {
+  return TEAM_CODE.test(token.toUpperCase());
+}
+
+function isStatToken(token: string): boolean {
+  return token === "-" || NUMERIC.test(token);
+}
+
+function isInjuryStatus(token: string, team: string | undefined, pos: string | undefined): boolean {
+  if (!INJURY_STATUS.test(token) || team == null || pos == null) return false;
+  return isTeamToken(team) && parseEspnPosition(pos) != null;
 }
 
 export function parseEspnPasteRows(text: string): EspnPasteRow[] {
@@ -80,18 +97,31 @@ export function parseEspnPasteRows(text: string): EspnPasteRow[] {
 
     const overallPick = Number(token);
     const player = tokens[index + 1];
-    const team = tokens[index + 2];
-    const pos = tokens[index + 3];
-    const fantasyTeam = tokens[index + 4];
     if (
       !player ||
+      HEADER.test(player) ||
+      ROUND.test(player) ||
+      PICK_NUMBER.test(player)
+    ) {
+      index += 1;
+      continue;
+    }
+
+    let cursor = index + 2;
+    if (isInjuryStatus(tokens[cursor] ?? "", tokens[cursor + 1], tokens[cursor + 2])) {
+      cursor += 1;
+    }
+    const team = tokens[cursor];
+    const pos = tokens[cursor + 1];
+    const fantasyTeam = tokens[cursor + 2];
+    if (
       !team ||
       !pos ||
       fantasyTeam == null ||
       parseEspnPosition(pos) == null ||
-      !TEAM_CODE.test(team.toUpperCase()) ||
-      HEADER.test(player) ||
-      ROUND.test(player)
+      !isTeamToken(team) ||
+      HEADER.test(fantasyTeam) ||
+      ROUND.test(fantasyTeam)
     ) {
       index += 1;
       continue;
@@ -105,12 +135,13 @@ export function parseEspnPasteRows(text: string): EspnPasteRow[] {
       fantasyTeam,
     });
 
-    index += 5;
+    cursor += 3;
     let consumed = 0;
-    while (consumed < 3 && tokens[index] != null && NUMERIC.test(tokens[index]!)) {
-      index += 1;
+    while (consumed < 3 && tokens[cursor] != null && isStatToken(tokens[cursor]!)) {
+      cursor += 1;
       consumed += 1;
     }
+    index = cursor;
   }
 
   return rows;
@@ -137,30 +168,48 @@ export function fantasyTeamsMatch(left: string, right: string): boolean {
   return normalizeName(left) === normalizeName(right);
 }
 
+const FIRST_NAME_ALIASES: Record<string, string[]> = {
+  kenny: ["kenneth"],
+  kenneth: ["kenny"],
+};
+
+function nameVariants(playerName: string): string[] {
+  const normalized = normalizeName(playerName);
+  const parts = normalized.split(" ").filter(Boolean);
+  if (parts.length < 2) return [normalized];
+  const first = parts[0]!;
+  const rest = parts.slice(1).join(" ");
+  const aliases = FIRST_NAME_ALIASES[first] ?? [];
+  return [normalized, ...aliases.map((alias) => `${alias} ${rest}`)];
+}
+
 export function matchEspnPlayer(
   players: Player[],
   row: EspnPasteRow,
 ): Player | null {
   const pos = parseEspnPosition(row.pos);
   if (!pos) return null;
-  const name = normalizeName(row.player);
+  const variants = nameVariants(row.player);
   const team = normalizeTeam(row.team);
   const pool = players.filter((player) => player.pos === pos);
 
   if (pos === "DST") {
     const byTeam = pool.filter((player) => normalizeTeam(player.team) === team);
     if (byTeam.length === 1) return byTeam[0]!;
-    const byName = pool.filter(
-      (player) =>
-        normalizeName(player.player) === name ||
-        name.includes(normalizeName(player.player)) ||
-        normalizeName(player.player).includes(name),
-    );
+    const byName = pool.filter((player) => {
+      const playerName = normalizeName(player.player);
+      return variants.some(
+        (name) =>
+          name === playerName ||
+          name.includes(playerName) ||
+          playerName.includes(name),
+      );
+    });
     if (byName.length === 1) return byName[0]!;
     return null;
   }
 
-  const named = pool.filter((player) => normalizeName(player.player) === name);
+  const named = pool.filter((player) => variants.includes(normalizeName(player.player)));
   if (named.length === 1) return named[0]!;
   const withTeam = named.filter((player) => normalizeTeam(player.team) === team);
   if (withTeam.length === 1) return withTeam[0]!;

@@ -2,6 +2,16 @@ import { describe, expect, it } from "vitest";
 import { explainChip } from "./chipExplain.ts";
 
 describe("chip explanations", () => {
+  it("explains Take now and Can wait timing chips", () => {
+    const take = explainChip("Take now");
+    expect(take.definition.toLowerCase()).toMatch(/passing|return/);
+    expect(take.detail?.toLowerCase()).toMatch(/timing/);
+
+    const wait = explainChip("Can wait");
+    expect(wait.definition.toLowerCase()).toMatch(/return/);
+    expect(wait.detail?.toLowerCase()).toMatch(/planning|drop/);
+  });
+
   it("adds pick-number detail to availability chips", () => {
     const unlikely = explainChip("Unlikely to be available at pick 47");
     expect(unlikely.definition.toLowerCase()).toContain("adp");

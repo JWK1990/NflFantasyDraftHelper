@@ -72,6 +72,25 @@ export function explainChip(label: string): ChipExplanation {
     };
   }
 
+  if (label === "Take now") {
+    return {
+      title: label,
+      definition:
+        "Passing is likely to cost completed-team value because they may not return.",
+      detail:
+        "This is a timing warning. The row is still scored from taking them now, not from a forecasted later board.",
+    };
+  }
+
+  if (label === "Can wait") {
+    return {
+      title: label,
+      definition: "They are likely to return, and the cost of passing looks small.",
+      detail:
+        "Useful planning information. It does not drop them below a worse take-now team.",
+    };
+  }
+
   const need = label.match(/^Need (QB|RB|WR|TE)$/i);
   if (need) {
     const pos = need[1]!.toUpperCase();

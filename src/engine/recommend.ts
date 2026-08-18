@@ -4,6 +4,7 @@ import {
 } from "../config/recommendationConfig.ts";
 import type {
   DraftState,
+  LaterPosBreakdown,
   Player,
   Recommendation,
   RosterCounts,
@@ -15,8 +16,10 @@ import { isAcceptableQb } from "./qb.ts";
 import { compareQbBranches, forcedQbOverallPick, type QbBranchComparison } from "./qbBranch.ts";
 import {
   intrinsicLookaheadPool,
+  preSelectionStateHash,
   returnProbability,
   simulateCandidateDraft,
+  type LaterAcquisition,
 } from "./draftSim.ts";
 import { completedTeamUtility } from "./teamUtility.ts";
 import { lateRoundReservation } from "./lateRound.ts";
@@ -28,7 +31,7 @@ import {
   userPickSchedule,
 } from "./snake.ts";
 import { playerMatchesTagFilter, scoutingTag } from "./tags.ts";
-import { likelyGoneByNextTurn, vonaForCandidate } from "./vona.ts";
+import { likelyGoneByNextTurn } from "./vona.ts";
 import { LEAGUE } from "../config/leagueSettings.ts";
 
 function similarSecureQbCount(
@@ -96,7 +99,6 @@ function collectReasons(
   leftInTier: number,
   currentOverallPick: number,
   likelyGone: Set<string>,
-  vonaUrgency: number,
   counts: RosterCounts,
   starts: boolean,
 ): string[] {
@@ -130,9 +132,6 @@ function collectReasons(
     if (next != null) {
       reasons.push(`Unlikely to be available at pick ${next}`);
     }
-  }
-  if (vonaUrgency >= 6) {
-    reasons.push("big drop if you pass (VONA)");
   }
 
   const unique = [...new Set(reasons)].filter(Boolean);
@@ -212,6 +211,80 @@ function addLikelyAvailableReasons(
   return scored;
 }
 
+function addTimingReasons(
+  scored: Recommendation[],
+  config: RecommendationConfig,
+): Recommendation[] {
+  for (const row of scored) {
+    if (row.player.pos === "K" || row.player.pos === "DST") continue;
+    if (
+      row.breakdown.expectedPassLoss >= config.takeNowPassLoss &&
+      row.breakdown.returnProbability < 0.5
+    ) {
+      if (!row.reasons.includes("Take now")) row.reasons.push("Take now");
+    } else if (
+      row.breakdown.returnProbability >= config.returnChip.minProbability &&
+      row.breakdown.expectedPassLoss < config.canWaitPassLoss
+    ) {
+      if (!row.reasons.includes("Can wait")) row.reasons.push("Can wait");
+    }
+  }
+  return scored;
+}
+
+function laterNote(row: LaterAcquisition | null | undefined): LaterPosBreakdown | undefined {
+  if (!row) return undefined;
+  return {
+    player: row.player.player,
+    overallPick: row.overallPick,
+    returnProbability: row.returnProbability,
+  };
+}
+
+function scenariosAllowInversion(ahead: Recommendation, behind: Recommendation): boolean {
+  const aScen = ahead.breakdown.scenarioUtilities;
+  const bScen = behind.breakdown.scenarioUtilities;
+  if (!aScen || !bScen || aScen.length !== bScen.length || aScen.length === 0) {
+    return false;
+  }
+  return aScen.every((utility, index) => utility + 0.01 >= (bScen[index] ?? 0));
+}
+
+function samePositionInversionBlocked(
+  ahead: Recommendation,
+  behind: Recommendation,
+): boolean {
+  if (ahead.player.pos !== behind.player.pos) return false;
+  if (ahead.player.pos === "K" || ahead.player.pos === "DST") return false;
+  if (ahead.player.modelPts >= behind.player.modelPts) return false;
+  const directEdge = behind.player.modelPts - ahead.player.modelPts;
+  const continuation =
+    ahead.dynamicScore - behind.dynamicScore + directEdge;
+  return !(continuation > directEdge + 0.01 && scenariosAllowInversion(ahead, behind));
+}
+
+function annotateInversions(scored: Recommendation[]): void {
+  for (let index = 0; index < scored.length; index += 1) {
+    const ahead = scored[index];
+    if (!ahead) continue;
+    const behind = scored.find(
+      (row, inner) =>
+        inner > index &&
+        row.player.pos === ahead.player.pos &&
+        row.player.modelPts > ahead.player.modelPts,
+    );
+    if (!behind) continue;
+    if (samePositionInversionBlocked(ahead, behind)) continue;
+    const directEdge = behind.player.modelPts - ahead.player.modelPts;
+    ahead.breakdown.samePositionInversion = {
+      otherPlayer: behind.player.player,
+      directEdge,
+      continuationEdge: ahead.dynamicScore - behind.dynamicScore + directEdge,
+      netEdge: ahead.dynamicScore - behind.dynamicScore,
+    };
+  }
+}
+
 export function recommend(
   players: Player[],
   state: DraftState,
@@ -223,6 +296,7 @@ export function recommend(
   const currentOverallPick = state.picks.length + 1;
   const remainingUserPicks = Math.max(0, LEAGUE.rosterSize - counts.total);
   const nextUser = nextUserPickAfter(currentOverallPick);
+  const stateHash = preSelectionStateHash(state);
   const branch = compareQbBranches(players, state, config);
 
   const eligible = eligiblePlayers(
@@ -244,7 +318,6 @@ export function recommend(
 
   const scored: Recommendation[] = eligible.map((player) => {
     const leftInTier = remaining.get(`${player.pos}-${player.posTier}`) ?? 0;
-    const vonaUrgency = vonaForCandidate(player, eligible, likelyGone, config);
     const qbReasons = qbReasonChips(
       player,
       counts,
@@ -286,12 +359,22 @@ export function recommend(
       expectedGain: 0,
       returnProbability: returnChance,
       lookahead: fullLookahead,
+      preSelectionStateHash: stateHash,
+      candidateSecuredNow: player.player,
+      directProjection: player.modelPts,
+      continuationEffect: 0,
+      expectedPassLoss: 0,
+      waitPick: nextUser,
       laterPlayer: later?.player.player,
       laterPos: later?.player.pos,
       laterOverallPick: later?.overallPick,
       laterReturnProbability: later?.returnProbability,
       laterFallback: later?.fallbackPlayer?.player,
       laterQbPolicy: later?.qbPolicy ?? sim?.qbPolicy,
+      laterQb: laterNote(sim?.laterQb),
+      laterWr: laterNote(sim?.laterWr),
+      laterTe: laterNote(sim?.laterTe),
+      scenarioUtilities: sim?.scenarioUtilities,
     };
 
     return {
@@ -304,32 +387,55 @@ export function recommend(
         leftInTier,
         currentOverallPick,
         likelyGone,
-        vonaUrgency,
         counts,
         starts,
       ),
     };
   });
 
-  scored.sort((a, b) => {
-    if (b.dynamicScore !== a.dynamicScore) return b.dynamicScore - a.dynamicScore;
-    return b.player.vorp - a.player.vorp || a.player.modelRank - b.player.modelRank;
+  const compareUtility = (left: Recommendation, right: Recommendation) => {
+    if (samePositionInversionBlocked(left, right)) return 1;
+    if (samePositionInversionBlocked(right, left)) return -1;
+    const diff = right.dynamicScore - left.dynamicScore;
+    if (Math.abs(diff) > config.timingTieTolerance) return diff;
+    const pass =
+      (right.breakdown.expectedPassLoss ?? 0) - (left.breakdown.expectedPassLoss ?? 0);
+    if (pass !== 0) return pass;
+    return right.player.vorp - left.player.vorp || left.player.modelRank - right.player.modelRank;
+  };
+
+  scored.sort((left, right) => {
+    const diff = right.dynamicScore - left.dynamicScore;
+    if (diff !== 0) return diff;
+    return right.player.vorp - left.player.vorp || left.player.modelRank - right.player.modelRank;
   });
 
-  const bestUtility = scored[0]?.dynamicScore ?? 0;
-  const alternativeUtility = scored[1]?.dynamicScore ?? bestUtility;
   for (const row of scored) {
-    row.breakdown.alternativeUtility =
-      row.player.id === scored[0]?.player.id ? alternativeUtility : bestUtility;
-    row.breakdown.expectedGain =
-      row.dynamicScore - row.breakdown.alternativeUtility;
+    const alternative =
+      scored.find((peer) => peer.player.id !== row.player.id) ?? row;
+    row.breakdown.alternativeUtility = alternative.dynamicScore;
+    row.breakdown.alternativePlayer = alternative.player.player;
+    row.breakdown.expectedGain = row.dynamicScore - alternative.dynamicScore;
+    row.breakdown.continuationEffect =
+      row.dynamicScore -
+      alternative.dynamicScore -
+      (row.player.modelPts - alternative.player.modelPts);
+    row.breakdown.expectedPassLoss =
+      (1 - row.breakdown.returnProbability) *
+      Math.max(0, row.dynamicScore - alternative.dynamicScore);
   }
 
-  return addLikelyAvailableReasons(
-    applyLivePins(scored, currentOverallPick, counts, branch),
-    currentOverallPick,
-    likelyGone,
-    branch,
+  scored.sort(compareUtility);
+  annotateInversions(scored);
+
+  return addTimingReasons(
+    addLikelyAvailableReasons(
+      applyLivePins(scored, currentOverallPick, counts, branch),
+      currentOverallPick,
+      likelyGone,
+      branch,
+      config,
+    ),
     config,
   );
 }

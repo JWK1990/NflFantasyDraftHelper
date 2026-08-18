@@ -77,6 +77,9 @@ export const RECOMMENDATION_CONFIG = {
     topN: 8,
     minProbability: 0.7,
   },
+  timingTieTolerance: 4,
+  takeNowPassLoss: 8,
+  canWaitPassLoss: 6,
 };
 
 export type RecommendationConfig = typeof RECOMMENDATION_CONFIG;
