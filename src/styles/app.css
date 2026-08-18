@@ -387,19 +387,6 @@ button.roster-chip {
   min-height: 24px;
 }
 
-.lw-chip {
-  border: 0;
-  border-radius: 6px;
-  padding: 1px 6px;
-  min-height: 24px;
-  font: inherit;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  background: #8a6414;
-  color: #ffe7a3;
-}
-
 .stats {
   width: 100%;
   margin-top: 2px;
@@ -433,6 +420,13 @@ button.roster-chip {
   padding: 4px 8px;
   font: inherit;
   font-size: 0.68rem;
+}
+
+.reason.lw-chip {
+  background: #8a6414;
+  color: #ffe7a3;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
 .reason-likely {

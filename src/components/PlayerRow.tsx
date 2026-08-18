@@ -64,19 +64,6 @@ export function PlayerRow({
           >
             {posLabel(player.pos)} T{player.posTier}
           </button>
-          {player.leagueWinner ? (
-            <button
-              className="lw-chip"
-              type="button"
-              aria-label={`League Winner candidate, ${player.leagueWinner.confidence} confidence`}
-              onClick={(event) => {
-                event.stopPropagation();
-                if (!expanded) onToggle();
-              }}
-            >
-              LW
-            </button>
-          ) : null}
           <button className="player-ident" type="button" onClick={onToggle}>
             <span className="name">{player.player}</span>
             <span className="meta">
@@ -94,8 +81,21 @@ export function PlayerRow({
           {", "}
           <strong>ADP {formatAdp(player.adp)}</strong>
         </button>
-        {reasons.length > 0 ? (
+        {reasons.length > 0 || player.leagueWinner ? (
           <div className="reasons">
+            {player.leagueWinner ? (
+              <button
+                className="reason lw-chip"
+                type="button"
+                aria-label={`League Winner candidate, ${player.leagueWinner.confidence} confidence`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (!expanded) onToggle();
+                }}
+              >
+                LW
+              </button>
+            ) : null}
             {reasons.map((reason) => (
               <button
                 key={reason}

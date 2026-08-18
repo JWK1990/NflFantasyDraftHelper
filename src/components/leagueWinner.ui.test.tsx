@@ -65,7 +65,9 @@ describe("league winner UI", () => {
   it("keeps risk chips alongside the LW pill", () => {
     const risky = winnersWithRisk();
     renderRow(risky);
-    expect(screen.getByRole("button", { name: /League Winner candidate/i })).toBeTruthy();
+    const lw = screen.getByRole("button", { name: /League Winner candidate/i });
+    expect(lw).toBeTruthy();
+    expect(lw.className).toContain("reason");
     expect(screen.getByRole("button", { name: risky.tag })).toBeTruthy();
   });
 

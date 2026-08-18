@@ -8,6 +8,7 @@ export const TAG_FILTERS = [
   { id: "risk", label: "Risk" },
   { id: "injury", label: "Injury watch" },
   { id: "anchor", label: "Anchor" },
+  { id: "league-winner", label: "Potential League Winner" },
 ] as const;
 
 export type TagFilterId = Exclude<TagFilter, "ALL">;
@@ -32,6 +33,7 @@ export function playerMatchesTagFilter(
   filter: TagFilter,
 ): boolean {
   if (filter === "ALL") return true;
+  if (filter === "league-winner") return Boolean(player.leagueWinner);
   const tag = normalizedTag(player);
   if (!tag) return false;
   switch (filter) {

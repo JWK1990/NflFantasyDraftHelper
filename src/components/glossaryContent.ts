@@ -166,7 +166,7 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
       {
         term: "LW pill",
         definition:
-          "League-winning players are frequently found early because early picks have the highest hit rates. Upside becomes more decisive later because safe but replaceable bench production has little value and failed late picks can usually be replaced through waivers. Tap LW to open the research on that player.",
+          "Gold tag in the same row as the other chips. League-winning players are frequently found early because early picks have the highest hit rates. Upside becomes more decisive later because safe but replaceable bench production has little value and failed late picks can usually be replaced through waivers. Tap LW to open the research on that player. Filter by Potential League Winner in Search / filter.",
       },
     ],
   },

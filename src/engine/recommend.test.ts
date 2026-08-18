@@ -323,6 +323,14 @@ describe("recommendation engine", () => {
     ).toBe(true);
   });
 
+  it("filters the board to Potential League Winner candidates", () => {
+    const state = { ...initialDraftState, tagFilter: "league-winner" as const };
+    const winners = players.filter((player) => matchesFilters(player, state));
+    expect(winners).toHaveLength(31);
+    expect(winners.every((player) => player.leagueWinner)).toBe(true);
+    expect(winners.some((player) => player.player === "Josh Allen")).toBe(true);
+  });
+
   it("gives bench-only players diminishing value rather than full starter points", () => {
     const roster = [
       named("Josh Allen"),
