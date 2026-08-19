@@ -127,34 +127,33 @@ describe("recommendation engine", () => {
     expect(tierCliffBonus(jsn, players)).toBe(0);
   });
 
-  it("does not manufacture early QB2 need in adaptive-punt with similar secure QBs", () => {
-    const state = draft(initialDraftState, "Josh Allen", "mine");
-    const punt = recommend(players, { ...state, qb2Mode: "adaptive-punt" });
-    const lamarPunt = punt.find((row) => row.player.player === "Lamar Jackson");
-    expect(lamarPunt).toBeDefined();
-    expect(lamarPunt!.reasons.some((reason) => reason.startsWith("QB2 can wait"))).toBe(true);
-  });
-
-  it("ranks the best remaining QB first at pick 174 with only one user QB", () => {
+  it("ranks the best remaining QB first at pick 163 with zero user QBs (legal QB1)", () => {
+    // QB1 is still a genuine legal-roster requirement, so it is pinned when the
+    // user would otherwise reach the deadline with no QB at all.
     const allen = named("Josh Allen");
-    const remainingQbs = players
+    const bestRemaining = players
       .filter((player) => player.pos === "QB" && player.id !== allen.id)
-      .sort((a, b) => b.modelPts - a.modelPts || a.modelRank - b.modelRank);
-    const bestRemaining = remainingQbs[0];
+      .sort((a, b) => b.modelPts - a.modelPts || a.modelRank - b.modelRank)[0];
     if (!bestRemaining) throw new Error("Expected remaining QBs");
 
-    let state = draft(initialDraftState, allen.player, "mine");
+    // No user QB at all: user picks are all skill, opponents take everyone else.
+    let state = draft(initialDraftState, "Christian McCaffrey", "mine");
+    const keep = new Set([bestRemaining.id, named("Christian McCaffrey").id]);
     const fillers = players.filter(
-      (player) => player.id !== allen.id && player.id !== bestRemaining.id,
+      (player) => !keep.has(player.id) && player.pos !== "K" && player.pos !== "DST",
     );
-    for (const player of fillers.slice(0, 172)) {
+    let index = 0;
+    while (state.picks.length < 162) {
+      const filler = fillers[index];
+      index += 1;
+      if (!filler) throw new Error("Ran out of fillers before pick 163");
       state = draftReducer(state, {
         type: "DRAFT_PLAYER",
-        playerId: player.id,
+        playerId: filler.id,
         draftedBy: "other",
       });
     }
-    expect(state.picks).toHaveLength(173);
+    expect(state.picks).toHaveLength(162);
     const recs = recommend(players, state);
     expect(recs[0]?.player.pos).toBe("QB");
     expect(recs[0]?.player.id).toBe(bestRemaining.id);
@@ -349,12 +348,13 @@ describe("recommendation engine", () => {
     expect(gained).toBeLessThan(extra.modelPts * 0.5);
   });
 
-  it("finishes a wait-branch rollout with 15 players including two QBs, K and D/ST", () => {
+  it("finishes a wait-branch rollout with 15 players, K, D/ST and a legal QB1 (no forced QB2)", () => {
     const sim = simulateCompletedDraft(players, initialDraftState, null, undefined, true);
     expect(sim.roster).toHaveLength(15);
     expect(sim.roster.some((player) => player.pos === "K")).toBe(true);
     expect(sim.roster.some((player) => player.pos === "DST")).toBe(true);
-    expect(sim.roster.filter((player) => player.pos === "QB")).toHaveLength(2);
+    // QB1 is a legal requirement; the wait branch never forces a second QB.
+    expect(sim.roster.filter((player) => player.pos === "QB")).toHaveLength(1);
   });
 });
 

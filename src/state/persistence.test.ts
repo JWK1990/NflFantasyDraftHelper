@@ -40,7 +40,7 @@ describe("persistence", () => {
 
   it("falls back when the schema version changes", () => {
     const storage = memoryStorage({
-      [STORAGE_KEY]: JSON.stringify({ ...initialDraftState, schemaVersion: 2 }),
+      [STORAGE_KEY]: JSON.stringify({ ...initialDraftState, schemaVersion: 3 }),
     });
     const loaded = loadState(storage);
     expect(loaded.state).toEqual(initialDraftState);

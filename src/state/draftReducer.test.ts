@@ -115,6 +115,5 @@ describe("draftReducer", () => {
     });
     expect(replaced.picks).toHaveLength(1);
     expect(replaced.picks[0]?.playerId).toBe(chase);
-    expect(replaced.qb2Mode).toBe(started.qb2Mode);
   });
 });

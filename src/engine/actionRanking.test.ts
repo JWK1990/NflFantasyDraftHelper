@@ -3,9 +3,6 @@ import { LEAGUE } from "../config/leagueSettings.ts";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player } from "../domain/types.ts";
 import {
-  QB2_POLICIES,
-  adpWindowIds,
-  remainingOpponentPicks,
   returnProbability,
   simulateCandidateDraft,
   simulateCompletedDraft,
@@ -14,7 +11,6 @@ import {
 } from "./draftSim.ts";
 import { recommend } from "./recommend.ts";
 import { completedTeamUtility } from "./teamUtility.ts";
-import { likelyGoneByNextTurn } from "./vona.ts";
 import { eligiblePlayers } from "./eligibility.ts";
 import { nextUserPickAfter, userPickSchedule } from "./snake.ts";
 import { myRosterPlayers, playersById, rosterCounts } from "./roster.ts";
@@ -272,13 +268,6 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
     expect(riceRow.roster.some((player) => player.id === rice.id)).toBe(true);
   });
 
-  it("evaluates next, tier-cliff, middle, and final QB2 strategies on a Rice branch", () => {
-    const state = fillToPick(16, keepStars);
-    const sim = simulateCandidateDraft(players, state, named("Rashee Rice"));
-    expect(sim.qbPoliciesTried).toEqual(QB2_POLICIES);
-    expect(QB2_POLICIES).toContain(sim.qbPolicy);
-  });
-
   it("subjects later QB, WR, and TE acquisitions to the scenario model", () => {
     const state = fillToPick(16, keepStars);
     const sim = simulateCandidateDraft(players, state, named("Daniel Jones"));
@@ -422,16 +411,6 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
 });
 
 describe("availability chips vs remaining opponent picks", { timeout: 30_000 }, () => {
-  it("keeps the ADP consume window helper aligned with remaining opponent picks", () => {
-    const state = fillToPick(16, keepStars);
-    const counts = rosterCounts(state.picks, byId);
-    const eligible = eligiblePlayers(players, state.picks, counts, 16, RECOMMENDATION_CONFIG);
-    expect(nextUserPickAfter(16)).toBe(19);
-    expect(likelyGoneByNextTurn(eligible, 16)).toEqual(
-      adpWindowIds(eligible, remainingOpponentPicks(16, 19)),
-    );
-  });
-
   it("uses the same return probability for Unlikely chips and the breakdown", () => {
     const recs = recommend(players, fillToPick(16, keepStars));
     const threshold = RECOMMENDATION_CONFIG.robustness.unlikelyReturn;

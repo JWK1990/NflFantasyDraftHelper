@@ -15,7 +15,7 @@ export function ImportPicksModal({
   onImport,
 }: ImportPicksModalProps) {
   const [paste, setPaste] = useState("");
-  const [teamName, setTeamName] = useState(LEAGUE.userTeamName);
+  const [teamName, setTeamName] = useState<string>(LEAGUE.userTeamName);
 
   if (!open) return null;
 

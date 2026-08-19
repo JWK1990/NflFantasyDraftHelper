@@ -6,13 +6,15 @@ import { matchesFilters, recommend } from "../engine/recommend.ts";
 import { draftedIds, myRosterPlayers, playersById, rosterCounts, rosterCoverageFromPlayers } from "../engine/roster.ts";
 import { remainingByPosTier, currentEdgeTiers } from "../engine/tierScarcity.ts";
 import { isUserPick } from "../engine/snake.ts";
+import { teamInitials, teamSlotForOverallPick } from "../engine/teams.ts";
+import { teamNamesBySlot } from "../config/leagueTeams.ts";
 import { compareQbBranches } from "../engine/qbBranch.ts";
 import { QbBranchCard } from "../components/QbBranchCard.tsx";
 import { DraftHeader } from "../components/DraftHeader.tsx";
 import { DraftLogDrawer } from "../components/DraftLogDrawer.tsx";
 import { ImportPicksModal } from "../components/ImportPicksModal.tsx";
 import { ChipExplainProvider } from "../components/ChipExplainContext.tsx";
-import { RecommendationList } from "../components/RecommendationList.tsx";
+import { RecommendationList, type PickTeamContext } from "../components/RecommendationList.tsx";
 import { RosterStrip } from "../components/RosterStrip.tsx";
 import { TierPressureStrip, type ListFocus } from "../components/TierPressureStrip.tsx";
 import { Toast } from "../components/Toast.tsx";
@@ -54,20 +56,28 @@ export default function App() {
   }, [toast]);
 
   const currentOverallPick = state.picks.length + 1;
+  const pickTeam = useMemo<PickTeamContext>(() => {
+    const slot = teamSlotForOverallPick(currentOverallPick);
+    const teamName = teamNamesBySlot().get(slot) ?? `Team ${slot}`;
+    return {
+      isUserPick: isUserPick(currentOverallPick),
+      initials: teamInitials(teamName),
+      teamName,
+    };
+  }, [currentOverallPick]);
   const counts = useMemo(() => rosterCounts(state.picks, byId), [state.picks]);
   const roster = useMemo(() => myRosterPlayers(state.picks, byId), [state.picks]);
   const coverage = useMemo(() => rosterCoverageFromPlayers(roster), [roster]);
   const rankingState = useMemo<DraftState>(
     () => ({
-      schemaVersion: 1,
+      schemaVersion: 2,
       picks: state.picks,
       search: "",
       positionFilter: "ALL",
       tierFilter: "ALL",
       tagFilter: "ALL",
-      qb2Mode: state.qb2Mode,
     }),
-    [state.picks, state.qb2Mode],
+    [state.picks],
   );
   const recs = useMemo(() => recommend(players, rankingState), [rankingState]);
   const qbBranch = useMemo(
@@ -179,8 +189,6 @@ export default function App() {
           setImportError(null);
           setImportOpen(true);
         }}
-        qb2Mode={state.qb2Mode}
-        onQb2Mode={(mode) => dispatch({ type: "SET_QB2_MODE", mode })}
       />
       {resetBanner ? <div className="banner">{resetBanner}</div> : null}
       <RosterStrip
@@ -216,6 +224,7 @@ export default function App() {
         ranks={rankById}
         focus={listFocus}
         topVorp={recs[0]?.player.vorp ?? null}
+        pickTeam={pickTeam}
         onToggle={(playerId) =>
           setExpandedId((current) => (current === playerId ? null : playerId))
         }

@@ -2,13 +2,12 @@ import type { DraftAction, DraftState } from "../domain/types.ts";
 import { roundForPick } from "../engine/snake.ts";
 
 export const initialDraftState: DraftState = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   picks: [],
   search: "",
   positionFilter: "ALL",
   tierFilter: "ALL",
   tagFilter: "ALL",
-  qb2Mode: "adaptive-punt",
 };
 
 export function draftReducer(state: DraftState, action: DraftAction): DraftState {
@@ -38,10 +37,7 @@ export function draftReducer(state: DraftState, action: DraftAction): DraftState
       return { ...state, picks: state.picks.slice(0, -1) };
     }
     case "RESET_DRAFT": {
-      return {
-        ...initialDraftState,
-        qb2Mode: state.qb2Mode,
-      };
+      return { ...initialDraftState };
     }
     case "LOAD_STATE":
       return action.state;
@@ -59,8 +55,6 @@ export function draftReducer(state: DraftState, action: DraftAction): DraftState
       return { ...state, tierFilter: action.tier };
     case "SET_TAG_FILTER":
       return { ...state, tagFilter: action.tag };
-    case "SET_QB2_MODE":
-      return { ...state, qb2Mode: action.mode };
     default:
       return state;
   }

@@ -39,7 +39,8 @@ export function lateRoundReservation(
     return null;
   }
   if (overallPick === 174) {
-    if (qbCount < 2) return "QB";
+    // QB1 is a genuine legal-roster requirement; QB2 is never forced (§1.3).
+    if (qbCount === 0) return "QB";
     if (!hasDst) return "DST";
     if (!hasK) return "K";
     return null;

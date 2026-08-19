@@ -28,12 +28,15 @@ function renderRow(
         player={player}
         rank={1}
         expanded={extras.expanded ?? false}
+        pickTeam={USER_PICK}
         onToggle={onToggle}
         onDraft={onDraft}
       />
     </ChipExplainProvider>,
   );
 }
+
+const USER_PICK = { isUserPick: true, initials: "YOU", teamName: "The Dan Marinehos" };
 
 describe("league winner UI", () => {
   afterEach(() => cleanup());
@@ -50,6 +53,7 @@ describe("league winner UI", () => {
             player={player}
             rank={1}
             expanded={false}
+            pickTeam={USER_PICK}
             onToggle={() => undefined}
             onDraft={() => undefined}
           />

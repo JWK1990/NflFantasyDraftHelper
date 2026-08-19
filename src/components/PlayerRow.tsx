@@ -1,4 +1,5 @@
 import type { DraftedBy, Player, Recommendation } from "../domain/types.ts";
+import type { PickTeamContext } from "./RecommendationList.tsx";
 import { formatAdp, formatVorp, formatVorpDiff, posLabel, positionColor } from "./format.ts";
 import { scoutingTag } from "../engine/tags.ts";
 import { useChipExplain } from "./ChipExplainContext.tsx";
@@ -12,6 +13,7 @@ interface PlayerRowProps {
   expanded: boolean;
   dimmed?: boolean;
   topVorp?: number | null;
+  pickTeam: PickTeamContext;
   onToggle: () => void;
   onDraft: (draftedBy: DraftedBy) => void;
 }
@@ -37,23 +39,6 @@ function formatSigned(value: number): string {
   return `${rounded >= 0 ? "+" : ""}${rounded.toFixed(1)}`;
 }
 
-function policyLabel(policy: Recommendation["breakdown"]["laterQbPolicy"]): string {
-  switch (policy) {
-    case "qb-next":
-      return "next";
-    case "cliff":
-      return "tier cliff";
-    case "middle":
-      return "middle";
-    case "punt":
-      return "final";
-    case "flex":
-      return "flex";
-    default:
-      return "—";
-  }
-}
-
 function laterLine(
   label: string,
   row: Recommendation["breakdown"]["laterQb"],
@@ -77,6 +62,7 @@ export function PlayerRow({
   expanded,
   dimmed = false,
   topVorp = null,
+  pickTeam,
   onToggle,
   onDraft,
 }: PlayerRowProps) {
@@ -148,13 +134,21 @@ export function PlayerRow({
       </div>
       {draftedBy ? (
         <div className="taken-label">{draftedBy === "mine" ? "MINE" : "TAKEN"}</div>
-      ) : (
+      ) : pickTeam.isUserPick ? (
         <div className="row-actions">
           <button className="btn-mine" type="button" onClick={() => onDraft("mine")}>
             Mine
           </button>
-          <button className="btn-other" type="button" onClick={() => onDraft("other")}>
-            Other
+        </div>
+      ) : (
+        <div className="row-actions">
+          <button
+            className="btn-other"
+            type="button"
+            title={`Drafted by ${pickTeam.teamName}`}
+            onClick={() => onDraft("other")}
+          >
+            {pickTeam.initials}
           </button>
         </div>
       )}
@@ -253,10 +247,6 @@ export function PlayerRow({
               {laterLine("Later QB", recommendation.breakdown.laterQb)}
               {laterLine("Later WR", recommendation.breakdown.laterWr)}
               {laterLine("Later TE", recommendation.breakdown.laterTe)}
-              <div className="breakdown-row">
-                <span>QB2 policy</span>
-                <span>{policyLabel(recommendation.breakdown.laterQbPolicy)}</span>
-              </div>
               {recommendation.breakdown.samePositionComparison ? (
                 <p className="breakdown-note">
                   Versus {recommendation.breakdown.samePositionComparison.otherPlayer}:
@@ -302,26 +292,6 @@ export function PlayerRow({
                       ? "Lean"
                       : "Clear edge"}
                   .
-                </p>
-              ) : null}
-              {recommendation.breakdown.laterQbPolicy === "punt" ? (
-                <p className="breakdown-note">
-                  This row’s rest-of-draft plan waits on QB2 until pick 174.
-                </p>
-              ) : recommendation.breakdown.laterQbPolicy === "qb-next" ? (
-                <p className="breakdown-note">
-                  This row’s rest-of-draft plan takes a QB at the next pick if one
-                  is still there.
-                </p>
-              ) : recommendation.breakdown.laterQbPolicy === "cliff" ? (
-                <p className="breakdown-note">
-                  This row’s rest-of-draft plan takes QB2 before the current
-                  starter tier runs out.
-                </p>
-              ) : recommendation.breakdown.laterQbPolicy === "middle" ? (
-                <p className="breakdown-note">
-                  This row’s rest-of-draft plan looks for QB2 in the middle-round
-                  window.
                 </p>
               ) : null}
               {recommendation.breakdown.riskAdjustment > 0 ? (

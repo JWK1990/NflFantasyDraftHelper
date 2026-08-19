@@ -22,6 +22,7 @@ function TapUndoHarness() {
         rank={1}
         expanded={false}
         draftedBy={drafted?.draftedBy}
+        pickTeam={{ isUserPick: true, initials: "YOU", teamName: "The Dan Marinehos" }}
         onToggle={() => undefined}
         onDraft={(draftedBy: DraftedBy) =>
           dispatch({ type: "DRAFT_PLAYER", playerId: bijan.id, draftedBy })
@@ -46,5 +47,25 @@ describe("critical tap and undo flow", () => {
     fireEvent.click(screen.getByRole("button", { name: "Undo last" }));
     expect(screen.getByText("picks:0")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Mine" })).toBeTruthy();
+  });
+
+  it("shows a grey team-initials button (no Mine) on an opponent's pick", () => {
+    const drafts: DraftedBy[] = [];
+    render(
+      <PlayerRow
+        player={bijan}
+        rank={1}
+        expanded={false}
+        pickTeam={{ isUserPick: false, initials: "GRD", teamName: "Gridiron" }}
+        onToggle={() => undefined}
+        onDraft={(draftedBy) => drafts.push(draftedBy)}
+      />,
+    );
+    // No Mine button off the clock — prevents an accidental off-schedule Mine.
+    expect(screen.queryByRole("button", { name: "Mine" })).toBeNull();
+    const teamButton = screen.getByRole("button", { name: "GRD" });
+    expect(teamButton.getAttribute("title")).toContain("Gridiron");
+    fireEvent.click(teamButton);
+    expect(drafts).toEqual(["other"]);
   });
 });

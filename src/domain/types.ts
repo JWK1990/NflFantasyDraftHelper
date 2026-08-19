@@ -1,6 +1,5 @@
 export type Position = "QB" | "RB" | "WR" | "TE" | "K" | "DST";
 export type DraftedBy = "mine" | "other";
-export type Qb2Mode = "adaptive-punt" | "normal";
 export type PositionFilter = Position | "ALL";
 export type TierFilter = number | "ALL";
 export type TagFilter =
@@ -63,13 +62,12 @@ export interface DraftPick {
 }
 
 export interface DraftState {
-  schemaVersion: 1;
+  schemaVersion: 2;
   picks: DraftPick[];
   search: string;
   positionFilter: PositionFilter;
   tierFilter: TierFilter;
   tagFilter: TagFilter;
-  qb2Mode: Qb2Mode;
 }
 
 export type DraftAction =
@@ -81,10 +79,7 @@ export type DraftAction =
   | { type: "SET_SEARCH"; search: string }
   | { type: "SET_POSITION_FILTER"; position: PositionFilter }
   | { type: "SET_TIER_FILTER"; tier: TierFilter }
-  | { type: "SET_TAG_FILTER"; tag: TagFilter }
-  | { type: "SET_QB2_MODE"; mode: Qb2Mode };
-
-export type Qb2PolicyLabel = "flex" | "punt" | "qb-next" | "cliff" | "middle";
+  | { type: "SET_TAG_FILTER"; tag: TagFilter };
 
 export interface LaterPosBreakdown {
   player: string;
@@ -128,7 +123,6 @@ export interface ScoreBreakdown {
   laterOverallPick?: number;
   laterReturnProbability?: number;
   laterFallback?: string;
-  laterQbPolicy?: Qb2PolicyLabel;
   laterQb?: LaterPosBreakdown;
   laterWr?: LaterPosBreakdown;
   laterTe?: LaterPosBreakdown;

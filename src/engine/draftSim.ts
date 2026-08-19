@@ -6,7 +6,7 @@ import { LEAGUE } from "../config/leagueSettings.ts";
 import type { DraftState, Player, Position } from "../domain/types.ts";
 import { completedTeamUtility, type TeamUtility } from "./teamUtility.ts";
 import { lateRoundReservation } from "./lateRound.ts";
-import { bestQb, isAcceptableQb } from "./qb.ts";
+import { bestQb } from "./qb.ts";
 import { draftedIds, myRosterPlayers, playersById } from "./roster.ts";
 import { mulberry32, scenarioStreamSalt, seedForScenario, weightedSample, type Rng } from "./rng.ts";
 import {
@@ -16,14 +16,12 @@ import {
 } from "./robustness.ts";
 import {
   isUserPick,
-  nextUserPickAfter,
   roundForPick,
   slotForPick,
   upcomingUserPick,
   userPickSchedule,
 } from "./snake.ts";
 
-export type QbSimPolicy = "flex" | "punt" | "qb-next" | "cliff" | "middle";
 export type BoardScenario = "median" | "early-qb" | "late-qb" | "early-wr" | "tier-cliff";
 
 export const BOARD_SCENARIOS: BoardScenario[] = [
@@ -46,15 +44,12 @@ export function utilityTrialCount(
   return BOARD_SCENARIOS.length * config.robustness.utilityStreams;
 }
 
-export const QB2_POLICIES: QbSimPolicy[] = ["qb-next", "cliff", "middle", "punt"];
-
 export interface SimAcquisition {
   player: Player;
   overallPick: number;
 }
 
 export interface SimulateExtras {
-  qbPolicy?: QbSimPolicy;
   scenario?: BoardScenario;
   rngSeed?: number;
   seedSalt?: number;
@@ -68,7 +63,6 @@ export interface LaterAcquisition {
   overallPick: number;
   returnProbability: number;
   fallbackPlayer: Player | null;
-  qbPolicy: QbSimPolicy;
 }
 
 export function adpSortValue(player: Player): number {
@@ -118,28 +112,10 @@ export function remainingOpponentPicks(
   return opponentPicksBetween(currentOverallPick - 1, targetPick);
 }
 
-export function adpWindowIds(
-  available: Player[],
-  count: number,
-  reservedId: string | null = null,
-  scenario: BoardScenario = "median",
-): Set<string> {
-  const ids = new Set<string>();
-  if (count <= 0) return ids;
-  for (const player of [...available].sort((left, right) =>
-    compareByScenario(left, right, scenario),
-  )) {
-    if (player.id === reservedId) continue;
-    ids.add(player.id);
-    if (ids.size >= count) break;
-  }
-  return ids;
-}
-
 export function preSelectionStateHash(state: DraftState): string {
   const raw = `${state.picks
     .map((pick) => `${pick.overallPick}:${pick.playerId}:${pick.draftedBy}`)
-    .join(",")}|${state.picks.length + 1}|${state.qb2Mode}`;
+    .join(",")}|${state.picks.length + 1}`;
   let hash = 2166136261;
   for (let index = 0; index < raw.length; index += 1) {
     hash ^= raw.charCodeAt(index);
@@ -267,43 +243,21 @@ function greedyPool(eligible: Player[], roster: Player[]): Player[] {
   });
 }
 
-export function qb2PolicyDue(
-  policy: QbSimPolicy,
-  overallPick: number,
-  qbCount: number,
-  available: Player[],
-  config: RecommendationConfig,
-  alreadyForced = false,
-): boolean {
-  if (qbCount >= 2) return false;
-  if (policy === "flex") return false;
-  if (policy === "punt") {
-    return overallPick === 174 || (overallPick === 163 && qbCount === 0);
-  }
-  if (policy === "qb-next") return !alreadyForced && qbCount < 2;
-  if (policy === "middle") {
-    const round = roundForPick(overallPick);
-    return qbCount < 2 && round >= 6 && round <= 9;
-  }
-  if (policy === "cliff") {
-    const acceptable = available.filter((player) => isAcceptableQb(player, config));
-    if (acceptable.length === 0) return false;
-    if (acceptable.length <= config.qb.shrinkingPoolThreshold) return true;
-    const minTier = Math.min(...acceptable.map((player) => player.posTier));
-    return acceptable.filter((player) => player.posTier === minTier).length <= 2;
-  }
-  return false;
-}
-
+/**
+ * The simulated user's future pick. One unified objective across every legal
+ * position: maximise one-step completed-team utility. QB competes with RB/WR/TE
+ * on the same footing — no QB strategy, suppression or forcing. Only genuine
+ * legal-roster feasibility (a required QB1, or a late K/DST that must be taken
+ * to finish a legal roster) overrides the utility choice.
+ */
 export function chooseGreedyUserPlayer(
   available: Player[],
   roster: Player[],
   overallPick: number,
   config: RecommendationConfig,
-  qbPolicy: QbSimPolicy = "flex",
 ): Player | null {
   if (roster.length >= LEAGUE.rosterSize) return null;
-  let eligible = simEligible(available, roster);
+  const eligible = simEligible(available, roster);
   if (eligible.length === 0) return null;
 
   const qbCount = countPos(roster, "QB");
@@ -333,17 +287,6 @@ export function chooseGreedyUserPlayer(
     }
   }
 
-  const due = qb2PolicyDue(qbPolicy, overallPick, qbCount, eligible, config);
-  const suppressQb =
-    qbCount >= 1 &&
-    (qbPolicy === "punt" || qbPolicy === "cliff" || qbPolicy === "middle") &&
-    !due &&
-    overallPick !== 174;
-  if (suppressQb) {
-    eligible = eligible.filter((player) => player.pos !== "QB");
-    if (eligible.length === 0) eligible = simEligible(available, roster);
-  }
-
   const skill = eligible.filter((player) => player.pos !== "K" && player.pos !== "DST");
   const pool = greedyPool(skill.length > 0 ? skill : eligible, roster);
   if (pool.length === 0) return eligible[0] ?? null;
@@ -370,8 +313,6 @@ export interface CompletedSim {
   dstBySlot: number[];
   candidateLocked: boolean;
   acquisitions: SimAcquisition[];
-  qbPolicy: QbSimPolicy;
-  qbPoliciesTried: QbSimPolicy[];
   laterAcquisition: LaterAcquisition | null;
   laterQb: LaterAcquisition | null;
   laterWr: LaterAcquisition | null;
@@ -383,14 +324,13 @@ export interface CompletedSim {
 
 function emptyLater(): Pick<
   CompletedSim,
-  "laterAcquisition" | "laterQb" | "laterWr" | "laterTe" | "qbPoliciesTried" | "scenarioUtilities"
+  "laterAcquisition" | "laterQb" | "laterWr" | "laterTe" | "scenarioUtilities"
 > {
   return {
     laterAcquisition: null,
     laterQb: null,
     laterWr: null,
     laterTe: null,
-    qbPoliciesTried: [],
     scenarioUtilities: [],
   };
 }
@@ -409,14 +349,13 @@ function mixUtility(parts: TeamUtility[]): TeamUtility {
   };
 }
 
-function nextUnskippedUserPick(overall: number, skipUserPick: number | null): number | null {
-  let next = upcomingUserPick(overall);
-  if (next != null && next === skipUserPick) {
-    next = nextUserPickAfter(next);
-  }
-  return next;
-}
-
+/**
+ * Roll a board out to completion from the current state.
+ *
+ * `waitOnQb` filters QBs out of the simulated user's pool (except a forced legal
+ * QB1) and is used only by the display-only QB card's "wait" branch. The main
+ * per-candidate ranking never sets it — there the user is fully unified.
+ */
 export function simulateCompletedDraft(
   players: Player[],
   state: DraftState,
@@ -441,7 +380,6 @@ export function simulateCompletedDraft(
   const last = LEAGUE.teams * LEAGUE.rounds;
   const reservedId = openingUserPick?.id ?? null;
   const skipUserPick = reservedId == null ? null : upcomingUserPick(start);
-  const qbPolicy = extras.qbPolicy ?? (waitOnQb ? "punt" : "flex");
   const protect = extras.protectUntilPick;
   const forcePick = extras.forcePick;
   const rng = mulberry32(
@@ -450,8 +388,6 @@ export function simulateCompletedDraft(
   );
   let firstPick: Player | null = null;
   let candidateLocked = reservedId == null;
-  let tookForcedQb = false;
-  let consumeIds: Set<string> | null = null;
   const acquisitions: SimAcquisition[] = [];
   const cap = config.branch.opponentQbCap;
   let securedBeforeOpponents = reservedId == null;
@@ -471,7 +407,6 @@ export function simulateCompletedDraft(
   for (let overall = start; overall <= last; overall += 1) {
     const isUser = userPicks.has(overall);
     if (isUser && skipUserPick != null && overall === skipUserPick) {
-      consumeIds = null;
       continue;
     }
     const slot = slotForPick(overall);
@@ -480,13 +415,8 @@ export function simulateCompletedDraft(
     let pick: Player | null = null;
     if (isUser) {
       if (roster.length >= LEAGUE.rosterSize) {
-        consumeIds = null;
         continue;
       }
-      const blocked = consumeIds ?? new Set<string>();
-      const userPool = available.filter(
-        (player) => player.id === forcePick?.playerId || !blocked.has(player.id),
-      );
       if (
         forcePick != null &&
         overall === forcePick.overallPick &&
@@ -495,47 +425,25 @@ export function simulateCompletedDraft(
         pick = available.find((player) => player.id === forcePick.playerId) ?? null;
       } else {
         const qbCount = countPos(roster, "QB");
-        const reserved = lateRoundReservation(
-          overall,
-          qbCount,
-          rosterHas(roster, "K"),
-          rosterHas(roster, "DST"),
-        );
-        const takeQbNow =
-          reserved !== "K" &&
-          reserved !== "DST" &&
-          qb2PolicyDue(qbPolicy, overall, qbCount, available, config, tookForcedQb);
-        if (takeQbNow && (qbPolicy === "qb-next" || qbPolicy === "cliff" || qbPolicy === "middle")) {
-          pick = bestQb(userPool.length > 0 ? userPool : available, config);
-          tookForcedQb = true;
-        } else {
-          const forceQb = reserved === "QB";
-          const waitPool =
-            waitOnQb && !forceQb
-              ? (userPool.length > 0 ? userPool : available).filter(
-                  (player) => player.pos !== "QB",
-                )
-              : userPool.length > 0
-                ? userPool
-                : available;
-          pick = chooseGreedyUserPlayer(
-            waitPool.length > 0 ? waitPool : available,
-            roster,
+        const forceQb =
+          lateRoundReservation(
             overall,
-            config,
-            waitOnQb ? "flex" : qbPolicy,
-          );
-        }
+            qbCount,
+            rosterHas(roster, "K"),
+            rosterHas(roster, "DST"),
+          ) === "QB";
+        const userPool =
+          waitOnQb && !forceQb
+            ? available.filter((player) => player.pos !== "QB")
+            : available;
+        pick = chooseGreedyUserPlayer(
+          userPool.length > 0 ? userPool : available,
+          roster,
+          overall,
+          config,
+        );
       }
-      consumeIds = null;
     } else {
-      if (consumeIds == null) {
-        const nextUser = nextUnskippedUserPick(overall, skipUserPick);
-        const remainingOpponents =
-          nextUser == null ? 0 : opponentPicksBetween(overall - 1, nextUser);
-        consumeIds = adpWindowIds(available, remainingOpponents, null, scenario);
-        if (protectNow) consumeIds.delete(protectNow);
-      }
       const protectedPool = protectNow
         ? available.filter((player) => player.id !== protectNow)
         : available;
@@ -577,7 +485,6 @@ export function simulateCompletedDraft(
     dstBySlot,
     candidateLocked,
     acquisitions,
-    qbPolicy,
     skippedUserPick: skipUserPick,
     securedBeforeOpponents,
     ...emptyLater(),
@@ -696,7 +603,6 @@ function annotateLater(
   candidate: Player,
   players: Player[],
   state: DraftState,
-  qbPolicy: QbSimPolicy,
   config: RecommendationConfig = RECOMMENDATION_CONFIG,
 ): LaterAcquisition | null {
   if (!row) return null;
@@ -714,17 +620,7 @@ function annotateLater(
       config,
     }),
     fallbackPlayer: null,
-    qbPolicy,
   };
-}
-
-function policiesForCandidate(
-  roster: Player[],
-  candidate: Player,
-): QbSimPolicy[] {
-  const after = countPos(roster, "QB") + (candidate.pos === "QB" ? 1 : 0);
-  if (after >= 2) return ["flex"];
-  return [...QB2_POLICIES];
 }
 
 export function simulateCandidateDraft(
@@ -734,37 +630,15 @@ export function simulateCandidateDraft(
   config: RecommendationConfig = RECOMMENDATION_CONFIG,
   seedSalt = 0,
 ): CompletedSim {
-  const byId = playersById(players);
-  const roster = myRosterPlayers(state.picks, byId);
-  const policies = policiesForCandidate(roster, candidate);
   const stateHash = preSelectionStateHash(state);
   const streams = config.robustness.utilityStreams;
-  let bestPolicy = policies[0] ?? "flex";
-  let bestMedian: CompletedSim | null = null;
-  for (const policy of policies) {
-    const sim = simulateCompletedDraft(players, state, candidate, config, false, {
-      qbPolicy: policy,
-      scenario: "median",
-      rngSeed: seedForScenario(stateHash, "median", scenarioStreamSalt(seedSalt, 0)),
-      seedSalt: scenarioStreamSalt(seedSalt, 0),
-    });
-    if (!bestMedian || sim.utility.utility > bestMedian.utility.utility) {
-      bestMedian = sim;
-      bestPolicy = policy;
-    }
-  }
 
   const scenarioSims: CompletedSim[] = [];
   for (const scenario of BOARD_SCENARIOS) {
     for (let stream = 0; stream < streams; stream += 1) {
       const salt = scenarioStreamSalt(seedSalt, stream);
-      if (scenario === "median" && stream === 0 && bestMedian) {
-        scenarioSims.push(bestMedian);
-        continue;
-      }
       scenarioSims.push(
         simulateCompletedDraft(players, state, candidate, config, false, {
-          qbPolicy: bestPolicy,
           scenario,
           rngSeed: seedForScenario(stateHash, scenario, salt),
           seedSalt: salt,
@@ -772,21 +646,19 @@ export function simulateCandidateDraft(
       );
     }
   }
-  const median = scenarioSims[0] ?? bestMedian;
+  const median = scenarioSims[0];
   if (!median) {
     return simulateCompletedDraft(players, state, candidate, config);
   }
 
-  const laterQb = annotateLater(laterByPos(median, candidate, "QB"), candidate, players, state, bestPolicy, config);
-  const laterWr = annotateLater(laterByPos(median, candidate, "WR"), candidate, players, state, bestPolicy, config);
-  const laterTe = annotateLater(laterByPos(median, candidate, "TE"), candidate, players, state, bestPolicy, config);
+  const laterQb = annotateLater(laterByPos(median, candidate, "QB"), candidate, players, state, config);
+  const laterWr = annotateLater(laterByPos(median, candidate, "WR"), candidate, players, state, config);
+  const laterTe = annotateLater(laterByPos(median, candidate, "TE"), candidate, players, state, config);
   const primary = candidate.pos === "QB" ? laterWr ?? laterTe ?? laterQb : laterQb ?? laterWr ?? laterTe;
 
   return {
     ...median,
     utility: mixUtility(scenarioSims.map((sim) => sim.utility)),
-    qbPolicy: bestPolicy,
-    qbPoliciesTried: policies,
     laterAcquisition: primary,
     laterQb,
     laterWr,

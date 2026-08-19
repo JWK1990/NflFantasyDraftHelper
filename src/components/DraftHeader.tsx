@@ -15,8 +15,6 @@ interface DraftHeaderProps {
   onReset: () => void;
   onExport: () => void;
   onImport: () => void;
-  qb2Mode: "adaptive-punt" | "normal";
-  onQb2Mode: (mode: "adaptive-punt" | "normal") => void;
 }
 
 export function DraftHeader({
@@ -26,8 +24,6 @@ export function DraftHeader({
   onReset,
   onExport,
   onImport,
-  qb2Mode,
-  onQb2Mode,
 }: DraftHeaderProps) {
   const round = roundForPick(currentOverallPick);
   const until = picksUntilTurn(currentOverallPick);
@@ -60,8 +56,6 @@ export function DraftHeader({
           </button>
           <GlossaryMenu />
           <ResetMenu
-            qb2Mode={qb2Mode}
-            onQb2Mode={onQb2Mode}
             onReset={onReset}
             onExport={onExport}
             onImport={onImport}
@@ -73,14 +67,10 @@ export function DraftHeader({
 }
 
 function ResetMenu({
-  qb2Mode,
-  onQb2Mode,
   onReset,
   onExport,
   onImport,
 }: {
-  qb2Mode: "adaptive-punt" | "normal";
-  onQb2Mode: (mode: "adaptive-punt" | "normal") => void;
   onReset: () => void;
   onExport: () => void;
   onImport: () => void;
@@ -91,21 +81,6 @@ function ResetMenu({
         Menu
       </summary>
       <div className="menu-panel">
-        <p>QB2 mode</p>
-        <div className="mode-toggle">
-          <button
-            className={`filter-chip ${qb2Mode === "adaptive-punt" ? "active" : ""}`}
-            onClick={() => onQb2Mode("adaptive-punt")}
-          >
-            Punt
-          </button>
-          <button
-            className={`filter-chip ${qb2Mode === "normal" ? "active" : ""}`}
-            onClick={() => onQb2Mode("normal")}
-          >
-            Normal
-          </button>
-        </div>
         <button className="action-btn" type="button" onClick={onExport}>
           Export draft
         </button>

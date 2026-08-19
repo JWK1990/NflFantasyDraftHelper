@@ -9,12 +9,21 @@ interface ListRow {
   draftedBy?: DraftedBy;
 }
 
+export interface PickTeamContext {
+  isUserPick: boolean;
+  /** Initials shown on the grey button during an opponent's pick. */
+  initials: string;
+  /** Full team name, used for the button title/tooltip. */
+  teamName: string;
+}
+
 interface RecommendationListProps {
   rows: ListRow[];
   expandedId: string | null;
   ranks: Map<string, number>;
   focus: ListFocus | null;
   topVorp?: number | null;
+  pickTeam: PickTeamContext;
   onToggle: (playerId: string) => void;
   onDraft: (playerId: string, draftedBy: DraftedBy) => void;
 }
@@ -25,6 +34,7 @@ export function RecommendationList({
   ranks,
   focus,
   topVorp = null,
+  pickTeam,
   onToggle,
   onDraft,
 }: RecommendationListProps) {
@@ -59,6 +69,7 @@ export function RecommendationList({
             expanded={expandedId === row.player.id}
             dimmed={dimmed}
             topVorp={topVorp}
+            pickTeam={pickTeam}
             onToggle={() => onToggle(row.player.id)}
             onDraft={(draftedBy) => onDraft(row.player.id, draftedBy)}
           />

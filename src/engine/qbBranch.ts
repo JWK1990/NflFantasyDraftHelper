@@ -158,10 +158,3 @@ export function compareQbBranches(
     securePool: secure.length,
   };
 }
-
-export function forcedQbOverallPick(overallPick: number, qbCount: number): boolean {
-  if (qbCount >= 2) return false;
-  if (overallPick === 174) return true;
-  if (overallPick === 163 && qbCount === 0) return true;
-  return false;
-}

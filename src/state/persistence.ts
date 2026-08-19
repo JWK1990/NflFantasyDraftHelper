@@ -2,7 +2,7 @@ import type { DraftState, TagFilter } from "../domain/types.ts";
 import { initialDraftState } from "./draftReducer.ts";
 import { TAG_FILTER_IDS } from "../engine/tags.ts";
 
-export const STORAGE_KEY = "nfl-draft-assistant:v1";
+export const STORAGE_KEY = "nfl-draft-assistant:v2";
 
 export type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -16,15 +16,12 @@ const POSITIONS = new Set(["QB", "RB", "WR", "TE", "K", "DST", "ALL"]);
 function isDraftState(value: unknown): value is DraftState {
   if (!value || typeof value !== "object") return false;
   const record = value as Record<string, unknown>;
-  if (record.schemaVersion !== 1) return false;
+  if (record.schemaVersion !== 2) return false;
   if (!Array.isArray(record.picks)) return false;
   if (typeof record.search !== "string") return false;
   if (typeof record.positionFilter !== "string") return false;
   if (!POSITIONS.has(record.positionFilter)) return false;
   if (record.tierFilter !== "ALL" && typeof record.tierFilter !== "number") {
-    return false;
-  }
-  if (record.qb2Mode !== "adaptive-punt" && record.qb2Mode !== "normal") {
     return false;
   }
   if (
@@ -82,7 +79,7 @@ export function loadState(
       };
     }
     const version = (parsed as { schemaVersion?: unknown }).schemaVersion;
-    if (version !== 1) {
+    if (version !== 2) {
       return {
         state: initialDraftState,
         resetReason: "Saved draft used an older format, so the board was reset.",

@@ -2,23 +2,14 @@ import { describe, expect, it } from "vitest";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player } from "../domain/types.ts";
 import {
-  adpWindowIds,
-  remainingOpponentPicks,
   returnProbability,
   simulateCandidateDraft,
   simulateCompletedDraft,
-  QB2_POLICIES,
 } from "./draftSim.ts";
 import { recommend } from "./recommend.ts";
-import { likelyGoneByNextTurn } from "./vona.ts";
-import { eligiblePlayers } from "./eligibility.ts";
-import { nextUserPickAfter } from "./snake.ts";
-import { playersById, rosterCounts } from "./roster.ts";
 import { draftReducer, initialDraftState } from "../state/draftReducer.ts";
-import { RECOMMENDATION_CONFIG } from "../config/recommendationConfig.ts";
 
 const players = loadPlayers();
-const byId = playersById(players);
 
 function named(name: string): Player {
   const match = players.find((player) => player.player === name);
@@ -67,33 +58,6 @@ function fillToPick(targetPick: number, keepNames: string[], userPickName = "Jos
 const keepStars = ["Rashee Rice", "Daniel Jones", "Bryce Young", "Malik Nabers", "Amon-Ra St. Brown"];
 
 describe("availability-aware rest-of-draft", { timeout: 30_000 }, () => {
-  it("keeps the ADP consume window helper aligned with remaining opponent picks", () => {
-    const state = fillToPick(16, keepStars);
-    const counts = rosterCounts(state.picks, byId);
-    const eligible = eligiblePlayers(players, state.picks, counts, 16, RECOMMENDATION_CONFIG);
-    const next = nextUserPickAfter(16);
-    expect(next).toBe(19);
-    expect(likelyGoneByNextTurn(eligible, 16)).toEqual(
-      adpWindowIds(eligible, remainingOpponentPicks(16, 19)),
-    );
-  });
-
-  it("lets a WR row consider next, cliff, middle, and final QB2 paths instead of auto-punting to 174", () => {
-    const state = fillToPick(16, keepStars);
-    const rice = named("Rashee Rice");
-    const sim = simulateCandidateDraft(players, state, rice);
-    const qb2 = sim.acquisitions.find(
-      (row) => row.player.pos === "QB" && row.player.player !== "Josh Allen",
-    );
-    expect(sim.candidateLocked).toBe(true);
-    expect(sim.firstPick?.id).toBe(rice.id);
-    expect(sim.qbPoliciesTried).toEqual(QB2_POLICIES);
-    expect(qb2).toBeDefined();
-    if (sim.qbPolicy !== "punt") {
-      expect(qb2!.overallPick).toBeLessThan(174);
-    }
-  });
-
   it("does not treat an ADP-unlikely later WR as a certain Jones-branch acquisition", () => {
     const state = fillToPick(16, keepStars);
     const board = withAdp(players, "Rashee Rice", 16);
@@ -127,7 +91,6 @@ describe("availability-aware rest-of-draft", { timeout: 30_000 }, () => {
     const jones = named("Daniel Jones");
     const mixed = simulateCandidateDraft(players, state, jones);
     const median = simulateCompletedDraft(players, state, jones, undefined, false, {
-      qbPolicy: mixed.qbPolicy,
       scenario: "median",
     });
     expect(mixed.scenarioUtilities.length).toBeGreaterThan(1);
@@ -139,7 +102,7 @@ describe("availability-aware rest-of-draft", { timeout: 30_000 }, () => {
     expect(median.candidateLocked).toBe(true);
   });
 
-  it("ranks Rice's availability-aware team without forcing the Round 15 punt pairing", () => {
+  it("ranks Rice's availability-aware team from one unified objective", () => {
     const state = fillToPick(16, keepStars);
     const recs = recommend(players, state);
     const rice = recs.find((row) => row.player.player === "Rashee Rice");
@@ -147,9 +110,10 @@ describe("availability-aware rest-of-draft", { timeout: 30_000 }, () => {
     expect(rice).toBeDefined();
     expect(jones).toBeDefined();
     expect(rice!.breakdown.lookahead).toBe(true);
-    expect(QB2_POLICIES).toContain(rice!.breakdown.laterQbPolicy);
-    if (rice!.breakdown.laterQbPolicy !== "punt") {
-      expect(rice!.breakdown.laterOverallPick).toBeLessThan(174);
+    // No forced Round-15 QB pairing: any later QB the rollout takes is a utility
+    // choice, not an auto-punt to pick 174.
+    if (rice!.breakdown.laterOverallPick != null) {
+      expect(rice!.breakdown.laterOverallPick).toBeLessThanOrEqual(174);
     }
   });
 });

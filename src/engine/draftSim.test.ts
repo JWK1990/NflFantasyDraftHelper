@@ -42,12 +42,14 @@ describe("draft simulation", () => {
     }
   });
 
-  it("completes a double-late wait from pick 139 with K, DST, and two QBs", () => {
+  it("completes a QB-wait from pick 139 with K, DST, and a legal QB1 (no forced QB2)", () => {
     const state = fillUntil(139);
     const sim = simulateCompletedDraft(players, state, null, undefined, true);
     expect(sim.firstPick?.pos).toBe("K");
     expect(sim.roster.some((player) => player.pos === "K")).toBe(true);
     expect(sim.roster.some((player) => player.pos === "DST")).toBe(true);
-    expect(sim.roster.filter((player) => player.pos === "QB")).toHaveLength(2);
+    // QB1 remains a legal requirement; QB2 is never forced by the wait branch.
+    // (Only the last four user picks remain here, so the user roster is small.)
+    expect(sim.roster.filter((player) => player.pos === "QB").length).toBe(1);
   });
 });
