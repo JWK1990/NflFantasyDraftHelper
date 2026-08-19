@@ -1,6 +1,7 @@
+import type { ReactNode } from "react";
 import { GLOSSARY_SECTIONS } from "./glossaryContent.ts";
 
-export function GlossaryMenu() {
+export function GlossaryMenu({ children }: { children?: ReactNode }) {
   return (
     <details className="menu glossary-menu">
       <summary
@@ -28,6 +29,7 @@ export function GlossaryMenu() {
             </dl>
           </section>
         ))}
+        {children}
       </div>
     </details>
   );

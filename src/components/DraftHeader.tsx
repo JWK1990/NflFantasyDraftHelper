@@ -54,12 +54,12 @@ export function DraftHeader({
           <button className="icon-btn" disabled={!canUndo} onClick={onUndo}>
             Undo
           </button>
-          <GlossaryMenu />
-          <ResetMenu
-            onReset={onReset}
-            onExport={onExport}
-            onImport={onImport}
-          />
+          <GlossaryMenu>
+            <ResetMenu onReset={onReset} onExport={onExport} />
+          </GlossaryMenu>
+          <button className="icon-btn" type="button" onClick={onImport}>
+            Import
+          </button>
         </div>
       </div>
     </header>
@@ -69,40 +69,23 @@ export function DraftHeader({
 function ResetMenu({
   onReset,
   onExport,
-  onImport,
 }: {
   onReset: () => void;
   onExport: () => void;
-  onImport: () => void;
 }) {
   return (
-    <details className="menu">
-      <summary className="icon-btn" style={{ listStyle: "none", display: "grid", placeItems: "center" }}>
-        Menu
-      </summary>
-      <div className="menu-panel">
-        <button className="action-btn" type="button" onClick={onExport}>
-          Export draft
-        </button>
-        <button
-          className="action-btn"
-          type="button"
-          onClick={(event) => {
-            const menu = event.currentTarget.closest("details");
-            if (menu) menu.removeAttribute("open");
-            onImport();
-          }}
-        >
-          Import picks
-        </button>
-        <p style={{ marginTop: 12 }}>
-          Reset clears picks stored on this phone. Private/incognito windows may
-          not keep the draft. Paste ESPN picks to catch up, or export a JSON
-          backup if you want a second copy.
-        </p>
-        <ResetConfirm onReset={onReset} />
-      </div>
-    </details>
+    <section className="glossary-section glossary-draft">
+      <h3>Draft</h3>
+      <button className="action-btn" type="button" onClick={onExport}>
+        Export draft
+      </button>
+      <p style={{ marginTop: 12 }}>
+        Reset clears picks stored on this phone. Private/incognito windows may
+        not keep the draft. Paste ESPN picks from Import to catch up, or export
+        a JSON backup if you want a second copy.
+      </p>
+      <ResetConfirm onReset={onReset} />
+    </section>
   );
 }
 
