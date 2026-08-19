@@ -24,6 +24,7 @@ interface RecommendationListProps {
   focus: ListFocus | null;
   topVorp?: number | null;
   pickTeam: PickTeamContext;
+  busy?: boolean;
   onToggle: (playerId: string) => void;
   onDraft: (playerId: string, draftedBy: DraftedBy) => void;
 }
@@ -35,6 +36,7 @@ export function RecommendationList({
   focus,
   topVorp = null,
   pickTeam,
+  busy = false,
   onToggle,
   onDraft,
 }: RecommendationListProps) {
@@ -70,6 +72,7 @@ export function RecommendationList({
             dimmed={dimmed}
             topVorp={topVorp}
             pickTeam={pickTeam}
+            busy={busy}
             onToggle={() => onToggle(row.player.id)}
             onDraft={(draftedBy) => onDraft(row.player.id, draftedBy)}
           />

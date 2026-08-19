@@ -476,6 +476,29 @@ button.roster-chip {
   background: var(--other-press);
 }
 
+.btn-mine.is-busy,
+.btn-other.is-busy {
+  opacity: 0.7;
+  cursor: progress;
+  display: grid;
+  place-items: center;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #ffffff;
+  animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .taken-label {
   align-self: center;
   color: var(--text-muted);

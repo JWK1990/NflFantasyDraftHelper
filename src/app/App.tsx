@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { LEAGUE } from "../config/leagueSettings.ts";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftedBy, DraftState } from "../domain/types.ts";
@@ -79,11 +79,38 @@ export default function App() {
     }),
     [state.picks],
   );
-  const recs = useMemo(() => recommend(players, rankingState), [rankingState]);
-  const qbCard = useMemo(
-    () => deriveQbCard(recs, players, rankingState),
-    [recs, rankingState],
-  );
+  // The ranking recompute is heavy (~1-2s) and synchronous. To keep a visible
+  // "working" signal, we defer it one tick: the busy state paints first, the
+  // previous ranking stays on screen, then results replace atomically. Stale
+  // computes are discarded if a newer pick arrives mid-flight.
+  const computeRanking = (draftState: DraftState) => {
+    const recs = recommend(players, draftState);
+    return { recs, qbCard: deriveQbCard(recs, players, draftState) };
+  };
+  const [ranking, setRanking] = useState(() => computeRanking(rankingState));
+  const [busy, setBusy] = useState(false);
+  const firstRankingRun = useRef(true);
+  useEffect(() => {
+    if (firstRankingRun.current) {
+      firstRankingRun.current = false;
+      return;
+    }
+    setBusy(true);
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      const next = computeRanking(rankingState);
+      if (cancelled) return;
+      setRanking(next);
+      setBusy(false);
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rankingState]);
+  const recs = ranking.recs;
+  const qbCard = ranking.qbCard;
   const recById = useMemo(
     () => new Map(recs.map((row) => [row.player.id, row])),
     [recs],
@@ -225,6 +252,7 @@ export default function App() {
         focus={listFocus}
         topVorp={recs[0]?.player.vorp ?? null}
         pickTeam={pickTeam}
+        busy={busy}
         onToggle={(playerId) =>
           setExpandedId((current) => (current === playerId ? null : playerId))
         }

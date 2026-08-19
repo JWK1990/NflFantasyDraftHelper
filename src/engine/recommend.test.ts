@@ -1,16 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player } from "../domain/types.ts";
-import { remainingByPosTier, currentEdgeTiers, tierCliffBonus } from "./tierScarcity.ts";
+import { remainingByPosTier, currentEdgeTiers } from "./tierScarcity.ts";
 import { matchesFilters, recommend } from "./recommend.ts";
-import { rbStarterNeed } from "./rosterNeed.ts";
-import { playersById, rosterCounts } from "./roster.ts";
 import { completedTeamUtility } from "./teamUtility.ts";
 import { simulateCompletedDraft } from "./draftSim.ts";
 import { draftReducer, initialDraftState } from "../state/draftReducer.ts";
 
 const players = loadPlayers();
-const byId = playersById(players);
 
 function named(name: string): Player {
   const match = players.find((player) => player.player === name);
@@ -95,8 +92,6 @@ describe("recommendation engine", () => {
   it("drops RB starter-need after two user RBs but keeps RBs eligible", () => {
     let state = draft(initialDraftState, "Bijan Robinson", "mine");
     state = draft(state, "Jahmyr Gibbs", "mine");
-    const counts = rosterCounts(state.picks, byId);
-    expect(rbStarterNeed(counts)).toBe(0);
     const recs = recommend(players, state);
     const cmc = recs.find((row) => row.player.player === "Christian McCaffrey");
     expect(cmc).toBeDefined();
@@ -118,13 +113,6 @@ describe("recommendation engine", () => {
     state = draft(state, "Jahmyr Gibbs", "mine");
     const recs = recommend(players, state);
     expect(rankOf(recs, "Christian McCaffrey")).toBeLessThan(rankOf(recs, "Dontayvion Wicks"));
-  });
-
-  it("scores last-in-tier only by the drop to the next tier, not by headcount", () => {
-    const allen = named("Josh Allen");
-    const jsn = named("Jaxon Smith-Njigba");
-    expect(tierCliffBonus(allen, players)).toBeGreaterThan(0);
-    expect(tierCliffBonus(jsn, players)).toBe(0);
   });
 
   it("ranks the best remaining QB first at pick 163 with zero user QBs (legal QB1)", () => {

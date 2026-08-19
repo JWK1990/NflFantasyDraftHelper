@@ -17,8 +17,10 @@ import {
   preSelectionStateHash,
   returnProbability,
   simulateCandidateDraft,
+  type CompletedSim,
   type LaterAcquisition,
 } from "./draftSim.ts";
+import { upperBoundUtility } from "./promotion.ts";
 import { completedTeamUtility } from "./teamUtility.ts";
 import { lateRoundReservation } from "./lateRound.ts";
 import { myRosterPlayers, playersById, rosterCounts } from "./roster.ts";
@@ -195,19 +197,32 @@ function samePositionPeer(
   return [...same].sort((left, right) => right.player.modelPts - left.player.modelPts)[0];
 }
 
-function nextSamePosition(
+/**
+ * The realistic same-position fallback if you pass now: the best lower-projected
+ * player at this position that is actually likely to still be available at your
+ * next pick (§11.2 — expected later positional option, not merely the next name
+ * down the projection list). Falls back to the next name if none look safe.
+ */
+function expectedLaterSamePosition(
   row: Recommendation,
   scored: Recommendation[],
+  config: RecommendationConfig,
 ): Recommendation | undefined {
   if (row.player.pos === "K" || row.player.pos === "DST") return undefined;
-  return scored
-    .filter(
-      (peer) =>
-        peer.player.pos === row.player.pos &&
-        peer.player.id !== row.player.id &&
-        peer.player.modelPts < row.player.modelPts,
-    )
-    .sort((left, right) => right.player.modelPts - left.player.modelPts)[0];
+  const lower = scored.filter(
+    (peer) =>
+      peer.player.pos === row.player.pos &&
+      peer.player.id !== row.player.id &&
+      peer.player.modelPts < row.player.modelPts,
+  );
+  if (lower.length === 0) return undefined;
+  const likely = lower.filter(
+    (peer) => peer.breakdown.returnProbability >= config.returnChip.minProbability,
+  );
+  const pool = likely.length > 0 ? likely : lower;
+  return [...pool].sort(
+    (left, right) => right.breakdown.rawUtility - left.breakdown.rawUtility,
+  )[0];
 }
 
 function samePositionBreakdown(
@@ -295,10 +310,10 @@ function annotateAlternatives(
       raw - altRaw - (row.player.modelPts - alternative.player.modelPts);
     row.breakdown.expectedPassLoss =
       (1 - row.breakdown.returnProbability) * Math.max(0, raw - altRaw);
-    const nextSame = nextSamePosition(row, scored);
-    row.breakdown.positionalPassLoss = nextSame
+    const laterSame = expectedLaterSamePosition(row, scored, config);
+    row.breakdown.positionalPassLoss = laterSame
       ? (1 - row.breakdown.returnProbability) *
-        Math.max(0, raw - nextSame.breakdown.rawUtility)
+        Math.max(0, raw - laterSame.breakdown.rawUtility)
       : 0;
     const utilities = row.breakdown.scenarioUtilities ?? [];
     if (utilities.length > 0) {
@@ -316,6 +331,82 @@ function annotateAlternatives(
       config,
     );
   }
+}
+
+interface SimulationSet {
+  simulations: Map<string, CompletedSim>;
+  upperBounds: Map<string, number>;
+}
+
+/**
+ * Choose which candidates get a full rest-of-draft simulation (§7.2).
+ *
+ * Step 1 fully simulates a cheap-utility shortlist with positional coverage —
+ * this reliably captures the actionable group. Step 2 is adaptive promotion: any
+ * candidate the shortlist missed whose SOUND upper bound still reaches the
+ * actionable full-simulation threshold is promoted (catching fallers), bounded
+ * by a hard simulation cap so live ranking stays responsive.
+ */
+function selectSimulations(
+  players: Player[],
+  state: DraftState,
+  eligible: Player[],
+  roster: Player[],
+  remainingUserPicks: number,
+  currentOverallPick: number,
+  config: RecommendationConfig,
+): SimulationSet {
+  const sortedAvailable = [...eligible].sort((a, b) => b.modelPts - a.modelPts);
+  const upperBounds = new Map<string, number>();
+  for (const player of eligible) {
+    upperBounds.set(
+      player.id,
+      upperBoundUtility(roster, player, sortedAvailable, remainingUserPicks, config),
+    );
+  }
+
+  const eligibleById = new Map(eligible.map((player) => [player.id, player]));
+  const simulations = new Map<string, CompletedSim>();
+  const runSim = (player: Player) =>
+    simulations.set(player.id, simulateCandidateDraft(players, state, player, config));
+
+  const shortlist = intrinsicLookaheadPool(
+    eligible,
+    roster,
+    remainingUserPicks,
+    currentOverallPick,
+    config,
+  );
+  for (const id of shortlist) {
+    const player = eligibleById.get(id);
+    if (player) runSim(player);
+  }
+
+  const { actionableTopN, maxSimulations } = config.promotion;
+  const actionableThreshold = (): number => {
+    const utils = [...simulations.values()]
+      .filter((sim) => sim.candidateLocked)
+      .map((sim) => sim.utility.utility)
+      .sort((a, b) => b - a);
+    return utils[actionableTopN - 1] ?? Number.NEGATIVE_INFINITY;
+  };
+
+  const promotable = eligible
+    .filter((player) => !simulations.has(player.id))
+    .sort(
+      (a, b) =>
+        (upperBounds.get(b.id) ?? 0) - (upperBounds.get(a.id) ?? 0) ||
+        a.modelRank - b.modelRank,
+    );
+  for (const player of promotable) {
+    if (simulations.size >= maxSimulations) break;
+    // Upper bounds are non-increasing here; once one cannot reach the actionable
+    // threshold, none of the rest can either.
+    if ((upperBounds.get(player.id) ?? 0) < actionableThreshold()) break;
+    runSim(player);
+  }
+
+  return { simulations, upperBounds };
 }
 
 export function recommend(
@@ -339,31 +430,49 @@ export function recommend(
     config,
   );
   const remaining = remainingByPosTier(eligible);
-  const lookahead = intrinsicLookaheadPool(
+  const sims = selectSimulations(
+    players,
+    state,
     eligible,
     roster,
     remainingUserPicks,
     currentOverallPick,
     config,
   );
+  const lockedUtilities = [...sims.simulations.values()]
+    .filter((sim) => sim.candidateLocked)
+    .map((sim) => sim.utility.utility);
+  const minSimUtility = lockedUtilities.length > 0 ? Math.min(...lockedUtilities) : 0;
+  const maxUpperBound = Math.max(0, ...eligible.map((p) => sims.upperBounds.get(p.id) ?? 0));
 
   const scored: Recommendation[] = eligible.map((player) => {
     const leftInTier = remaining.get(`${player.pos}-${player.posTier}`) ?? 0;
     const starts = makesStartingLineup(roster, player);
-    const fullLookahead = lookahead.has(player.id);
-    const sim = fullLookahead
-      ? simulateCandidateDraft(players, state, player, config)
-      : null;
-    const cheap = completedTeamUtility(
-      [...roster, player],
-      Math.max(0, remainingUserPicks - 1),
-      config,
-    );
+    const sim = sims.simulations.get(player.id) ?? null;
     const simLocked = Boolean(
       sim?.candidateLocked && sim.roster.some((row) => row.id === player.id),
     );
-    const team = simLocked && sim ? sim.utility : cheap;
-    const rankingScore = simLocked ? team.utility : team.utility - 4000;
+
+    let team;
+    let rankingScore: number;
+    if (simLocked && sim) {
+      team = sim.utility;
+      rankingScore = team.utility;
+    } else {
+      // Approximate row: cheap one-step utility for the breakdown display, and a
+      // ranking score placed just below every fully simulated row, ordered by
+      // the candidate's upper bound. No arbitrary offset — the gap is derived
+      // from the actual simulated scores, so no approximate row can outrank a
+      // fully evaluated one without being promoted (§7.1/§7.2).
+      team = completedTeamUtility(
+        [...roster, player],
+        Math.max(0, remainingUserPicks - 1),
+        config,
+      );
+      const upper = sims.upperBounds.get(player.id) ?? 0;
+      rankingScore = minSimUtility - config.promotion.approxMargin - (maxUpperBound - upper);
+    }
+
     const returnChance = returnProbability(
       player,
       eligible,
@@ -382,7 +491,7 @@ export function recommend(
       alternativeUtility: 0,
       expectedGain: 0,
       returnProbability: returnChance,
-      lookahead: fullLookahead,
+      lookahead: simLocked,
       preSelectionStateHash: stateHash,
       candidateSecuredNow: player.player,
       directProjection: player.modelPts,

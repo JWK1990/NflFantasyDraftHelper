@@ -42,8 +42,13 @@ describe("ADP robustness helpers", () => {
     ).toBe(true);
   });
 
-  it("pairs scenario wins in lockstep", () => {
-    expect(pairedWinRate([10, 12, 8], [9, 12, 9])).toBeCloseTo(2 / 3);
+  it("pairs scenario wins in lockstep, counting ties symmetrically", () => {
+    // 10>9 win, 12==12 tie (0.5), 8<9 loss -> 1.5 / 3.
+    expect(pairedWinRate([10, 12, 8], [9, 12, 9])).toBeCloseTo(0.5);
+    // Symmetry: a-vs-b plus b-vs-a always sums to 1.
+    const ab = pairedWinRate([10, 12, 8], [9, 12, 9])!;
+    const ba = pairedWinRate([9, 12, 9], [10, 12, 8])!;
+    expect(ab + ba).toBeCloseTo(1);
   });
 
   it("uses matched seeds so the same state and scenario draw the same stream", () => {

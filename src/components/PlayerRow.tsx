@@ -14,6 +14,7 @@ interface PlayerRowProps {
   dimmed?: boolean;
   topVorp?: number | null;
   pickTeam: PickTeamContext;
+  busy?: boolean;
   onToggle: () => void;
   onDraft: (draftedBy: DraftedBy) => void;
 }
@@ -63,6 +64,7 @@ export function PlayerRow({
   dimmed = false,
   topVorp = null,
   pickTeam,
+  busy = false,
   onToggle,
   onDraft,
 }: PlayerRowProps) {
@@ -136,19 +138,25 @@ export function PlayerRow({
         <div className="taken-label">{draftedBy === "mine" ? "MINE" : "TAKEN"}</div>
       ) : pickTeam.isUserPick ? (
         <div className="row-actions">
-          <button className="btn-mine" type="button" onClick={() => onDraft("mine")}>
-            Mine
+          <button
+            className={`btn-mine${busy ? " is-busy" : ""}`}
+            type="button"
+            disabled={busy}
+            onClick={() => onDraft("mine")}
+          >
+            {busy ? <span className="btn-spinner" aria-label="Updating" /> : "Mine"}
           </button>
         </div>
       ) : (
         <div className="row-actions">
           <button
-            className="btn-other"
+            className={`btn-other${busy ? " is-busy" : ""}`}
             type="button"
+            disabled={busy}
             title={`Drafted by ${pickTeam.teamName}`}
             onClick={() => onDraft("other")}
           >
-            {pickTeam.initials}
+            {busy ? <span className="btn-spinner" aria-label="Updating" /> : pickTeam.initials}
           </button>
         </div>
       )}
@@ -235,13 +243,13 @@ export function PlayerRow({
               </div>
               <div className="breakdown-row">
                 <span>
-                  Action pass loss versus{" "}
+                  Availability-adjusted edge vs{" "}
                   {recommendation.breakdown.alternativePlayer ?? "the alternative"}
                 </span>
                 <span>{formatSigned(recommendation.breakdown.expectedPassLoss)}</span>
               </div>
               <div className="breakdown-row">
-                <span>Positional / tier drop</span>
+                <span>Drop to next likely {recommendation.player.pos}</span>
                 <span>{formatSigned(recommendation.breakdown.positionalPassLoss)}</span>
               </div>
               {laterLine("Later QB", recommendation.breakdown.laterQb)}

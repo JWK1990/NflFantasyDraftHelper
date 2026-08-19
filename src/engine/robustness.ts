@@ -16,11 +16,21 @@ export function percentile(values: number[], p: number): number {
   return sorted[index] ?? 0;
 }
 
+export const PAIRED_TIE_EPSILON = 0.01;
+
+/**
+ * Fraction of matched scenarios the left candidate wins. Ties count as 0.5 to
+ * each side (§11.4), so pairedWinRate(a, b) + pairedWinRate(b, a) === 1 — no
+ * systematic advantage to whichever candidate is passed first.
+ */
 export function pairedWinRate(left: number[] | undefined, right: number[] | undefined): number | null {
   if (!left || !right || left.length === 0 || left.length !== right.length) return null;
   let wins = 0;
   for (let index = 0; index < left.length; index += 1) {
-    if ((left[index] ?? 0) + 0.01 >= (right[index] ?? 0)) wins += 1;
+    const l = left[index] ?? 0;
+    const r = right[index] ?? 0;
+    if (Math.abs(l - r) <= PAIRED_TIE_EPSILON) wins += 0.5;
+    else if (l > r) wins += 1;
   }
   return wins / left.length;
 }
