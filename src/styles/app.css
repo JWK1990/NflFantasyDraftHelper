@@ -216,8 +216,12 @@
   border-color: #e24b4b;
 }
 
-.qb-card.verdict-double-late {
+.qb-card.verdict-skill {
   border-color: #2f9e62;
+}
+
+.qb-card.verdict-close {
+  border-color: var(--line);
 }
 
 .qb-card-body {

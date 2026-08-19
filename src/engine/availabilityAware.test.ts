@@ -90,7 +90,7 @@ describe("availability-aware rest-of-draft", { timeout: 30_000 }, () => {
     const state = fillToPick(16, keepStars);
     const jones = named("Daniel Jones");
     const mixed = simulateCandidateDraft(players, state, jones);
-    const median = simulateCompletedDraft(players, state, jones, undefined, false, {
+    const median = simulateCompletedDraft(players, state, jones, undefined, {
       scenario: "median",
     });
     expect(mixed.scenarioUtilities.length).toBeGreaterThan(1);

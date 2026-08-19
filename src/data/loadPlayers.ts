@@ -1,4 +1,4 @@
-import type { Player, Position, QbStarterSecurity } from "../domain/types.ts";
+import type { Player, Position } from "../domain/types.ts";
 import draftModel from "./draft_model_data.json";
 import specialTeams from "./specialTeams.json";
 import { parseLeagueWinner } from "./leagueWinner.ts";
@@ -46,13 +46,6 @@ function requireNumber(value: unknown, field: string, player: string): number {
   return value;
 }
 
-function inferQbSecurity(pos: Position, posRank: number): QbStarterSecurity | undefined {
-  if (pos !== "QB") return undefined;
-  if (posRank <= 12) return "secure";
-  if (posRank <= 24) return "probable";
-  return "fragile";
-}
-
 function toPlayer(raw: RawPlayer): Player {
   if (typeof raw.player !== "string" || !raw.player.trim()) {
     throw new Error("Player is missing a name");
@@ -79,7 +72,6 @@ function toPlayer(raw: RawPlayer): Player {
     adp: raw.adp == null ? null : requireNumber(raw.adp, "adp", raw.player),
     tag,
     note: typeof raw.note === "string" ? raw.note : "",
-    qbStarterSecurity: inferQbSecurity(raw.pos, posRank),
     leagueWinner: parseLeagueWinner(raw.leagueWinner, raw.player),
   };
 }

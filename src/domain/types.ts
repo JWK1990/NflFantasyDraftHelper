@@ -12,7 +12,6 @@ export type TagFilter =
   | "injury"
   | "anchor"
   | "league-winner";
-export type QbStarterSecurity = "secure" | "probable" | "fragile";
 export type LeagueWinnerConfidence = "high" | "medium" | "low";
 export type LeagueWinnerArchetype =
   | "power-law-ceiling"
@@ -49,7 +48,6 @@ export interface Player {
   adp: number | null;
   tag: string;
   note: string;
-  qbStarterSecurity?: QbStarterSecurity;
   leagueWinner?: LeagueWinnerProfile;
 }
 

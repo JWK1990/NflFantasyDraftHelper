@@ -87,10 +87,14 @@ describe("team tracking", () => {
     expect(teams[0]!.counts.QB).toBe(2);
   });
 
-  it("derives initials from team names", () => {
-    expect(teamInitials("The Dan Marinehos")).toBe("TDM");
+  it("derives readable initials from team names, skipping filler words", () => {
+    expect(teamInitials("The Dan Marinehos")).toBe("DM");
+    expect(teamInitials("Silence of the Lamb")).toBe("SL");
+    expect(teamInitials("Lamb On The Skip")).toBe("LS");
+    expect(teamInitials("KC and the Burrow Band")).toBe("KBB");
+    expect(teamInitials("!!! Fire Sale")).toBe("FS");
+    expect(teamInitials("The Situation")).toBe("SIT");
     expect(teamInitials("Gridiron")).toBe("GRI");
-    expect(teamInitials("A B C D")).toBe("ABC");
   });
 
   it("counts a team's own picks within a window", () => {

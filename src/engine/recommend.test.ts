@@ -238,18 +238,20 @@ describe("recommendation engine", () => {
     expect(recs.every((row) => row.reasons.length >= 1)).toBe(true);
   });
 
-  it("makes K and D/ST eligible at picks 139 and 150 with zero QBs", () => {
+  it("keeps K and D/ST eligible late but does not pin them while value remains", () => {
+    // Feasibility: with picks to spare, K/D/ST show in the list but are not
+    // force-pinned to row 1 — the ranking still prefers value.
     const at139 = fillUntil(139);
     const recs139 = recommend(players, at139);
     expect(recs139.some((row) => row.player.pos === "K")).toBe(true);
     expect(recs139.some((row) => row.player.pos === "DST")).toBe(true);
-    expect(recs139[0]?.player.pos).toBe("K");
+    expect(["K", "DST"]).not.toContain(recs139[0]?.player.pos);
 
     const at150 = fillUntil(150);
     const recs150 = recommend(players, at150);
     expect(recs150.some((row) => row.player.pos === "K")).toBe(true);
     expect(recs150.some((row) => row.player.pos === "DST")).toBe(true);
-    expect(recs150[0]?.player.pos).toBe("DST");
+    expect(["K", "DST"]).not.toContain(recs150[0]?.player.pos);
   });
 
   it("still forces the best remaining QB at pick 174 with zero user QBs", () => {
@@ -348,13 +350,14 @@ describe("recommendation engine", () => {
     expect(gained).toBeLessThan(extra.modelPts * 0.5);
   });
 
-  it("finishes a wait-branch rollout with 15 players, K, D/ST and a legal QB1 (no forced QB2)", () => {
-    const sim = simulateCompletedDraft(players, initialDraftState, null, undefined, true);
+  it("finishes a full-board rollout with 15 players, K, D/ST and at least one QB", () => {
+    const sim = simulateCompletedDraft(players, initialDraftState, null);
     expect(sim.roster).toHaveLength(15);
     expect(sim.roster.some((player) => player.pos === "K")).toBe(true);
     expect(sim.roster.some((player) => player.pos === "DST")).toBe(true);
-    // QB1 is a legal requirement; the wait branch never forces a second QB.
-    expect(sim.roster.filter((player) => player.pos === "QB")).toHaveLength(1);
+    // QB1 is a legal requirement; QB2 only appears if it wins on utility.
+    expect(sim.roster.filter((player) => player.pos === "QB").length).toBeGreaterThanOrEqual(1);
+    expect(sim.roster.filter((player) => player.pos === "QB").length).toBeLessThanOrEqual(2);
   });
 });
 

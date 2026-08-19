@@ -54,12 +54,18 @@ export const RECOMMENDATION_CONFIG = {
   },
   branch: {
     weeks: 17,
-    qbNowPpwLead: 1.5,
-    waitPpwLead: 1.0,
-    lateQbFloor: 430,
     opponentQbCap: 2,
-    probablePenalty: 10,
-    fragilePenalty: 28,
+  },
+  // Modest multipliers on opponent ADP sampling that nudge toward roster needs
+  // without overpowering ADP uncertainty (§4.2). Never zero for RB/WR/TE — a
+  // filled starter slot reduces but does not eliminate demand (FLEX/bench).
+  opponentNeeds: {
+    starterMissing: 1.5, // missing a mandatory starter at this position
+    flexOpening: 1.1, // starters filled but FLEX/OP/bench still building
+    opQbOpening: 1.1, // a second QB as an OP option
+    filled: 0.9, // starters filled, roster fairly deep
+    deep: 0.6, // already stacked deep at this position
+    deepThreshold: 4, // count at which "deep" kicks in for RB/WR
   },
   benchScale: 0.12,
   benchCap: 48,

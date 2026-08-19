@@ -42,14 +42,16 @@ describe("draft simulation", () => {
     }
   });
 
-  it("completes a QB-wait from pick 139 with K, DST, and a legal QB1 (no forced QB2)", () => {
+  it("defers specials from pick 139 but still finishes a legal roster", () => {
     const state = fillUntil(139);
-    const sim = simulateCompletedDraft(players, state, null, undefined, true);
-    expect(sim.firstPick?.pos).toBe("K");
+    const sim = simulateCompletedDraft(players, state, null);
+    // Feasibility no longer force-pins K at 139 (4 picks left for 3 mandatory
+    // slots), so the first pick chases value instead of a zero-point special.
+    expect(sim.firstPick?.pos).not.toBe("K");
+    expect(sim.firstPick?.pos).not.toBe("DST");
+    // Mandatory slots are still completed by the last feasible picks.
     expect(sim.roster.some((player) => player.pos === "K")).toBe(true);
     expect(sim.roster.some((player) => player.pos === "DST")).toBe(true);
-    // QB1 remains a legal requirement; QB2 is never forced by the wait branch.
-    // (Only the last four user picks remain here, so the user roster is small.)
-    expect(sim.roster.filter((player) => player.pos === "QB").length).toBe(1);
+    expect(sim.roster.filter((player) => player.pos === "QB").length).toBeGreaterThanOrEqual(1);
   });
 });

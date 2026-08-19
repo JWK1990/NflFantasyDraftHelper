@@ -8,8 +8,8 @@ import { remainingByPosTier, currentEdgeTiers } from "../engine/tierScarcity.ts"
 import { isUserPick } from "../engine/snake.ts";
 import { teamInitials, teamSlotForOverallPick } from "../engine/teams.ts";
 import { teamNamesBySlot } from "../config/leagueTeams.ts";
-import { compareQbBranches } from "../engine/qbBranch.ts";
-import { QbBranchCard } from "../components/QbBranchCard.tsx";
+import { deriveQbCard } from "../engine/qbCard.ts";
+import { QbCardView } from "../components/QbCard.tsx";
 import { DraftHeader } from "../components/DraftHeader.tsx";
 import { DraftLogDrawer } from "../components/DraftLogDrawer.tsx";
 import { ImportPicksModal } from "../components/ImportPicksModal.tsx";
@@ -80,9 +80,9 @@ export default function App() {
     [state.picks],
   );
   const recs = useMemo(() => recommend(players, rankingState), [rankingState]);
-  const qbBranch = useMemo(
-    () => compareQbBranches(players, rankingState),
-    [rankingState],
+  const qbCard = useMemo(
+    () => deriveQbCard(recs, players, rankingState),
+    [recs, rankingState],
   );
   const recById = useMemo(
     () => new Map(recs.map((row) => [row.player.id, row])),
@@ -204,7 +204,7 @@ export default function App() {
           );
         }}
       />
-      {qbBranch ? <QbBranchCard comparison={qbBranch} /> : null}
+      {qbCard ? <QbCardView card={qbCard} /> : null}
       <TierPressureStrip
         tiers={endingTiers}
         focus={listFocus?.kind === "tier" ? listFocus : null}

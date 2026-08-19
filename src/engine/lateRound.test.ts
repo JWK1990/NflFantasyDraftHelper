@@ -2,35 +2,51 @@ import { describe, expect, it } from "vitest";
 import { lateRoundReservation, specialTeamsWindowOpen } from "./lateRound.ts";
 import { emptyRosterCounts } from "./roster.ts";
 
-describe("late-round reservation", () => {
-  it("reserves K/DST and a legal QB1 late, but never forces a QB2", () => {
-    expect(lateRoundReservation(139, 0, false, false)).toBe("K");
-    expect(lateRoundReservation(150, 0, true, false)).toBe("DST");
-    // QB1 is still forced when the user would otherwise finish with no QB.
-    expect(lateRoundReservation(163, 0, true, true)).toBe("QB");
-    expect(lateRoundReservation(174, 0, true, true)).toBe("QB");
+// User (slot 6) picks: 6,19,30,43,54,67,78,91,102,115,126,139,150,163,174.
+// Picks remaining at/after: 139->4, 150->3, 163->2, 174->1.
+
+describe("late-round reservation (feasibility-based)", () => {
+  it("does not force any mandatory position while there is room to wait", () => {
+    // With 0 QB and no K/DST (3 mandatory), pick 139 has 4 picks left — wait.
+    expect(lateRoundReservation(139, 0, false, false)).toBeNull();
+    // With a QB and no K/DST (2 mandatory), pick 150 has 3 picks left — wait.
+    expect(lateRoundReservation(150, 1, false, false)).toBeNull();
+    // Nothing unfilled — never a reservation.
+    expect(lateRoundReservation(139, 1, true, true)).toBeNull();
   });
 
-  it("leaves pick 139 for skill after a first QB, then takes K/DST — QB2 is never forced", () => {
-    expect(lateRoundReservation(139, 1, false, false)).toBeNull();
-    expect(lateRoundReservation(150, 1, false, false)).toBe("K");
-    expect(lateRoundReservation(163, 1, true, false)).toBe("DST");
-    // Regression (§1.3): with one QB already and K/DST filled, 174 does NOT
-    // force a second QB — a skill player may legally fill OP.
+  it("forces a mandatory position once picks left equal unfilled mandatory slots", () => {
+    // 0 QB + no K/DST = 3 mandatory; pick 150 has exactly 3 left -> forced (QB first).
+    expect(lateRoundReservation(150, 0, false, false)).toBe("QB");
+    // 1 QB + no K/DST = 2 mandatory; pick 163 has exactly 2 left -> DST (QB not needed).
+    expect(lateRoundReservation(163, 1, false, false)).toBe("DST");
+    // 1 QB + K, no DST = 1 mandatory; pick 174 (last) -> DST.
+    expect(lateRoundReservation(174, 1, true, false)).toBe("DST");
+  });
+
+  it("still forces a legal QB1 at the last feasible pick, but never a QB2", () => {
+    // 0 QB with K/DST filled (1 mandatory): can wait at 163, forced at 174.
+    expect(lateRoundReservation(163, 0, true, true)).toBeNull();
+    expect(lateRoundReservation(174, 0, true, true)).toBe("QB");
+    // Already have one QB: QB2 is never forced, at any pick.
     expect(lateRoundReservation(174, 1, true, true)).toBeNull();
     expect(lateRoundReservation(163, 1, true, true)).toBeNull();
   });
 
-  it("holds K/DST until 163 and 174 once two QBs are rostered", () => {
-    expect(lateRoundReservation(139, 2, false, false)).toBeNull();
-    expect(lateRoundReservation(150, 2, false, false)).toBeNull();
-    expect(lateRoundReservation(163, 2, false, false)).toBe("K");
-    expect(lateRoundReservation(174, 2, true, false)).toBe("DST");
+  it("prioritises QB1 over specials when several mandatory slots remain", () => {
+    // 0 QB + no K/DST, pick 163 (2 left, 3 mandatory) -> QB1 first.
+    expect(lateRoundReservation(163, 0, false, false)).toBe("QB");
   });
 
-  it("opens special-teams eligibility at 139 with zero QBs", () => {
-    const counts = { ...emptyRosterCounts(), QB: 0 };
-    expect(specialTeamsWindowOpen(139, counts)).toBe(true);
-    expect(specialTeamsWindowOpen(6, counts)).toBe(false);
+  it("opens the K/DST window only when specials are nearly forced", () => {
+    const zero = { ...emptyRosterCounts(), QB: 0 };
+    // 3 mandatory, pick 139 has 4 left (<= 3+1) -> window open.
+    expect(specialTeamsWindowOpen(139, zero)).toBe(true);
+    // Early on there is plenty of room -> closed.
+    expect(specialTeamsWindowOpen(6, zero)).toBe(false);
+    // Nothing mandatory -> never open.
+    expect(
+      specialTeamsWindowOpen(174, { ...emptyRosterCounts(), QB: 2, K: 1, DST: 1 }),
+    ).toBe(false);
   });
 });

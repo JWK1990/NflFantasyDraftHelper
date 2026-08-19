@@ -168,21 +168,69 @@ function bestByPos(eligible: Player[], pos: Position): Player | null {
   );
 }
 
+type SlotCounts = Record<Position, number[]>;
+
+function slotCountsFromPicks(
+  picks: DraftState["picks"],
+  byId: Map<string, Player>,
+): SlotCounts {
+  return {
+    QB: slotPosCounts(picks, byId, "QB"),
+    RB: slotPosCounts(picks, byId, "RB"),
+    WR: slotPosCounts(picks, byId, "WR"),
+    TE: slotPosCounts(picks, byId, "TE"),
+    K: slotPosCounts(picks, byId, "K"),
+    DST: slotPosCounts(picks, byId, "DST"),
+  };
+}
+
+export type TeamPosCounts = Record<Position, number>;
+
+/**
+ * Modest positional-need multiplier on top of ADP likelihood (§4.2). Never zero
+ * for RB/WR/TE: a filled starter slot reduces but does not eliminate demand
+ * because FLEX/OP/bench remain. QB/K/DST hard caps are enforced separately.
+ */
+export function opponentNeedMultiplier(
+  pos: Position,
+  counts: TeamPosCounts,
+  config: RecommendationConfig = RECOMMENDATION_CONFIG,
+): number {
+  const w = config.opponentNeeds;
+  if (pos === "K" || pos === "DST") return 1;
+  if (pos === "QB") return counts.QB === 0 ? w.starterMissing : w.opQbOpening;
+  const starterSlots = pos === "TE" ? 1 : 2;
+  const have = counts[pos];
+  if (have < starterSlots) return w.starterMissing;
+  if ((pos === "RB" || pos === "WR") && have >= w.deepThreshold) return w.deep;
+  const skillTotal = counts.RB + counts.WR + counts.TE;
+  return skillTotal < 8 ? w.flexOpening : w.filled;
+}
+
+function teamCountsAtSlot(bySlot: SlotCounts, slot: number): TeamPosCounts {
+  return {
+    QB: bySlot.QB[slot],
+    RB: bySlot.RB[slot],
+    WR: bySlot.WR[slot],
+    TE: bySlot.TE[slot],
+    K: bySlot.K[slot],
+    DST: bySlot.DST[slot],
+  };
+}
+
 function chooseOpponentPlayer(
   available: Player[],
   overallPick: number,
   slot: number,
-  qbBySlot: number[],
-  kBySlot: number[],
-  dstBySlot: number[],
+  bySlot: SlotCounts,
   cap: number,
   rng: Rng,
   config: RecommendationConfig,
 ): Player | null {
   const round = roundForPick(overallPick);
   const remainingRounds = LEAGUE.rounds - round + 1;
-  const needK = kBySlot[slot] === 0;
-  const needDst = dstBySlot[slot] === 0;
+  const needK = bySlot.K[slot] === 0;
+  const needDst = bySlot.DST[slot] === 0;
   const specialsNeeded = Number(needK) + Number(needDst);
   const takeSpecials =
     specialsNeeded > 0 && (round >= 13 || remainingRounds <= specialsNeeded);
@@ -200,19 +248,22 @@ function chooseOpponentPlayer(
 
   const legal: Player[] = [];
   for (const player of available) {
-    if (player.pos === "QB" && qbBySlot[slot] >= cap) continue;
-    if (player.pos === "K" && (kBySlot[slot] >= 1 || round < 13)) continue;
-    if (player.pos === "DST" && (dstBySlot[slot] >= 1 || round < 13)) continue;
+    if (player.pos === "QB" && bySlot.QB[slot] >= cap) continue;
+    if (player.pos === "K" && (bySlot.K[slot] >= 1 || round < 13)) continue;
+    if (player.pos === "DST" && (bySlot.DST[slot] >= 1 || round < 13)) continue;
     legal.push(player);
   }
   if (legal.length === 0) return available[0] ?? null;
 
   const pool = legal.slice(0, opponentPoolSize(round, config));
   const temperature = opponentTemperature(round, config);
+  const counts = teamCountsAtSlot(bySlot, slot);
   return weightedSample(
     pool.map((player) => ({
       item: player,
-      weight: marketWeight(player.adp, overallPick, temperature, config),
+      weight:
+        marketWeight(player.adp, overallPick, temperature, config) *
+        opponentNeedMultiplier(player.pos, counts, config),
     })),
     rng,
   );
@@ -265,7 +316,7 @@ export function chooseGreedyUserPlayer(
   const hasDst = rosterHas(roster, "DST");
   const reserved = lateRoundReservation(overallPick, qbCount, hasK, hasDst);
   if (reserved === "QB") {
-    return bestQb(eligible, config) ?? eligible[0] ?? null;
+    return bestQb(eligible) ?? eligible[0] ?? null;
   }
   if (reserved === "K") {
     return bestByPos(eligible, "K") ?? eligible[0] ?? null;
@@ -350,18 +401,15 @@ function mixUtility(parts: TeamUtility[]): TeamUtility {
 }
 
 /**
- * Roll a board out to completion from the current state.
- *
- * `waitOnQb` filters QBs out of the simulated user's pool (except a forced legal
- * QB1) and is used only by the display-only QB card's "wait" branch. The main
- * per-candidate ranking never sets it — there the user is fully unified.
+ * Roll a board out to completion from the current state. The simulated user
+ * always picks under one unified completed-team objective — there is no QB
+ * strategy, suppression or "wait" mode.
  */
 export function simulateCompletedDraft(
   players: Player[],
   state: DraftState,
   openingUserPick: Player | null,
   config: RecommendationConfig = RECOMMENDATION_CONFIG,
-  waitOnQb = false,
   extras: SimulateExtras = {},
 ): CompletedSim {
   const byId = playersById(players);
@@ -372,9 +420,7 @@ export function simulateCompletedDraft(
     .filter((player) => !taken.has(player.id) && !remove.has(player.id))
     .sort((left, right) => compareByScenario(left, right, scenario));
   const roster = [...myRosterPlayers(state.picks, byId)];
-  const qbBySlot = slotPosCounts(state.picks, byId, "QB");
-  const kBySlot = slotPosCounts(state.picks, byId, "K");
-  const dstBySlot = slotPosCounts(state.picks, byId, "DST");
+  const bySlot = slotCountsFromPicks(state.picks, byId);
   const userPicks = new Set(userPickSchedule());
   const start = state.picks.length + 1;
   const last = LEAGUE.teams * LEAGUE.rounds;
@@ -424,24 +470,7 @@ export function simulateCompletedDraft(
       ) {
         pick = available.find((player) => player.id === forcePick.playerId) ?? null;
       } else {
-        const qbCount = countPos(roster, "QB");
-        const forceQb =
-          lateRoundReservation(
-            overall,
-            qbCount,
-            rosterHas(roster, "K"),
-            rosterHas(roster, "DST"),
-          ) === "QB";
-        const userPool =
-          waitOnQb && !forceQb
-            ? available.filter((player) => player.pos !== "QB")
-            : available;
-        pick = chooseGreedyUserPlayer(
-          userPool.length > 0 ? userPool : available,
-          roster,
-          overall,
-          config,
-        );
+        pick = chooseGreedyUserPlayer(available, roster, overall, config);
       }
     } else {
       const protectedPool = protectNow
@@ -451,9 +480,7 @@ export function simulateCompletedDraft(
         protectedPool.length > 0 ? protectedPool : available,
         overall,
         slot,
-        qbBySlot,
-        kBySlot,
-        dstBySlot,
+        bySlot,
         cap,
         rng,
         config,
@@ -461,9 +488,7 @@ export function simulateCompletedDraft(
     }
     if (!pick) continue;
     available = removePlayer(available, pick.id);
-    if (pick.pos === "QB") qbBySlot[slot] += 1;
-    if (pick.pos === "K") kBySlot[slot] += 1;
-    if (pick.pos === "DST") dstBySlot[slot] += 1;
+    bySlot[pick.pos][slot] += 1;
     if (isUser) {
       roster.push(pick);
       acquisitions.push({ player: pick, overallPick: overall });
@@ -480,9 +505,9 @@ export function simulateCompletedDraft(
     roster,
     firstPick,
     utility: completedTeamUtility(roster, remaining, config),
-    qbBySlot,
-    kBySlot,
-    dstBySlot,
+    qbBySlot: bySlot.QB,
+    kBySlot: bySlot.K,
+    dstBySlot: bySlot.DST,
     candidateLocked,
     acquisitions,
     skippedUserPick: skipUserPick,
@@ -552,9 +577,7 @@ function sampledReturnProbability(
       let pool = [...available].sort((left, right) =>
         compareByScenario(left, right, scenario),
       );
-      const qbBySlot = slotPosCounts(context.state.picks, byId, "QB");
-      const kBySlot = slotPosCounts(context.state.picks, byId, "K");
-      const dstBySlot = slotPosCounts(context.state.picks, byId, "DST");
+      const bySlot = slotCountsFromPicks(context.state.picks, byId);
       let taken = false;
       for (let overall = currentOverallPick; overall < nextUserPick; overall += 1) {
         if (userPicks.has(overall)) continue;
@@ -562,9 +585,7 @@ function sampledReturnProbability(
           pool,
           overall,
           slotForPick(overall),
-          qbBySlot,
-          kBySlot,
-          dstBySlot,
+          bySlot,
           cap,
           rng,
           config,
@@ -575,9 +596,7 @@ function sampledReturnProbability(
           break;
         }
         pool = removePlayer(pool, pick.id);
-        if (pick.pos === "QB") qbBySlot[slotForPick(overall)] += 1;
-        if (pick.pos === "K") kBySlot[slotForPick(overall)] += 1;
-        if (pick.pos === "DST") dstBySlot[slotForPick(overall)] += 1;
+        bySlot[pick.pos][slotForPick(overall)] += 1;
       }
       trials += 1;
       if (!taken && pool.some((row) => row.id === player.id)) survived += 1;
@@ -638,7 +657,7 @@ export function simulateCandidateDraft(
     for (let stream = 0; stream < streams; stream += 1) {
       const salt = scenarioStreamSalt(seedSalt, stream);
       scenarioSims.push(
-        simulateCompletedDraft(players, state, candidate, config, false, {
+        simulateCompletedDraft(players, state, candidate, config, {
           scenario,
           rngSeed: seedForScenario(stateHash, scenario, salt),
           seedSalt: salt,

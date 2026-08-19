@@ -18,7 +18,7 @@ function adpValue(id: string): number {
 
 describe("scripted mock draft", () => {
   it(
-    "walks 180 picks on the slot-6 schedule and preserves the QB2 branch",
+    "walks 180 picks on the slot-6 schedule and finishes a legal roster",
     { timeout: 120_000 },
     () => {
     let state: DraftState = initialDraftState;
@@ -55,12 +55,12 @@ describe("scripted mock draft", () => {
     expect(mine.map((pick) => pick.overallPick)).toEqual(schedule);
 
     const counts = rosterCounts(state.picks, byId);
-    expect(counts.QB).toBeLessThanOrEqual(2);
     expect(counts.total).toBe(15);
-
-    const pick174 = mine.find((pick) => pick.overallPick === 174);
-    if (counts.QB === 1) {
-      expect(byId.get(pick174?.playerId ?? "")?.pos).toBe("QB");
-    }
+    // Legal roster: at least one QB (QB1), a K and a D/ST; never a third QB.
+    // QB2 is never forced — the user may or may not end with two QBs.
+    expect(counts.QB).toBeGreaterThanOrEqual(1);
+    expect(counts.QB).toBeLessThanOrEqual(2);
+    expect(counts.K).toBeGreaterThanOrEqual(1);
+    expect(counts.DST).toBeGreaterThanOrEqual(1);
   });
 });

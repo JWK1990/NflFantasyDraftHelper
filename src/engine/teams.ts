@@ -80,17 +80,29 @@ export function opponentTeams(teams: TeamDraftState[]): TeamDraftState[] {
   return teams.filter((team) => !team.isUser);
 }
 
-/** Initials for a team's display name, e.g. "The Dan Marinehos" -> "TDM". */
+const INITIAL_STOPWORDS = new Set([
+  "a", "an", "and", "at", "be", "for", "in", "of", "on", "so", "the", "to",
+]);
+
+/**
+ * Short button initials for a team, skipping filler words so names read
+ * cleanly, e.g. "Silence of the Lamb" -> "SL", "The Dan Marinehos" -> "DM".
+ * A single meaningful word falls back to its first three letters.
+ */
 export function teamInitials(name: string): string {
   const words = name
     .replace(/[^A-Za-z0-9 ]/g, " ")
     .split(/\s+/)
     .filter(Boolean);
-  if (words.length === 0) return "?";
-  if (words.length === 1) {
-    return words[0]!.slice(0, 3).toUpperCase();
+  const meaningful = words.filter(
+    (word) => !INITIAL_STOPWORDS.has(word.toLowerCase()),
+  );
+  const chosen = meaningful.length > 0 ? meaningful : words;
+  if (chosen.length === 0) return "?";
+  if (chosen.length === 1) {
+    return chosen[0]!.slice(0, 3).toUpperCase();
   }
-  return words
+  return chosen
     .slice(0, 3)
     .map((word) => word[0]!.toUpperCase())
     .join("");
