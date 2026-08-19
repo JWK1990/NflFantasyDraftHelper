@@ -40,6 +40,16 @@ describe("chip explanations", () => {
     expect(chip.detail).toContain("174");
   });
 
+  it("explains outlook and single-source projection chips as display-only", () => {
+    const outlook = explainChip("Outlook");
+    expect(outlook.title).toMatch(/outlook/i);
+    expect(outlook.detail).toMatch(/does not change/i);
+
+    const source = explainChip("1 projection source");
+    expect(source.definition.toLowerCase()).toMatch(/one independent projection/);
+    expect(source.detail).toMatch(/not a risk/i);
+  });
+
   it("explains the LW pill as display-only", () => {
     const chip = explainChip("LW");
     expect(chip.title).toBe("League Winner Candidate");

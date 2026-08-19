@@ -35,7 +35,12 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
       {
         term: "ADP",
         definition:
-          "Average draft position: where the market usually takes this player. Used for timing, not for how good they are on your team.",
+          "12-team PPR Superflex consensus ADP from DraftSharks. Used for opponent timing, not for how good they are on your team. ESPN’s on-screen list is a separate ESPN room number in the expanded row.",
+      },
+      {
+        term: "Age (24)",
+        definition:
+          "Integer age on draft day (22 Aug 2026). Display only — it is not recomputed from today and does not change ranking.",
       },
     ],
   },
@@ -167,6 +172,21 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
         term: "LW pill",
         definition:
           "Gold tag in the same row as the other chips. League-winning players are frequently found early because early picks have the highest hit rates. Upside becomes more decisive later because safe but replaceable bench production has little value and failed late picks can usually be replaced through waivers. Tap LW to open the research on that player. Filter by Potential League Winner in Search / filter.",
+      },
+      {
+        term: "Outlook pill",
+        definition:
+          "DraftSharks numeric summary and a short verdict excerpt. Tap to expand the player row. The source link opens the public write-up. Display only — it does not change ranking.",
+      },
+      {
+        term: "1 projection source",
+        definition:
+          "Only one independent projection was available for this player. Data-quality note in the expanded row, not a risk flag and not a rank penalty.",
+      },
+      {
+        term: "ESPN room",
+        definition:
+          "Where this player sits on the ESPN PPR draft-room list managers will see. Not Superflex ADP and not used to simulate opponents.",
       },
     ],
   },

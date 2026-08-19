@@ -66,8 +66,13 @@ export interface LaterAcquisition {
   fallbackPlayer: Player | null;
 }
 
+/** Superflex market prior used by opponent simulation. Never ESPN room ADP. */
+export function marketAdp(player: Player): number | null {
+  return player.sfConsensusAdp ?? player.adp;
+}
+
 export function adpSortValue(player: Player): number {
-  return player.adp ?? 900 + player.posRank;
+  return marketAdp(player) ?? 900 + player.posRank;
 }
 
 export function scenarioAdp(player: Player, scenario: BoardScenario): number {
@@ -263,7 +268,7 @@ function chooseOpponentPlayer(
     pool.map((player) => ({
       item: player,
       weight:
-        marketWeight(player.adp, overallPick, temperature, config) *
+        marketWeight(marketAdp(player), overallPick, temperature, config) *
         opponentNeedMultiplier(player.pos, counts, config),
     })),
     rng,

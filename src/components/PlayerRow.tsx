@@ -1,6 +1,14 @@
-import type { DraftedBy, Player, Recommendation } from "../domain/types.ts";
+import type { DraftedBy, Player, PlayerOutlook, Recommendation } from "../domain/types.ts";
 import type { PickTeamContext } from "./RecommendationList.tsx";
-import { formatAdp, formatVorp, formatVorpDiff, posLabel, positionColor } from "./format.ts";
+import {
+  formatAdp,
+  formatStat,
+  formatVorp,
+  formatVorpDiff,
+  isSafeHttpUrl,
+  posLabel,
+  positionColor,
+} from "./format.ts";
 import { scoutingTag } from "../engine/tags.ts";
 import { useChipExplain } from "./ChipExplainContext.tsx";
 import { LeagueWinnerDetail } from "./LeagueWinnerDetail.tsx";
@@ -55,6 +63,145 @@ function laterLine(
   );
 }
 
+function ResearchRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | null | undefined;
+}) {
+  if (!value) return null;
+  return (
+    <div className="breakdown-row">
+      <span>{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+function joinedStats(
+  parts: Array<[string, number | null | undefined]>,
+  digits = 1,
+): string | null {
+  const shown = parts
+    .filter(([, value]) => value != null)
+    .map(([label, value]) => `${label} ${formatStat(value, digits)}`);
+  return shown.length > 0 ? shown.join(" · ") : null;
+}
+
+function OutlookDetail({ outlook }: { outlook: PlayerOutlook }) {
+  const link = isSafeHttpUrl(outlook.sourceUrl) ? outlook.sourceUrl : null;
+  return (
+    <section className="outlook-detail">
+      <h3>DraftSharks outlook</h3>
+      {outlook.summary ? <p>{outlook.summary}</p> : null}
+      {outlook.bottomLineExcerpt ? (
+        <p className="breakdown-note">{outlook.bottomLineExcerpt}</p>
+      ) : null}
+      {link ? (
+        <p>
+          <a href={link} target="_blank" rel="noopener noreferrer">
+            Full DraftSharks verdict
+          </a>
+          <span className="breakdown-note"> · as of {outlook.asOf}</span>
+        </p>
+      ) : (
+        <p className="breakdown-note">As of {outlook.asOf}</p>
+      )}
+      <p className="breakdown-note">
+        Outlook, age, and source ranks are context only. They do not change this
+        player’s recommendation score.
+      </p>
+    </section>
+  );
+}
+
+function PlayerResearch({
+  player,
+  onExplain,
+}: {
+  player: Player;
+  onExplain: (label: string) => void;
+}) {
+  if (player.coverageOnly || player.pos === "K" || player.pos === "DST") {
+    return player.outlook ? <OutlookDetail outlook={player.outlook} /> : null;
+  }
+  const fpRank =
+    player.fantasyProsSfRank != null
+      ? `FP ${player.fantasyProsSfRank}${
+          player.fantasyProsSfTier != null ? ` T${player.fantasyProsSfTier}` : ""
+        }`
+      : null;
+  const espnPos =
+    player.espnConsensusPosRank != null
+      ? `${player.pos}${player.espnConsensusPosRank}${
+          player.espnConsensusAvgRank != null
+            ? ` (avg ${formatStat(player.espnConsensusAvgRank)})`
+            : ""
+        }`
+      : null;
+  const yahooPos =
+    player.yahooConsensusPprRank != null
+      ? `${formatStat(player.yahooConsensusPprRank, 0)}${
+          player.yahooConsensusPosRank != null
+            ? ` (${player.pos}${player.yahooConsensusPosRank})`
+            : ""
+        }`
+      : null;
+  const superflexRanks = [fpRank, player.draftSharksSfRank != null ? `DS ${player.draftSharksSfRank}` : null]
+    .filter(Boolean)
+    .join(" · ");
+  return (
+    <div className="player-research">
+      {player.projectionSourceCount === 1 ? (
+        <div className="research-chips">
+          <button
+            className="reason source-chip"
+            type="button"
+            onClick={() => onExplain("1 projection source")}
+          >
+            1 projection source
+          </button>
+        </div>
+      ) : null}
+      <ResearchRow label="Model points" value={formatStat(player.modelPts)} />
+      <ResearchRow
+        label="Source projections"
+        value={joinedStats([
+          ["CBS", player.cbsPprProjection],
+          ["FantasyPros", player.fantasyProsPprProjection],
+          ["DraftSharks", player.draftSharksConsensusProjection],
+        ])}
+      />
+      <ResearchRow
+        label="Superflex consensus"
+        value={
+          player.superflexConsensusRank != null
+            ? `${formatStat(player.superflexConsensusRank, 0)}${
+                player.superflexConsensusSourceCount != null
+                  ? ` (${player.superflexConsensusSourceCount} sources)`
+                  : ""
+              }`
+            : null
+        }
+      />
+      <ResearchRow label="Superflex ranks" value={superflexRanks || null} />
+      <ResearchRow label="Superflex ADP" value={formatAdp(player.sfConsensusAdp ?? player.adp)} />
+      <ResearchRow
+        label="Sleeper SF ADP"
+        value={player.sleeperSfAdp != null ? formatAdp(player.sleeperSfAdp) : null}
+      />
+      <ResearchRow
+        label="ESPN room"
+        value={player.espnRoomAdp != null ? formatAdp(player.espnRoomAdp) : null}
+      />
+      <ResearchRow label="ESPN consensus" value={espnPos} />
+      <ResearchRow label="Yahoo PPR" value={yahooPos} />
+      {player.outlook ? <OutlookDetail outlook={player.outlook} /> : null}
+    </div>
+  );
+}
+
 export function PlayerRow({
   player,
   rank,
@@ -93,6 +240,7 @@ export function PlayerRow({
             <span className="name">{player.player}</span>
             <span className="meta">
               {player.team} · {posLabel(player.pos)}
+              {player.age != null ? ` · ${player.age}` : ""}
             </span>
           </button>
         </div>
@@ -104,9 +252,9 @@ export function PlayerRow({
             </span>
           ) : null}
           {", "}
-          <strong>ADP {formatAdp(player.adp)}</strong>
+          <strong>ADP {formatAdp(player.sfConsensusAdp ?? player.adp)}</strong>
         </button>
-        {reasons.length > 0 || player.leagueWinner ? (
+        {reasons.length > 0 || player.leagueWinner || player.outlook ? (
           <div className="reasons">
             {player.leagueWinner ? (
               <button
@@ -119,6 +267,19 @@ export function PlayerRow({
                 }}
               >
                 LW
+              </button>
+            ) : null}
+            {player.outlook ? (
+              <button
+                className="reason outlook-chip"
+                type="button"
+                aria-label="DraftSharks outlook"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (!expanded) onToggle();
+                }}
+              >
+                Outlook
               </button>
             ) : null}
             {reasons.map((reason) => (
@@ -162,6 +323,7 @@ export function PlayerRow({
       )}
       {expanded ? (
         <div className="breakdown">
+          <PlayerResearch player={player} onExplain={explain} />
           {recommendation ? (
             <>
               <div className="breakdown-row">

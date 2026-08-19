@@ -27,7 +27,9 @@ function draft(state: DraftState, name: string, draftedBy: "mine" | "other"): Dr
 
 function withAdp(board: Player[], name: string, adp: number): Player[] {
   const id = named(name).id;
-  return board.map((player) => (player.id === id ? { ...player, adp } : player));
+  return board.map((player) =>
+    player.id === id ? { ...player, adp, sfConsensusAdp: adp } : player,
+  );
 }
 
 function fillToPick(targetPick: number, keepNames: string[], userPickName = "Josh Allen"): DraftState {

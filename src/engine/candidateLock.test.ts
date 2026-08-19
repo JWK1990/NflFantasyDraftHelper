@@ -29,7 +29,9 @@ function draft(
 
 function withAdp(board: Player[], name: string, adp: number): Player[] {
   const id = named(name).id;
-  return board.map((player) => (player.id === id ? { ...player, adp } : player));
+  return board.map((player) =>
+    player.id === id ? { ...player, adp, sfConsensusAdp: adp } : player,
+  );
 }
 
 function fillToPick(
@@ -117,7 +119,7 @@ describe("candidate lock", { timeout: 90_000 }, () => {
 
   it("does not let intervening simulated opponents take the reserved candidate", () => {
     const state = fillToPick(16, keepStars);
-    const taylor = { ...named("Jonathan Taylor"), adp: 1 };
+    const taylor = { ...named("Jonathan Taylor"), adp: 1, sfConsensusAdp: 1 };
     const board = withAdp(players, "Jonathan Taylor", 1);
     const sim = simulateCompletedDraft(board, state, taylor);
     expect(sim.firstPick?.id).toBe(taylor.id);

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { loadPlayers } from "./loadPlayers.ts";
+import draftModel from "./draft_model_data.json";
+import specialTeams from "./specialTeams.json";
+import { loadPlayers, REPLACEMENT } from "./loadPlayers.ts";
 import { eligiblePlayers, isEligible } from "../engine/eligibility.ts";
 import { emptyRosterCounts, rosterCounts } from "../engine/roster.ts";
 import { draftReducer, initialDraftState } from "../state/draftReducer.ts";
@@ -22,8 +24,8 @@ describe("loadPlayers", () => {
 
     const mayfield = players.find((player) => player.player === "Baker Mayfield");
     expect(mayfield?.coverageOnly).toBeFalsy();
-    expect(mayfield?.modelPts).toBe(250.5);
-    expect(mayfield?.vorp).toBe(12);
+    expect(mayfield?.modelPts).toBe(281.9);
+    expect(mayfield?.vorp).toBe(33);
 
     expect(players.some((player) => player.player === "Josh Allen")).toBe(true);
     expect(players.some((player) => player.player === "Brandon Aubrey")).toBe(true);
@@ -39,6 +41,52 @@ describe("loadPlayers", () => {
     expect(aubrey).toHaveLength(1);
     expect(aubrey[0]?.coverageOnly).toBeFalsy();
     expect(aubrey[0]?.pos).toBe("K");
+    expect(aubrey[0]?.age).toBeGreaterThan(0);
+    expect(aubrey[0]?.espnId).toBeDefined();
+  });
+});
+
+describe("refreshed model contract", () => {
+  const data = draftModel as {
+    players: Array<Record<string, unknown>>;
+    coverage: Array<Record<string, unknown>>;
+  };
+  const dstCount = (specialTeams as { defenses: unknown[] }).defenses.length;
+
+  it("keeps the two-pool ESPN universe", () => {
+    expect(data.players).toHaveLength(196);
+    expect(data.coverage).toHaveLength(799);
+    expect(data.players.length + data.coverage.length + dstCount).toBe(1027);
+  });
+
+  it("gives every individual player age, birth date, and a unique ESPN id", () => {
+    const people = [...data.players, ...data.coverage];
+    const espnIds = new Set<number>();
+    for (const row of people) {
+      expect(typeof row.birthDate).toBe("string");
+      expect(typeof row.age).toBe("number");
+      expect(row.ageAsOf).toBe("2026-08-22");
+      expect(typeof row.espnId).toBe("number");
+      espnIds.add(row.espnId as number);
+    }
+    expect(espnIds.size).toBe(995);
+  });
+
+  it("rebuilds VORP, Superflex priors, and outlooks for every ranked player", () => {
+    const ranks = new Set<number>();
+    for (const row of data.players) {
+      const pos = row.pos as "QB" | "RB" | "WR" | "TE";
+      expect(row.sfConsensusAdp).not.toBeNull();
+      expect(row.adp).toBe(row.sfConsensusAdp);
+      expect(row.fantasyProsSfRank).not.toBeNull();
+      expect(row.draftSharksSfRank).not.toBeNull();
+      expect(row.outlook).toEqual(expect.objectContaining({ source: "DraftSharks" }));
+      expect(row.vorp).toBeCloseTo((row.modelPts as number) - REPLACEMENT[pos], 1);
+      ranks.add(row.modelRank as number);
+    }
+    expect(ranks.size).toBe(196);
+    expect(Math.min(...ranks)).toBe(1);
+    expect(Math.max(...ranks)).toBe(196);
   });
 });
 

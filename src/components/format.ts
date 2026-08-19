@@ -5,9 +5,23 @@ export function positionColor(pos: Position): { bg: string; text: string } {
   return POSITION_COLORS[pos];
 }
 
-export function formatAdp(adp: number | null): string {
+export function formatAdp(adp: number | null | undefined): string {
   if (adp == null) return "—";
   return Number.isInteger(adp) ? String(adp) : adp.toFixed(1);
+}
+
+export function formatStat(value: number | null | undefined, digits = 1): string {
+  if (value == null) return "—";
+  return Number.isInteger(value) ? String(value) : value.toFixed(digits);
+}
+
+export function isSafeHttpUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
 }
 
 export function formatVorp(vorp: number): string {

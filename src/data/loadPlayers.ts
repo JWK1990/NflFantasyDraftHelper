@@ -1,10 +1,11 @@
-import type { Player, Position } from "../domain/types.ts";
+import type { AgeSource, Player, PlayerOutlook, Position } from "../domain/types.ts";
 import { normalizeName, normalizeTeam } from "../engine/espnPaste.ts";
 import draftModel from "./draft_model_data.json";
 import specialTeams from "./specialTeams.json";
 import { parseLeagueWinner } from "./leagueWinner.ts";
 
 const POSITIONS = new Set<Position>(["QB", "RB", "WR", "TE", "K", "DST"]);
+const AGE_SOURCES = new Set<AgeSource>(["DraftSharks", "Sleeper", "ESPN"]);
 
 interface RawPlayer {
   player: unknown;
@@ -21,7 +22,27 @@ interface RawPlayer {
   note?: unknown;
   leagueWinner?: unknown;
   espnId?: unknown;
-  espnSfRank?: unknown;
+  birthDate?: unknown;
+  age?: unknown;
+  ageAsOf?: unknown;
+  ageSource?: unknown;
+  cbsPprProjection?: unknown;
+  fantasyProsPprProjection?: unknown;
+  draftSharksConsensusProjection?: unknown;
+  projectionSourceCount?: unknown;
+  sfConsensusAdp?: unknown;
+  sleeperSfAdp?: unknown;
+  espnRoomAdp?: unknown;
+  draftSharksSfRank?: unknown;
+  fantasyProsSfRank?: unknown;
+  fantasyProsSfTier?: unknown;
+  espnConsensusPosRank?: unknown;
+  espnConsensusAvgRank?: unknown;
+  yahooConsensusPprRank?: unknown;
+  yahooConsensusPosRank?: unknown;
+  superflexConsensusRank?: unknown;
+  superflexConsensusSourceCount?: unknown;
+  outlook?: unknown;
 }
 
 interface RawCoverage {
@@ -29,6 +50,10 @@ interface RawCoverage {
   team: unknown;
   pos: unknown;
   espnId?: unknown;
+  birthDate?: unknown;
+  age?: unknown;
+  ageAsOf?: unknown;
+  ageSource?: unknown;
 }
 
 interface RawSpecial {
@@ -60,6 +85,75 @@ function optionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && !Number.isNaN(value) ? value : undefined;
 }
 
+function optionalString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value : undefined;
+}
+
+function parseAgeSource(value: unknown): AgeSource | undefined {
+  return typeof value === "string" && AGE_SOURCES.has(value as AgeSource)
+    ? (value as AgeSource)
+    : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function parseOutlook(raw: unknown, player: string): PlayerOutlook | undefined {
+  if (raw == null) return undefined;
+  if (!isRecord(raw)) {
+    throw new Error(`Invalid outlook for ${player}`);
+  }
+  if (raw.source !== "DraftSharks") {
+    throw new Error(`Invalid outlook source for ${player}`);
+  }
+  if (typeof raw.sourceUrl !== "string" || !raw.sourceUrl.trim()) {
+    throw new Error(`Invalid outlook sourceUrl for ${player}`);
+  }
+  if (typeof raw.asOf !== "string" || !raw.asOf.trim()) {
+    throw new Error(`Invalid outlook asOf for ${player}`);
+  }
+  const summary =
+    raw.summary == null
+      ? null
+      : typeof raw.summary === "string"
+        ? raw.summary
+        : (() => {
+            throw new Error(`Invalid outlook summary for ${player}`);
+          })();
+  const bottomLineExcerpt =
+    raw.bottomLineExcerpt == null
+      ? null
+      : typeof raw.bottomLineExcerpt === "string"
+        ? raw.bottomLineExcerpt
+        : (() => {
+            throw new Error(`Invalid outlook excerpt for ${player}`);
+          })();
+  return {
+    summary,
+    bottomLineExcerpt,
+    source: "DraftSharks",
+    sourceUrl: raw.sourceUrl,
+    asOf: raw.asOf,
+  };
+}
+
+function ageFields(raw: {
+  espnId?: unknown;
+  birthDate?: unknown;
+  age?: unknown;
+  ageAsOf?: unknown;
+  ageSource?: unknown;
+}): Pick<Player, "espnId" | "birthDate" | "age" | "ageAsOf" | "ageSource"> {
+  return {
+    espnId: optionalNumber(raw.espnId),
+    birthDate: optionalString(raw.birthDate),
+    age: optionalNumber(raw.age),
+    ageAsOf: optionalString(raw.ageAsOf),
+    ageSource: parseAgeSource(raw.ageSource),
+  };
+}
+
 export function playerIdentityKey(player: string, team: string, pos: Position): string {
   return `${normalizeName(player)}|${normalizeTeam(team)}|${pos}`;
 }
@@ -76,6 +170,8 @@ function toPlayer(raw: RawPlayer): Player {
   }
   const tag = typeof raw.tag === "string" ? raw.tag : "";
   const posRank = requireNumber(raw.posRank, "posRank", raw.player);
+  const sfConsensusAdp = optionalNumber(raw.sfConsensusAdp);
+  const adpValue = optionalNumber(raw.adp) ?? sfConsensusAdp;
   return {
     id: slug(raw.player, raw.team, raw.pos),
     player: raw.player,
@@ -87,12 +183,28 @@ function toPlayer(raw: RawPlayer): Player {
     tier: requireNumber(raw.tier, "tier", raw.player),
     modelPts: requireNumber(raw.modelPts, "modelPts", raw.player),
     vorp: requireNumber(raw.vorp, "vorp", raw.player),
-    adp: raw.adp == null ? null : requireNumber(raw.adp, "adp", raw.player),
+    adp: adpValue ?? null,
     tag,
     note: typeof raw.note === "string" ? raw.note : "",
     leagueWinner: parseLeagueWinner(raw.leagueWinner, raw.player),
-    espnId: optionalNumber(raw.espnId),
-    espnSfRank: optionalNumber(raw.espnSfRank),
+    ...ageFields(raw),
+    cbsPprProjection: optionalNumber(raw.cbsPprProjection),
+    fantasyProsPprProjection: optionalNumber(raw.fantasyProsPprProjection),
+    draftSharksConsensusProjection: optionalNumber(raw.draftSharksConsensusProjection),
+    projectionSourceCount: optionalNumber(raw.projectionSourceCount),
+    sfConsensusAdp,
+    sleeperSfAdp: optionalNumber(raw.sleeperSfAdp),
+    espnRoomAdp: optionalNumber(raw.espnRoomAdp),
+    draftSharksSfRank: optionalNumber(raw.draftSharksSfRank),
+    fantasyProsSfRank: optionalNumber(raw.fantasyProsSfRank),
+    fantasyProsSfTier: optionalNumber(raw.fantasyProsSfTier),
+    espnConsensusPosRank: optionalNumber(raw.espnConsensusPosRank),
+    espnConsensusAvgRank: optionalNumber(raw.espnConsensusAvgRank),
+    yahooConsensusPprRank: optionalNumber(raw.yahooConsensusPprRank),
+    yahooConsensusPosRank: optionalNumber(raw.yahooConsensusPosRank),
+    superflexConsensusRank: optionalNumber(raw.superflexConsensusRank),
+    superflexConsensusSourceCount: optionalNumber(raw.superflexConsensusSourceCount),
+    outlook: parseOutlook(raw.outlook, raw.player),
   };
 }
 
@@ -100,6 +212,7 @@ function specialToPlayer(
   raw: RawSpecial,
   pos: "K" | "DST",
   rankOffset: number,
+  coverage?: RawCoverage,
 ): Player {
   const modelRank = rankOffset + raw.rank;
   return {
@@ -116,6 +229,7 @@ function specialToPlayer(
     adp: null,
     tag: pos,
     note: "Late-round special teams ranking; stream if needed.",
+    ...ageFields(coverage ?? {}),
   };
 }
 
@@ -144,7 +258,7 @@ function coverageToPlayer(raw: RawCoverage, index: number): Player {
     tag: "",
     note: "ESPN depth; import and search only.",
     coverageOnly: true,
-    espnId: optionalNumber(raw.espnId),
+    ...ageFields(raw),
   };
 }
 
@@ -152,8 +266,21 @@ export function loadPlayers(): Player[] {
   const offensive = (draftModel as { players: RawPlayer[] }).players.map(toPlayer);
   const kickerOffset = 200;
   const dstOffset = 240;
+  const coverageRaw = (draftModel as { coverage?: RawCoverage[] }).coverage ?? [];
+  const coverageByIdentity = new Map<string, RawCoverage>();
+  for (const raw of coverageRaw) {
+    if (typeof raw.player !== "string" || typeof raw.team !== "string" || !isPosition(raw.pos)) {
+      continue;
+    }
+    coverageByIdentity.set(playerIdentityKey(raw.player, raw.team, raw.pos), raw);
+  }
   const kickers = (specialTeams as { kickers: RawSpecial[] }).kickers.map((row) =>
-    specialToPlayer(row, "K", kickerOffset),
+    specialToPlayer(
+      row,
+      "K",
+      kickerOffset,
+      coverageByIdentity.get(playerIdentityKey(row.player, row.team, "K")),
+    ),
   );
   const defenses = (specialTeams as { defenses: RawSpecial[] }).defenses.map((row) =>
     specialToPlayer(row, "DST", dstOffset),
@@ -175,9 +302,7 @@ export function loadPlayers(): Player[] {
     add(player);
   }
 
-  const coverage = ((draftModel as { coverage?: RawCoverage[] }).coverage ?? []).map(
-    coverageToPlayer,
-  );
+  const coverage = coverageRaw.map(coverageToPlayer);
   for (const player of coverage) {
     add(player);
   }
@@ -186,6 +311,10 @@ export function loadPlayers(): Player[] {
 }
 
 export const DATASET_GENERATED = (draftModel as { generated?: string }).generated ?? "";
+
+export const REPLACEMENT = (
+  draftModel as { replacement?: { QB: number; RB: number; WR: number; TE: number } }
+).replacement ?? { QB: 0, RB: 0, WR: 0, TE: 0 };
 
 export const LEAGUE_WINNER_METHODOLOGY = (
   draftModel as { leagueWinnerMethodology?: Record<string, unknown> }

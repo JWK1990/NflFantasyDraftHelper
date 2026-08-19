@@ -34,6 +34,16 @@ export interface LeagueWinnerProfile {
   reviewedAt?: string;
 }
 
+export type AgeSource = "DraftSharks" | "Sleeper" | "ESPN";
+
+export interface PlayerOutlook {
+  summary: string | null;
+  bottomLineExcerpt: string | null;
+  source: "DraftSharks";
+  sourceUrl: string;
+  asOf: string;
+}
+
 export interface Player {
   id: string;
   player: string;
@@ -51,7 +61,27 @@ export interface Player {
   leagueWinner?: LeagueWinnerProfile;
   coverageOnly?: boolean;
   espnId?: number;
-  espnSfRank?: number;
+  birthDate?: string;
+  age?: number;
+  ageAsOf?: string;
+  ageSource?: AgeSource;
+  cbsPprProjection?: number;
+  fantasyProsPprProjection?: number;
+  draftSharksConsensusProjection?: number;
+  projectionSourceCount?: number;
+  sfConsensusAdp?: number;
+  sleeperSfAdp?: number;
+  espnRoomAdp?: number;
+  draftSharksSfRank?: number;
+  fantasyProsSfRank?: number;
+  fantasyProsSfTier?: number;
+  espnConsensusPosRank?: number;
+  espnConsensusAvgRank?: number;
+  yahooConsensusPprRank?: number;
+  yahooConsensusPosRank?: number;
+  superflexConsensusRank?: number;
+  superflexConsensusSourceCount?: number;
+  outlook?: PlayerOutlook;
 }
 
 export interface DraftPick {

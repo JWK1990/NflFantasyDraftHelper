@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { LEAGUE } from "../config/leagueSettings.ts";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player } from "../domain/types.ts";
-import { simulateCompletedDraft } from "./draftSim.ts";
+import { simulateCompletedDraft, adpSortValue, marketAdp } from "./draftSim.ts";
 import { draftReducer, initialDraftState } from "../state/draftReducer.ts";
 
 const players = loadPlayers();
@@ -53,5 +53,16 @@ describe("draft simulation", () => {
     expect(sim.roster.some((player) => player.pos === "K")).toBe(true);
     expect(sim.roster.some((player) => player.pos === "DST")).toBe(true);
     expect(sim.roster.filter((player) => player.pos === "QB").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("uses Superflex consensus ADP for opponent ordering, not ESPN room ADP", () => {
+    const bijan = players.find((player) => player.player === "Bijan Robinson");
+    if (!bijan) throw new Error("Missing Bijan Robinson");
+    expect(marketAdp(bijan)).toBe(bijan.sfConsensusAdp);
+    expect(bijan.adp).toBe(bijan.sfConsensusAdp);
+    const espnSwapped = { ...bijan, espnRoomAdp: 999, sleeperSfAdp: 999 };
+    expect(adpSortValue(espnSwapped)).toBe(adpSortValue(bijan));
+    const sfShifted = { ...bijan, sfConsensusAdp: 80, adp: 80 };
+    expect(adpSortValue(sfShifted)).toBeGreaterThan(adpSortValue(bijan));
   });
 });

@@ -59,8 +59,8 @@ describe("starting lineup", () => {
   it("puts a third RB in FLEX rather than OP", () => {
     const roster = [named("Bijan Robinson"), named("Jahmyr Gibbs"), named("Christian McCaffrey")];
     const lineup = assignStarters(roster);
-    expect(lineup.RB1?.player).toBe("Bijan Robinson");
-    expect(lineup.RB2?.player).toBe("Jahmyr Gibbs");
+    expect(lineup.RB1?.player).toBe("Jahmyr Gibbs");
+    expect(lineup.RB2?.player).toBe("Bijan Robinson");
     expect(lineup.FLEX?.player).toBe("Christian McCaffrey");
     expect(lineup.OP).toBeNull();
   });

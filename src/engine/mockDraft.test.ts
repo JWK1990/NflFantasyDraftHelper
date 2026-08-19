@@ -13,7 +13,7 @@ const schedule = userPickSchedule();
 function adpValue(id: string): number {
   const player = byId.get(id);
   if (!player) return 9999;
-  return player.adp ?? 900 + player.modelRank;
+  return player.sfConsensusAdp ?? player.adp ?? 900 + player.modelRank;
 }
 
 // Skipped: 180 recommend() calls timed out with the full player list.

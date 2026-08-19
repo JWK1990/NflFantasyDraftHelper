@@ -40,7 +40,9 @@ function draft(
 
 function withAdp(board: Player[], name: string, adp: number): Player[] {
   const id = named(name).id;
-  return board.map((player) => (player.id === id ? { ...player, adp } : player));
+  return board.map((player) =>
+    player.id === id ? { ...player, adp, sfConsensusAdp: adp } : player,
+  );
 }
 
 function fillToPick(
@@ -161,7 +163,7 @@ describe("current-board action ranking", { timeout: 90_000 }, () => {
 
   it("does not change model points, VORP, or intrinsic contribution when only ADP changes", () => {
     const collins = named("Nico Collins");
-    const shifted = { ...collins, adp: 1 };
+    const shifted = { ...collins, adp: 1, sfConsensusAdp: 1 };
     expect(shifted.modelPts).toBe(collins.modelPts);
     expect(shifted.vorp).toBe(collins.vorp);
     expect(completedTeamUtility([shifted], 14).utility).toBe(
@@ -197,14 +199,14 @@ describe("current-board action ranking", { timeout: 90_000 }, () => {
     expect(lookahead.find((row) => row.dynamicScore === best)?.dynamicScore).toBe(best);
   });
 
-  it("gives Collins a 9.5 direct projection edge over McMillan", () => {
+  it("gives Collins a direct projection edge over McMillan", () => {
     const collins = named("Nico Collins");
     const mcmillan = named("Tetairoa McMillan");
-    expect(collins.modelPts).toBe(253.5);
-    expect(mcmillan.modelPts).toBe(244);
-    expect(collins.vorp).toBe(63.5);
-    expect(mcmillan.vorp).toBe(54);
-    expect(collins.modelPts - mcmillan.modelPts).toBe(9.5);
+    expect(collins.modelPts).toBe(246.6);
+    expect(mcmillan.modelPts).toBe(231);
+    expect(collins.vorp).toBe(55.4);
+    expect(mcmillan.vorp).toBe(39.8);
+    expect(collins.modelPts - mcmillan.modelPts).toBeCloseTo(15.6);
   });
 
   it("lets McMillan outrank Collins only when the timing edge is robust across matched scenarios", () => {
@@ -219,8 +221,10 @@ describe("current-board action ranking", { timeout: 90_000 }, () => {
       const inversion = mcmillan!.breakdown.samePositionInversion;
       expect(inversion).toBeDefined();
       expect(inversion!.otherPlayer).toBe("Nico Collins");
-      expect(inversion!.directEdge).toBe(9);
-      expect(inversion!.continuationEdge).toBeGreaterThan(9);
+      expect(inversion!.directEdge).toBeCloseTo(
+        collins!.player.modelPts - mcmillan!.player.modelPts,
+      );
+      expect(inversion!.continuationEdge).toBeGreaterThan(inversion!.directEdge);
       expect(inversion!.netEdge).toBeGreaterThanOrEqual(
         RECOMMENDATION_CONFIG.robustness.closeCallPpw * RECOMMENDATION_CONFIG.branch.weeks,
       );
@@ -331,12 +335,17 @@ describe("current-board action ranking", { timeout: 90_000 }, () => {
     expect(sim.roster.filter((player) => player.pos === "QB").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("does not change recommendation score when risk, injury, or LW chips change", () => {
+  it("does not change recommendation score when risk, injury, LW, outlook, or age change", () => {
     const state = fillToPick(16, keepStars);
     const mutated = players.map((player) => {
       if (player.player !== "Nico Collins") return player;
-      const { leagueWinner: _ignored, ...rest } = player;
-      return { ...rest, tag: "ELITE/RISK INJURY WATCH" };
+      const { leagueWinner: _ignored, outlook: _outlook, ...rest } = player;
+      return {
+        ...rest,
+        tag: "ELITE/RISK INJURY WATCH",
+        age: (player.age ?? 20) + 10,
+        note: "mutated note should not score",
+      };
     });
     const base = recommend(players, state).find((row) => row.player.player === "Nico Collins");
     const changed = recommend(mutated, state).find((row) => row.player.player === "Nico Collins");
@@ -358,11 +367,12 @@ describe("current-board action ranking", { timeout: 90_000 }, () => {
 
   it("does not reverse Collins over McMillan when every ADP is jittered a little", () => {
     const state = fillToPick(16, keepStars);
-    const jittered = players.map((player, index) =>
-      player.adp == null
-        ? player
-        : { ...player, adp: player.adp + ((index % 7) - 3) },
-    );
+    const jittered = players.map((player, index) => {
+      const base = player.sfConsensusAdp ?? player.adp;
+      if (base == null) return player;
+      const next = base + ((index % 7) - 3);
+      return { ...player, adp: next, sfConsensusAdp: next };
+    });
     const recs = recommend(jittered, state);
     const collinsRank = recs.findIndex((row) => row.player.player === "Nico Collins");
     const mcmillanRank = recs.findIndex((row) => row.player.player === "Tetairoa McMillan");
@@ -376,7 +386,7 @@ describe("current-board action ranking", { timeout: 90_000 }, () => {
     }
   });
 
-  it("ranks Warren above Loveland without grouping every TE together", () => {
+  it("ranks Loveland above Warren without grouping every TE together", () => {
     const recs = recommend(
       players,
       fillToPick(54, [...keepStars, "Tyler Warren", "Colston Loveland"]),
@@ -387,25 +397,25 @@ describe("current-board action ranking", { timeout: 90_000 }, () => {
     const loveland = recs[lovelandRank];
     expect(warren).toBeDefined();
     expect(loveland).toBeDefined();
-    expect(warrenRank).toBeGreaterThanOrEqual(0);
-    expect(lovelandRank).toBeGreaterThan(warrenRank);
-    expect(warren!.dynamicScore).toBeGreaterThanOrEqual(loveland!.dynamicScore);
-    expect(warren!.player.modelPts).toBeGreaterThan(loveland!.player.modelPts);
-    expect(loveland!.breakdown.returnProbability).toBeLessThan(0.99);
+    expect(lovelandRank).toBeGreaterThanOrEqual(0);
+    expect(warrenRank).toBeGreaterThan(lovelandRank);
+    expect(loveland!.dynamicScore).toBeGreaterThanOrEqual(warren!.dynamicScore);
+    expect(loveland!.player.modelPts).toBeGreaterThan(warren!.player.modelPts);
+    expect(warren!.breakdown.returnProbability).toBeLessThan(0.99);
     expect(warren!.breakdown.samePositionComparison?.otherPlayer).toBeDefined();
     expect(loveland!.breakdown.samePositionComparison?.otherPlayer).toBeDefined();
-    expect(warren!.breakdown.positionalPassLoss).toBeGreaterThanOrEqual(0);
-    expect(loveland!.breakdown.expectedPassLoss).toBeGreaterThanOrEqual(0);
+    expect(loveland!.breakdown.positionalPassLoss).toBeGreaterThanOrEqual(0);
+    expect(warren!.breakdown.expectedPassLoss).toBeGreaterThanOrEqual(0);
     const interleaved = recs.filter(
       (row) =>
         row.player.pos !== "TE" &&
-        row.dynamicScore < warren!.dynamicScore &&
-        row.dynamicScore > loveland!.dynamicScore,
+        row.dynamicScore < loveland!.dynamicScore &&
+        row.dynamicScore > warren!.dynamicScore,
     );
     for (const row of interleaved) {
       const rank = recs.findIndex((candidate) => candidate.player.id === row.player.id);
-      expect(rank).toBeGreaterThan(warrenRank);
-      expect(rank).toBeLessThan(lovelandRank);
+      expect(rank).toBeGreaterThan(lovelandRank);
+      expect(rank).toBeLessThan(warrenRank);
     }
   });
 });

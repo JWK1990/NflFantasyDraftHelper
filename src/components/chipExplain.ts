@@ -263,5 +263,24 @@ export function explainChip(label: string): ChipExplanation {
     };
   }
 
+  if (label === "Outlook") {
+    return {
+      title: "DraftSharks outlook",
+      definition:
+        "A compact rank/projection summary plus a short public verdict excerpt.",
+      detail:
+        "Display only. It does not change completed-team utility. Tap Outlook to expand the row and open the source link for the full write-up.",
+    };
+  }
+
+  if (label === "1 projection source") {
+    return {
+      title: "1 projection source",
+      definition: "Only one independent projection was available for this player.",
+      detail:
+        "A data-quality note, not a risk tag and not a rank penalty. The model still uses that single projection rather than inventing another.",
+    };
+  }
+
   return explainTag(label);
 }

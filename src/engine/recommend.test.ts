@@ -267,7 +267,7 @@ describe("recommendation engine", { timeout: 90_000 }, () => {
 
   it("does not change roster contribution when only ADP changes", () => {
     const bijan = named("Bijan Robinson");
-    const shifted = { ...bijan, adp: (bijan.adp ?? 10) + 40 };
+    const shifted = { ...bijan, adp: (bijan.adp ?? 10) + 40, sfConsensusAdp: (bijan.adp ?? 10) + 40 };
     const base = completedTeamUtility([bijan], 14);
     const later = completedTeamUtility([shifted], 14);
     expect(later.starterProjection).toBe(base.starterProjection);

@@ -66,6 +66,8 @@ export default function App() {
   }, [currentOverallPick]);
   const roster = useMemo(() => myRosterPlayers(state.picks, byId), [state.picks]);
   const coverage = useMemo(() => rosterCoverageFromPlayers(roster), [roster]);
+  // Search/filter stay on `state`; ranking ignores them so typing does not
+  // rerun the expensive recommendation simulation.
   const rankingState = useMemo<DraftState>(
     () => ({
       schemaVersion: 2,
