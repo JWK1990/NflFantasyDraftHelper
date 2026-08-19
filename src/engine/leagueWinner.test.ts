@@ -77,16 +77,16 @@ function expectInvariant(state: DraftState) {
 }
 
 describe("league winner data", () => {
-  it("loads 31 display-only candidates from JSON without adding unmatched names", () => {
+  it("loads 39 display-only candidates from JSON without adding unmatched names", () => {
     const offensive = players.filter(
       (player) =>
         player.pos !== "K" && player.pos !== "DST" && !player.coverageOnly,
     );
     const winners = players.filter((player) => player.leagueWinner);
     expect(offensive).toHaveLength(196);
-    expect(winners).toHaveLength(31);
+    expect(winners).toHaveLength(39);
     expect(winners.filter((player) => player.leagueWinner?.confidence === "high")).toHaveLength(12);
-    expect(winners.filter((player) => player.leagueWinner?.confidence === "medium")).toHaveLength(19);
+    expect(winners.filter((player) => player.leagueWinner?.confidence === "medium")).toHaveLength(27);
     expect(winners.filter((player) => player.leagueWinner?.confidence === "low")).toHaveLength(0);
     expect(LEAGUE_WINNER_METHODOLOGY?.mode).toBe("display-only");
     expect(LEAGUE_WINNER_METHODOLOGY?.rankingImpact).toBe(0);
@@ -105,6 +105,18 @@ describe("league winner data", () => {
     expect(named("Josh Allen").leagueWinner?.reasons[0]).toContain(
       "Has repeatedly separated from the normal QB1 baseline",
     );
+    for (const name of [
+      "George Kittle",
+      "Jordyn Tyson",
+      "David Montgomery",
+      "Terry McLaurin",
+      "Marvin Harrison Jr.",
+      "Oronde Gadsden II",
+      "Malik Willis",
+      "Stefon Diggs",
+    ]) {
+      expect(named(name).leagueWinner).toBeDefined();
+    }
   });
 });
 

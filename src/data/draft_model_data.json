@@ -3208,6 +3208,27 @@
       "posRank": 21,
       "posTier": 3,
       "tier": 3,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "ascending-offense",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Reunites with Jayden Daniels and faces little target competition at the top of Washington's receiver room.",
+          "A rebound to WR1-level weekly production at his current cost would create surplus most mid-round receivers cannot match."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Terry McLaurin Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/terry-mclaurin/10269"
+          }
+        ],
+        "reviewedAt": "2026-08-19"
+      },
       "espnId": 3121422,
       "birthDate": "1995-09-15",
       "age": 30,
@@ -4684,6 +4705,27 @@
       "posRank": 19,
       "posTier": 4,
       "tier": 4,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "rushing-qb",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Dual-threat starter in Miami with a rushing ceiling that can separate from replacement Superflex quarterbacks.",
+          "At a typical QB2 price the upside is usable every week if the starting job holds, not only in spike weeks."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Malik Willis Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/malik-willis/12572"
+          }
+        ],
+        "reviewedAt": "2026-08-19"
+      },
       "espnId": 4242512,
       "birthDate": "1999-05-25",
       "age": 27,
@@ -4903,6 +4945,27 @@
       "posRank": 23,
       "posTier": 3,
       "tier": 3,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Houston traded draft capital to acquire him and is signaling a lead-back role.",
+          "Touchdown volume in that offense can create a weekly RB advantage beyond his median projection."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 David Montgomery Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/david-montgomery/10194"
+          }
+        ],
+        "reviewedAt": "2026-08-19"
+      },
       "espnId": 4035538,
       "birthDate": "1997-06-07",
       "age": 29,
@@ -5186,6 +5249,27 @@
       "posRank": 30,
       "posTier": 3,
       "tier": 3,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "contingent-upside"
+        ],
+        "reasons": [
+          "Post-hype price leaves room for a true alpha-receiver outcome if the role stabilizes.",
+          "The ceiling still sits well above replacement even with added target competition in Arizona."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Marvin Harrison Jr. Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/marvin-harrison-jr/34975"
+          }
+        ],
+        "reviewedAt": "2026-08-19"
+      },
       "espnId": 4432708,
       "birthDate": "2002-08-11",
       "age": 24,
@@ -5382,6 +5466,28 @@
       "posRank": 9,
       "posTier": 2,
       "tier": 2,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "elite-positional-edge",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Per-game production still separates from the tight-end field when he is healthy.",
+          "A full-season run at that ceiling would create a weekly TE advantage most rosters cannot match.",
+          "Health and age remain separate risk chips and do not cancel the ceiling case."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 George Kittle Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/george-kittle/9540"
+          }
+        ],
+        "reviewedAt": "2026-08-19"
+      },
       "espnId": 3040151,
       "birthDate": "1993-10-09",
       "age": 32,
@@ -6803,6 +6909,27 @@
       "posRank": 42,
       "posTier": 4,
       "tier": 4,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "contingent-upside"
+        ],
+        "reasons": [
+          "Late-round value with a path to every-week WR production in Washington.",
+          "If the role holds, the surplus versus a typical ninth-round receiver is championship-relevant."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Stefon Diggs Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/stefon-diggs/7280"
+          }
+        ],
+        "reviewedAt": "2026-08-19"
+      },
       "espnId": 2976212,
       "birthDate": "1993-11-29",
       "age": 32,
@@ -8861,6 +8988,27 @@
       "posRank": 58,
       "posTier": 5,
       "tier": 5,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "contingent-upside"
+        ],
+        "reasons": [
+          "Landed in a shallow Saints receiver room with a pass-friendly staff and a path to immediate usage.",
+          "If the hamstring concern clears, the role can expand into every-week WR production at a late-round cost."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Jordyn Tyson Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/jordyn-tyson/35947"
+          }
+        ],
+        "reviewedAt": "2026-08-19"
+      },
       "espnId": 4880281,
       "birthDate": "2004-08-12",
       "age": 22,
@@ -9253,6 +9401,27 @@
       "posRank": 23,
       "posTier": 4,
       "tier": 4,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "elite-positional-edge",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Young receiver profile at tight end with a path into the Chargers' lead-TE conversation.",
+          "A late-round TE who becomes a weekly starter would create surplus most managers cannot find on waivers."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Oronde Gadsden II Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/oronde-gadsden/35532"
+          }
+        ],
+        "reviewedAt": "2026-08-19"
+      },
       "espnId": 4595342,
       "birthDate": "2003-06-25",
       "age": 23,
@@ -11350,10 +11519,10 @@
   ],
   "leagueWinnerMethodology": {
     "schemaVersion": 1,
-    "reviewedAt": "2026-08-18",
+    "reviewedAt": "2026-08-19",
     "mode": "display-only",
     "rankingImpact": 0,
-    "candidateCount": 31,
+    "candidateCount": 39,
     "leagueContext": {
       "teams": 12,
       "scoring": "full PPR",
@@ -11390,7 +11559,7 @@
       "Most source lists assume one-QB home leagues; quarterback rationales were adjusted qualitatively for this league's Superflex replacement level, but source rankings were not copied.",
       "Expert candidate lists are not calibrated probabilities and have substantial miss rates.",
       "Projection-source disagreement is epistemic uncertainty and was not treated as a player ceiling.",
-      "The 31 candidates are a curated union of strong current cases, not a claim that 31 players will become league winners.",
+      "The 39 candidates are a curated union of strong current cases plus a user watchlist, not a claim that 39 players will become league winners.",
       "News, depth charts and injuries remain time-sensitive and should be reviewed again immediately before the draft."
     ],
     "methodologySources": [

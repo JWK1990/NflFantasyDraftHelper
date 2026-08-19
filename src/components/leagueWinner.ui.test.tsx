@@ -41,9 +41,17 @@ const USER_PICK = { isUserPick: true, label: "Josh", teamName: "The Dan Marineho
 describe("league winner UI", () => {
   afterEach(() => cleanup());
 
+  it("gold-highlights league winner rows and leaves others unchanged", () => {
+    const winner = renderRow(allen);
+    expect(winner.container.querySelector(".player-row.league-winner")).toBeTruthy();
+    cleanup();
+    const other = renderRow(taylor);
+    expect(other.container.querySelector(".player-row.league-winner")).toBeNull();
+  });
+
   it("renders exactly one LW pill on configured players and none otherwise", () => {
     const winners = players.filter((player) => player.leagueWinner);
-    expect(winners).toHaveLength(31);
+    expect(winners).toHaveLength(39);
     for (const player of winners) {
       const view = renderRow(player);
       expect(screen.getAllByRole("button", { name: /League Winner candidate/i })).toHaveLength(1);

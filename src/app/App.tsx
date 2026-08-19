@@ -8,6 +8,7 @@ import { isUserPick } from "../engine/snake.ts";
 import { teamSlotForOverallPick } from "../engine/teams.ts";
 import { managerFirstName, teamNamesBySlot } from "../config/leagueTeams.ts";
 import { deriveQbCard } from "../engine/qbCard.ts";
+import { upcomingLeagueWinnerTips } from "../engine/leagueWinnerTips.ts";
 import { QbCardView } from "../components/QbCard.tsx";
 import { DraftHeader } from "../components/DraftHeader.tsx";
 import { DraftLogDrawer } from "../components/DraftLogDrawer.tsx";
@@ -85,7 +86,11 @@ export default function App() {
   // computes are discarded if a newer pick arrives mid-flight.
   const computeRanking = (draftState: DraftState) => {
     const recs = recommend(players, draftState);
-    return { recs, qbCard: deriveQbCard(recs, players, draftState) };
+    return {
+      recs,
+      qbCard: deriveQbCard(recs, players, draftState),
+      leagueWinnerTips: upcomingLeagueWinnerTips(recs, draftState),
+    };
   };
   const [ranking, setRanking] = useState(() => computeRanking(rankingState));
   const [busy, setBusy] = useState(false);
@@ -111,6 +116,7 @@ export default function App() {
   }, [rankingState]);
   const recs = ranking.recs;
   const qbCard = ranking.qbCard;
+  const leagueWinnerTips = ranking.leagueWinnerTips;
   const recById = useMemo(
     () => new Map(recs.map((row) => [row.player.id, row])),
     [recs],
@@ -236,7 +242,9 @@ export default function App() {
           );
         }}
       />
-      {qbCard ? <QbCardView card={qbCard} /> : null}
+      {qbCard || leagueWinnerTips.length > 0 ? (
+        <QbCardView card={qbCard} leagueWinnerTips={leagueWinnerTips} />
+      ) : null}
       <TierPressureStrip
         tiers={endingTiers}
         focus={listFocus?.kind === "tier" ? listFocus : null}

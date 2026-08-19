@@ -204,12 +204,24 @@
   line-height: 1.25;
 }
 
+.qb-card.has-lw-tip > summary {
+  align-items: flex-start;
+}
+
+.qb-card.has-lw-tip .qb-card-title {
+  font-size: 0.74rem;
+}
+
 .qb-card-delta {
   flex: none;
   font-size: 0.72rem;
   color: var(--text-muted);
   text-align: right;
   white-space: nowrap;
+}
+
+.qb-card.has-lw-tip .qb-card-delta {
+  color: #ffe7a3;
 }
 
 .qb-card-hint {
@@ -228,6 +240,28 @@
 
 .qb-card.verdict-close {
   border-color: var(--line);
+}
+
+.qb-card.verdict-lw,
+.qb-card.has-lw-tip {
+  border-color: #c9a227;
+  background: #2f2814;
+}
+
+.qb-card-lw {
+  margin: 0 0 8px;
+}
+
+.qb-card-lw-heading {
+  margin: 0 0 4px;
+  font-weight: 800;
+  color: #ffe7a3;
+}
+
+.qb-card-lw-line {
+  margin: 0 0 4px;
+  color: #f3ddb0;
+  line-height: 1.35;
 }
 
 .qb-card-body {
@@ -339,6 +373,12 @@ button.roster-chip {
   align-items: stretch;
   padding: 8px 6px;
   border-bottom: 1px solid var(--line);
+}
+
+.player-row.league-winner {
+  background: linear-gradient(90deg, #6b5414 0%, #3d3214 72%);
+  border-bottom-color: #c9a227;
+  box-shadow: inset 3px 0 0 #e4b429;
 }
 
 .player-main {

@@ -224,7 +224,11 @@ export function PlayerRow({
   const tag = scoutingTag(player);
   const reasons = recommendation?.reasons ?? (tag ? [tag] : []);
   return (
-    <article className={`player-row${dimmed ? " dimmed" : ""}`}>
+    <article
+      className={`player-row${dimmed ? " dimmed" : ""}${
+        player.leagueWinner ? " league-winner" : ""
+      }`}
+    >
       <div className="player-main">
         <div className="player-top">
           {rank != null ? <span className="rank">{rank}</span> : null}

@@ -1,80 +1,109 @@
 import type { QbCard } from "../engine/qbCard.ts";
+import {
+  formatLeagueWinnerTip,
+  type LeagueWinnerTip,
+} from "../engine/leagueWinnerTips.ts";
 import { formatPickLabel } from "../engine/snake.ts";
 
 interface QbCardProps {
-  card: QbCard;
+  card: QbCard | null;
+  leagueWinnerTips?: LeagueWinnerTip[];
 }
 
 function formatPts(value: number): string {
   return Math.round(value).toLocaleString("en-US");
 }
 
-export function QbCardView({ card }: QbCardProps) {
-  const edgePts = Math.abs(card.edge);
-  const verdictLabel =
-    card.tooClose || card.leader === "even"
+export function QbCardView({ card, leagueWinnerTips = [] }: QbCardProps) {
+  const primaryTip = leagueWinnerTips[0];
+  if (!card && !primaryTip) return null;
+
+  const edgePts = card ? Math.abs(card.edge) : 0;
+  const verdictLabel = !card
+    ? null
+    : card.tooClose || card.leader === "even"
       ? "QB vs skill is close — follow the list"
       : card.leader === "qb"
         ? "A QB is your strongest next pick"
         : "A skill player is your strongest next pick";
 
-  const deltaLabel =
-    card.leader === "even"
+  const deltaLabel = !card
+    ? leagueWinnerTips.length > 1
+      ? `+${leagueWinnerTips.length - 1} more LW`
+      : "LW watch"
+    : card.leader === "even"
       ? "About even"
       : card.leader === "qb"
         ? `QB +${formatPts(edgePts)} pts`
         : `Skill +${formatPts(edgePts)} pts`;
 
-  const guaranteed = card.guaranteedFloor;
+  const guaranteed = card?.guaranteedFloor;
   const capacityLine =
-    card.capacityToEnd === 0 && card.bestAvailableQb
-      ? `Opponent QB capacity: 0 — ${card.bestAvailableQb.player} is guaranteed through ${formatPickLabel(card.lastUserPick)}. No rush.`
-      : card.nextUserPick != null
-        ? `Opponent QB capacity before ${formatPickLabel(card.nextUserPick)}: ${card.capacityToNext}. ${card.remainingQbCount} QBs remain${
-            guaranteed ? `; guaranteed floor ${guaranteed.player}` : ""
-          }.`
-        : `${card.remainingQbCount} QBs remain${
-            guaranteed ? `; guaranteed floor ${guaranteed.player}` : ""
-          }.`;
+    card == null
+      ? null
+      : card.capacityToEnd === 0 && card.bestAvailableQb
+        ? `Opponent QB capacity: 0 — ${card.bestAvailableQb.player} is guaranteed through ${formatPickLabel(card.lastUserPick)}. No rush.`
+        : card.nextUserPick != null
+          ? `Opponent QB capacity before ${formatPickLabel(card.nextUserPick)}: ${card.capacityToNext}. ${card.remainingQbCount} QBs remain${
+              guaranteed ? `; guaranteed floor ${guaranteed.player}` : ""
+            }.`
+          : `${card.remainingQbCount} QBs remain${
+              guaranteed ? `; guaranteed floor ${guaranteed.player}` : ""
+            }.`;
 
-  const verdictClass = card.tooClose
-    ? "close"
-    : card.leader === "qb"
-      ? "qb-now"
-      : "skill";
+  const verdictClass = primaryTip
+    ? "lw"
+    : card?.tooClose
+      ? "close"
+      : card?.leader === "qb"
+        ? "qb-now"
+        : "skill";
+  const title = primaryTip ? formatLeagueWinnerTip(primaryTip) : verdictLabel;
 
   return (
-    <details className={`qb-card verdict-${verdictClass}`}>
+    <details className={`qb-card verdict-${verdictClass}${primaryTip ? " has-lw-tip" : ""}`}>
       <summary>
-        <span className="qb-card-title">{verdictLabel}</span>
+        <span className="qb-card-title">{title}</span>
         <span className="qb-card-delta">{deltaLabel}</span>
       </summary>
       <div className="qb-card-body">
         <p className="qb-card-hint">
-          Explains your next pick from the ranking below. It never changes the
-          order — the list already decides.
+          Draft tips from the ranking below. They never change the order — the
+          list already decides.
         </p>
-        {card.bestQb ? (
+        {leagueWinnerTips.length > 0 ? (
+          <div className="qb-card-lw">
+            <p className="qb-card-lw-heading">League winners in the next 20 picks</p>
+            {leagueWinnerTips.map((tip) => (
+              <p key={tip.player.id} className="qb-card-lw-line">
+                {formatLeagueWinnerTip(tip)}
+              </p>
+            ))}
+          </div>
+        ) : null}
+        {card?.bestQb ? (
           <div className="qb-card-row">
             <span>Best QB now: {card.bestQb.player.player}</span>
             <span>{formatPts(card.bestQb.utility)} pts</span>
           </div>
         ) : null}
-        {card.bestSkill ? (
+        {card?.bestSkill ? (
           <div className="qb-card-row">
             <span>Best skill now: {card.bestSkill.player.player}</span>
             <span>{formatPts(card.bestSkill.utility)} pts</span>
           </div>
         ) : null}
-        <p className="qb-card-reason">{capacityLine}</p>
-        <p className="qb-card-demand">
-          <strong>{card.qbsTaken}</strong> QBs drafted so far.{" "}
-          {card.teamsNeedingQb.length === 0
-            ? "No other team can add a QB — the rest are yours to time."
-            : `Still able to draft a QB: ${card.teamsNeedingQb
-                .map((team) => `${team.name} (${team.needs})`)
-                .join(", ")}.`}
-        </p>
+        {capacityLine ? <p className="qb-card-reason">{capacityLine}</p> : null}
+        {card ? (
+          <p className="qb-card-demand">
+            <strong>{card.qbsTaken}</strong> QBs drafted so far.{" "}
+            {card.teamsNeedingQb.length === 0
+              ? "No other team can add a QB — the rest are yours to time."
+              : `Still able to draft a QB: ${card.teamsNeedingQb
+                  .map((team) => `${team.name} (${team.needs})`)
+                  .join(", ")}.`}
+          </p>
+        ) : null}
       </div>
     </details>
   );
