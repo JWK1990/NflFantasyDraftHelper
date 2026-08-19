@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import { PlayerRow } from "./PlayerRow.tsx";
@@ -38,7 +38,7 @@ describe("player research UI", () => {
     renderRow(bijan);
     expect(screen.getByText(new RegExp(`${bijan.team} · RB · ${bijan.age}`))).toBeTruthy();
     expect(screen.getByText(`ADP ${bijan.adp}`)).toBeTruthy();
-    expect(screen.getByRole("button", { name: "DraftSharks outlook" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Quick Draft note" })).toBeTruthy();
     expect(screen.queryByText("ESPN room")).toBeNull();
   });
 
@@ -51,6 +51,31 @@ describe("player research UI", () => {
     const link = screen.getByRole("link", { name: "Full DraftSharks verdict" });
     expect(link.getAttribute("href")).toBe(bijan.outlook?.sourceUrl);
     expect(link.getAttribute("rel")).toContain("noopener");
+  });
+
+  it("opens the Quick Draft note from Outlook without expanding the row", () => {
+    let expanded = false;
+    render(
+      <ChipExplainProvider>
+        <PlayerRow
+          player={bijan}
+          rank={1}
+          expanded={false}
+          pickTeam={USER_PICK}
+          onToggle={() => {
+            expanded = true;
+          }}
+          onDraft={() => undefined}
+        />
+      </ChipExplainProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Quick Draft note" }));
+    expect(expanded).toBe(false);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.getByText("Quick Draft note")).toBeTruthy();
+    expect(screen.getByText(bijan.note)).toBeTruthy();
+    expect(screen.queryByText("ESPN room")).toBeNull();
+    expect(screen.queryByText("Full DraftSharks verdict")).toBeNull();
   });
 
   it("shows a data-quality chip only in the expanded row for single-source projections", () => {

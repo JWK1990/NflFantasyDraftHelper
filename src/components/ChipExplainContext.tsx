@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { explainChip, type ChipExplanation } from "./chipExplain.ts";
 
-const ChipExplainContext = createContext<(label: string) => void>(() => {});
+const ChipExplainContext = createContext<(input: string | ChipExplanation) => void>(
+  () => {},
+);
 
-export function useChipExplain(): (label: string) => void {
+export function useChipExplain(): (input: string | ChipExplanation) => void {
   return useContext(ChipExplainContext);
 }
 
@@ -11,7 +13,11 @@ export function ChipExplainProvider({ children }: { children: ReactNode }) {
   const [explanation, setExplanation] = useState<ChipExplanation | null>(null);
 
   return (
-    <ChipExplainContext.Provider value={(label) => setExplanation(explainChip(label))}>
+    <ChipExplainContext.Provider
+      value={(input) =>
+        setExplanation(typeof input === "string" ? explainChip(input) : input)
+      }
+    >
       {children}
       {explanation ? (
         <div className="modal-backdrop" onClick={() => setExplanation(null)}>

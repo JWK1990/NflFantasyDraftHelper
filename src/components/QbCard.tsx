@@ -1,6 +1,6 @@
 import type { QbCard } from "../engine/qbCard.ts";
 import {
-  formatLeagueWinnerTip,
+  lastNameFromPlayer,
   type LeagueWinnerTip,
 } from "../engine/leagueWinnerTips.ts";
 import { formatPickLabel } from "../engine/snake.ts";
@@ -15,7 +15,13 @@ function formatPts(value: number): string {
 }
 
 export function QbCardView({ card, leagueWinnerTips = [] }: QbCardProps) {
-  const primaryTip = leagueWinnerTips[0];
+  const tips = [...leagueWinnerTips].sort(
+    (a, b) =>
+      a.expectedPick - b.expectedPick ||
+      a.rank - b.rank ||
+      a.player.player.localeCompare(b.player.player),
+  );
+  const primaryTip = tips[0];
   if (!card && !primaryTip) return null;
 
   const edgePts = card ? Math.abs(card.edge) : 0;
@@ -28,9 +34,7 @@ export function QbCardView({ card, leagueWinnerTips = [] }: QbCardProps) {
         : "A skill player is your strongest next pick";
 
   const deltaLabel = !card
-    ? leagueWinnerTips.length > 1
-      ? `+${leagueWinnerTips.length - 1} more LW`
-      : "LW watch"
+    ? "LW watch"
     : card.leader === "even"
       ? "About even"
       : card.leader === "qb"
@@ -58,29 +62,33 @@ export function QbCardView({ card, leagueWinnerTips = [] }: QbCardProps) {
       : card?.leader === "qb"
         ? "qb-now"
         : "skill";
-  const title = primaryTip ? formatLeagueWinnerTip(primaryTip) : verdictLabel;
+  const title = primaryTip ? "Upcoming LW players" : verdictLabel;
 
   return (
     <details className={`qb-card verdict-${verdictClass}${primaryTip ? " has-lw-tip" : ""}`}>
       <summary>
-        <span className="qb-card-title">{title}</span>
-        <span className="qb-card-delta">{deltaLabel}</span>
+        <div className="qb-card-summary-row">
+          <span className="qb-card-title">{title}</span>
+          <span className="qb-card-delta">{deltaLabel}</span>
+        </div>
+        {tips.length > 0 ? (
+          <ul className="qb-card-lw-list">
+            {tips.map((tip) => (
+              <li key={tip.player.id}>
+                <span className="qb-card-lw-name">{lastNameFromPlayer(tip.player.player)}</span>
+                <span className="qb-card-lw-meta">
+                  {` (ADP ${tip.expectedPick}, Rank ${tip.rank}, Picks Before ${tip.picksBefore})`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </summary>
       <div className="qb-card-body">
         <p className="qb-card-hint">
           Draft tips from the ranking below. They never change the order — the
           list already decides.
         </p>
-        {leagueWinnerTips.length > 0 ? (
-          <div className="qb-card-lw">
-            <p className="qb-card-lw-heading">League winners in the next 20 picks</p>
-            {leagueWinnerTips.map((tip) => (
-              <p key={tip.player.id} className="qb-card-lw-line">
-                {formatLeagueWinnerTip(tip)}
-              </p>
-            ))}
-          </div>
-        ) : null}
         {card?.bestQb ? (
           <div className="qb-card-row">
             <span>Best QB now: {card.bestQb.player.player}</span>

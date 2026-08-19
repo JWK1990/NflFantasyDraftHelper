@@ -68,4 +68,20 @@ describe("critical tap and undo flow", () => {
     fireEvent.click(teamButton);
     expect(drafts).toEqual(["other"]);
   });
+
+  it("hides the coach name behind a spinner while ranking is updating", () => {
+    render(
+      <PlayerRow
+        player={bijan}
+        rank={1}
+        expanded={false}
+        pickTeam={{ isUserPick: false, label: "Alistair", teamName: "The Situation" }}
+        busy
+        onToggle={() => undefined}
+        onDraft={() => undefined}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "Alistair" })).toBeNull();
+    expect(screen.getByLabelText("Updating")).toBeTruthy();
+  });
 });

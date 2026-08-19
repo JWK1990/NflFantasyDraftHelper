@@ -258,7 +258,7 @@ export function PlayerRow({
           {", "}
           <strong>ADP {formatAdp(player.sfConsensusAdp ?? player.adp)}</strong>
         </button>
-        {reasons.length > 0 || player.leagueWinner || player.outlook ? (
+        {reasons.length > 0 || player.leagueWinner || player.note ? (
           <div className="reasons">
             {player.leagueWinner ? (
               <button
@@ -273,14 +273,17 @@ export function PlayerRow({
                 LW
               </button>
             ) : null}
-            {player.outlook ? (
+            {player.note ? (
               <button
                 className="reason outlook-chip"
                 type="button"
-                aria-label="DraftSharks outlook"
+                aria-label="Quick Draft note"
                 onClick={(event) => {
                   event.stopPropagation();
-                  if (!expanded) onToggle();
+                  explain({
+                    title: "Quick Draft note",
+                    definition: player.note,
+                  });
                 }}
               >
                 Outlook

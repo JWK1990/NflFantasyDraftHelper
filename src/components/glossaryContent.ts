@@ -171,12 +171,12 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
       {
         term: "LW pill",
         definition:
-          "Gold row plus a gold LW tag in the same row as the other chips. League-winning players are frequently found early because early picks have the highest hit rates. Upside becomes more decisive later because safe but replaceable bench production has little value and failed late picks can usually be replaced through waivers. Tap LW to open the research on that player. Filter by Potential League Winner in Search / filter. When an available candidate is expected within the next 20 picks, the tip bar at the top names them so you can reach if you need to.",
+          "Gold row plus a gold LW tag in the same row as the other chips. League-winning players are frequently found early because early picks have the highest hit rates. Upside becomes more decisive later because safe but replaceable bench production has little value and failed late picks can usually be replaced through waivers. Tap LW to open the research on that player. Filter by Potential League Winner in Search / filter. When an available candidate is expected within your next 3 picks, the tip bar at the top names them so you can reach if you need to.",
       },
       {
         term: "Outlook pill",
         definition:
-          "DraftSharks numeric summary and a short verdict excerpt. Tap to expand the player row. The source link opens the public write-up. Display only — it does not change ranking.",
+          "Opens this player's Quick Draft note. Tap the player name or VORP/ADP line to expand the full research, including the DraftSharks outlook and source link. Display only — it does not change ranking.",
       },
       {
         term: "1 projection source",

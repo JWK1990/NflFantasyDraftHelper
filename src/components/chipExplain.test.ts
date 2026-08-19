@@ -42,7 +42,7 @@ describe("chip explanations", () => {
 
   it("explains outlook and single-source projection chips as display-only", () => {
     const outlook = explainChip("Outlook");
-    expect(outlook.title).toMatch(/outlook/i);
+    expect(outlook.title).toMatch(/quick draft note/i);
     expect(outlook.detail).toMatch(/does not change/i);
 
     const source = explainChip("1 projection source");

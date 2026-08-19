@@ -3,8 +3,10 @@ import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player, Recommendation } from "../domain/types.ts";
 import { initialDraftState } from "../state/draftReducer.ts";
 import {
-  formatLeagueWinnerTip,
+  formatLeagueWinnerTipShort,
+  lastNameFromPlayer,
   upcomingLeagueWinnerTips,
+  userPicksBeforeExpected,
 } from "./leagueWinnerTips.ts";
 
 const players = loadPlayers();
@@ -47,52 +49,57 @@ function stateAtPick(overallPick: number, drafted: Player[] = []): DraftState {
 }
 
 describe("league winner tip bar", () => {
-  it("formats the reach reminder from ADP, remaining picks and list rank", () => {
-    const washington = named("Parker Washington");
-    const tip = {
-      player: washington,
-      expectedPick: 94,
-      picksBefore: 14,
-      rank: 8,
-    };
-    expect(formatLeagueWinnerTip(tip)).toBe(
-      "LW Parker Washington (WR) is expected at pick 94, you have 14 picks before then, he is currently your 8th-best option",
-    );
-  });
-
-  it("uses best-option wording for rank 1 and singular pick when one pick remains", () => {
+  it("formats upcoming players as ADP, rank and picks-before shorthand", () => {
+    expect(lastNameFromPlayer("Josh Allen")).toBe("Allen");
+    expect(lastNameFromPlayer("Marvin Harrison Jr.")).toBe("Harrison Jr.");
     expect(
-      formatLeagueWinnerTip({
-        player: named("Malik Nabers"),
-        expectedPick: 40,
+      formatLeagueWinnerTipShort({
+        player: named("Parker Washington"),
+        expectedPick: 94,
         picksBefore: 1,
+        rank: 8,
+      }),
+    ).toBe("Washington (ADP 94, Rank 8, Picks Before 1)");
+    expect(
+      formatLeagueWinnerTipShort({
+        player: named("Josh Allen"),
+        expectedPick: 3,
+        picksBefore: 0,
         rank: 1,
       }),
-    ).toBe(
-      "LW Malik Nabers (WR) is expected at pick 40, you have 1 pick before then, he is currently your best option",
-    );
+    ).toBe("Allen (ADP 3, Rank 1, Picks Before 0)");
   });
 
-  it("surfaces league winners expected within the next 20 picks, soonest first", () => {
+  it("counts the user's remaining picks before ADP, not overall picks", () => {
+    expect(userPicksBeforeExpected(80, 94)).toBe(1);
+    expect(userPicksBeforeExpected(80, 80)).toBe(0);
+    expect(userPicksBeforeExpected(80, 122)).toBe(3);
+    expect(userPicksBeforeExpected(80, 138)).toBe(4);
+  });
+
+  it("surfaces league winners within the next 3 user picks, sorted by ADP", () => {
     const recs = [
       rec(named("Bijan Robinson")),
       rec(named("Josh Downs")),
       rec(named("Parker Washington")),
       rec(named("Jadarian Price")),
+      rec(named("Matthew Golden")),
     ];
     const tips = upcomingLeagueWinnerTips(recs, stateAtPick(80));
     expect(tips.map((tip) => tip.player.player)).toEqual([
       "Jadarian Price",
       "Parker Washington",
+      "Josh Downs",
     ]);
     expect(tips[0]).toMatchObject({ expectedPick: 80, picksBefore: 0, rank: 4 });
-    expect(tips[1]).toMatchObject({ expectedPick: 94, picksBefore: 14, rank: 3 });
+    expect(tips[1]).toMatchObject({ expectedPick: 94, picksBefore: 1, rank: 3 });
+    expect(tips[2]).toMatchObject({ expectedPick: 122, picksBefore: 3, rank: 2 });
   });
 
-  it("excludes drafted players and anyone outside the 20-pick window", () => {
+  it("excludes drafted players and anyone more than 3 user picks out", () => {
     const recs = [
       rec(named("Parker Washington")),
-      rec(named("Josh Downs")),
+      rec(named("Matthew Golden")),
     ];
     const tips = upcomingLeagueWinnerTips(
       recs,

@@ -56,15 +56,6 @@ export default function App() {
   }, [toast]);
 
   const currentOverallPick = state.picks.length + 1;
-  const pickTeam = useMemo<PickTeamContext>(() => {
-    const slot = teamSlotForOverallPick(currentOverallPick);
-    const teamName = teamNamesBySlot().get(slot) ?? `Team ${slot}`;
-    return {
-      isUserPick: isUserPick(currentOverallPick),
-      label: managerFirstName(slot),
-      teamName,
-    };
-  }, [currentOverallPick]);
   const roster = useMemo(() => myRosterPlayers(state.picks, byId), [state.picks]);
   const coverage = useMemo(() => rosterCoverageFromPlayers(roster), [roster]);
   // Search/filter stay on `state`; ranking ignores them so typing does not
@@ -81,7 +72,8 @@ export default function App() {
     [state.picks],
   );
   // The ranking recompute is heavy (~1-2s) and synchronous. To keep a visible
-  // "working" signal, we defer it one tick: the busy state paints first, the
+  // "working" signal, we defer it one tick: busy is derived from ranking
+  // staleness so the first paint after a pick already shows the spinner, the
   // previous ranking stays on screen, then results replace atomically. Stale
   // computes are discarded if a newer pick arrives mid-flight.
   const computeRanking = (draftState: DraftState) => {
@@ -90,23 +82,21 @@ export default function App() {
       recs,
       qbCard: deriveQbCard(recs, players, draftState),
       leagueWinnerTips: upcomingLeagueWinnerTips(recs, draftState),
+      picksLength: draftState.picks.length,
     };
   };
   const [ranking, setRanking] = useState(() => computeRanking(rankingState));
-  const [busy, setBusy] = useState(false);
   const firstRankingRun = useRef(true);
   useEffect(() => {
     if (firstRankingRun.current) {
       firstRankingRun.current = false;
       return;
     }
-    setBusy(true);
     let cancelled = false;
     const timer = window.setTimeout(() => {
       const next = computeRanking(rankingState);
       if (cancelled) return;
       setRanking(next);
-      setBusy(false);
     }, 0);
     return () => {
       cancelled = true;
@@ -114,6 +104,19 @@ export default function App() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rankingState]);
+  const busy = ranking.picksLength !== rankingState.picks.length;
+  // Keep the list buttons on the last rendered ranking until the new one
+  // lands, so the next coach's name does not flash in before the spinner.
+  const displayedOverallPick = ranking.picksLength + 1;
+  const pickTeam = useMemo<PickTeamContext>(() => {
+    const slot = teamSlotForOverallPick(displayedOverallPick);
+    const teamName = teamNamesBySlot().get(slot) ?? `Team ${slot}`;
+    return {
+      isUserPick: isUserPick(displayedOverallPick),
+      label: managerFirstName(slot),
+      teamName,
+    };
+  }, [displayedOverallPick]);
   const recs = ranking.recs;
   const qbCard = ranking.qbCard;
   const leagueWinnerTips = ranking.leagueWinnerTips;

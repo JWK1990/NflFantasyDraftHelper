@@ -265,11 +265,11 @@ export function explainChip(label: string): ChipExplanation {
 
   if (label === "Outlook") {
     return {
-      title: "DraftSharks outlook",
+      title: "Quick Draft note",
       definition:
-        "A compact rank/projection summary plus a short public verdict excerpt.",
+        "A short draft-day reminder for this player. It is not the full DraftSharks write-up.",
       detail:
-        "Display only. It does not change completed-team utility. Tap Outlook to expand the row and open the source link for the full write-up.",
+        "Tap Outlook to read the note. Tap the player name or VORP/ADP line to expand the full research, including the DraftSharks outlook. Display only — it does not change ranking.",
     };
   }
 
