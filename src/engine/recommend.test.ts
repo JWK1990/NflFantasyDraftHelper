@@ -301,7 +301,7 @@ describe("recommendation engine", () => {
     expect(completedTeamUtility([risky], 14).riskAdjustment).toBe(0);
   });
 
-  it("surfaces scouting tags as chips without using them as the only rank signal", { timeout: 20_000 }, () => {
+  it("surfaces scouting tags as chips without using them as the only rank signal", () => {
     const recs = recommend(players, initialDraftState);
     const cmc = recs.find((row) => row.player.player === "Christian McCaffrey");
     expect(cmc?.reasons).toContain("ELITE/RISK");

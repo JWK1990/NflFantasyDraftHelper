@@ -126,7 +126,7 @@ describe("league winner ranking isolation", () => {
     expectInvariant(fillUntil(139));
   });
 
-  it("does not change scores when an LW candidate shares a tier with a non-LW player", { timeout: 20_000 }, () => {
+  it("does not change scores when an LW candidate shares a tier with a non-LW player", () => {
     const recs = recommend(players, initialDraftState);
     const lw = recs.find((row) =>
       recs.some(

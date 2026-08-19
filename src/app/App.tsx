@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { LEAGUE } from "../config/leagueSettings.ts";
 import { loadPlayers } from "../data/loadPlayers.ts";
-import type { DraftedBy } from "../domain/types.ts";
+import type { DraftedBy, DraftState } from "../domain/types.ts";
 import { matchesFilters, recommend } from "../engine/recommend.ts";
 import { draftedIds, myRosterPlayers, playersById, rosterCounts, rosterCoverageFromPlayers } from "../engine/roster.ts";
 import { remainingByPosTier, currentEdgeTiers } from "../engine/tierScarcity.ts";
@@ -57,8 +57,23 @@ export default function App() {
   const counts = useMemo(() => rosterCounts(state.picks, byId), [state.picks]);
   const roster = useMemo(() => myRosterPlayers(state.picks, byId), [state.picks]);
   const coverage = useMemo(() => rosterCoverageFromPlayers(roster), [roster]);
-  const recs = useMemo(() => recommend(players, state), [state]);
-  const qbBranch = useMemo(() => compareQbBranches(players, state), [state]);
+  const rankingState = useMemo<DraftState>(
+    () => ({
+      schemaVersion: 1,
+      picks: state.picks,
+      search: "",
+      positionFilter: "ALL",
+      tierFilter: "ALL",
+      tagFilter: "ALL",
+      qb2Mode: state.qb2Mode,
+    }),
+    [state.picks, state.qb2Mode],
+  );
+  const recs = useMemo(() => recommend(players, rankingState), [rankingState]);
+  const qbBranch = useMemo(
+    () => compareQbBranches(players, rankingState),
+    [rankingState],
+  );
   const recById = useMemo(
     () => new Map(recs.map((row) => [row.player.id, row])),
     [recs],

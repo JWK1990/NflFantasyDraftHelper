@@ -57,8 +57,8 @@ export function explainChip(label: string): ChipExplanation {
     return {
       title: label,
       definition:
-        "ADP among remaining players says they will probably be gone before that pick.",
-      detail: `Your next relevant pick is ${unlikely[1]}. This named player is still ranked as if you would get them. Other later additions on this row are weighted by the same ADP chance.`,
+        "They were gone before that pick in more than half of the matched opponent streams. Players who have fallen past ADP are treated as more likely to be taken, not less.",
+      detail: `Your next relevant pick is ${unlikely[1]}. This named player is still ranked as if you would get them. The chip uses the same stream-survival rate as the breakdown, not a precise market probability.`,
     };
   }
 
@@ -67,8 +67,8 @@ export function explainChip(label: string): ChipExplanation {
     return {
       title: label,
       definition:
-        "This player is high on your list, and ADP says they should still be there at that pick.",
-      detail: `Pick ${likely[1]} is the availability target. You can often take someone more urgent first. Availability never swaps a different player onto this row.`,
+        "This player is high on your list, and they were still on the board at that pick in most matched opponent streams.",
+        detail: `Pick ${likely[1]} is the availability target. You can often take someone more urgent first. The chip uses the same stream-survival rate as the breakdown, not a precise market probability.`,
     };
   }
 
@@ -88,6 +88,32 @@ export function explainChip(label: string): ChipExplanation {
       definition: "They are likely to return, and the cost of passing looks small.",
       detail:
         "Useful planning information. It does not drop them below a worse take-now team.",
+    };
+  }
+
+  if (label === "Too close") {
+    return {
+      title: label,
+      definition:
+        "The completed-team gap is smaller than the close-call threshold, or the timing edge is unstable across matched draft streams.",
+      detail:
+        "Projections and ADP are not precise enough to treat this as a lock. Use tiers, VORP, and League Winner chips to choose. Too close is a label only — it does not change the sort order.",
+    };
+  }
+
+  if (label === "Lean") {
+    return {
+      title: label,
+      definition: "A modest completed-team advantage that holds across matched scenarios.",
+      detail: "Not a huge gap. Timing chips still matter.",
+    };
+  }
+
+  if (label === "Clear edge") {
+    return {
+      title: label,
+      definition: "The take-now completed-team advantage is large enough to trust over ADP noise.",
+      detail: "Still not a championship probability — just a robust projected-team gap.",
     };
   }
 

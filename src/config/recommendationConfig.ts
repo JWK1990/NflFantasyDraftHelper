@@ -77,9 +77,28 @@ export const RECOMMENDATION_CONFIG = {
     topN: 8,
     minProbability: 0.7,
   },
-  timingTieTolerance: 4,
   takeNowPassLoss: 8,
   canWaitPassLoss: 6,
+  robustness: {
+    closeCallPpw: 0.7,
+    leanPpw: 1.5,
+    robustWinRate: 0.62,
+    opponentPoolEarly: 10,
+    opponentPoolMiddle: 16,
+    opponentPoolLate: 24,
+    temperatureEarly: 8,
+    temperatureMiddle: 14,
+    temperatureLate: 22,
+    earlyThroughRound: 3,
+    middleThroughRound: 8,
+    overdueScale: 8,
+    overdueWeightCap: 3,
+    unlikelyReturn: 0.5,
+    // Availability is cheap (opponent window only). Full rest-of-draft
+    // utility stays at 1 stream per scenario so live ranking stays snappy.
+    availabilityStreams: 10,
+    utilityStreams: 1,
+  },
 };
 
 export type RecommendationConfig = typeof RECOMMENDATION_CONFIG;

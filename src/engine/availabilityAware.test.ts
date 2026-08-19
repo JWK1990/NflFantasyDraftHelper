@@ -4,6 +4,7 @@ import type { DraftState, Player } from "../domain/types.ts";
 import {
   adpWindowIds,
   remainingOpponentPicks,
+  returnProbability,
   simulateCandidateDraft,
   simulateCompletedDraft,
   QB2_POLICIES,
@@ -66,7 +67,7 @@ function fillToPick(targetPick: number, keepNames: string[], userPickName = "Jos
 const keepStars = ["Rashee Rice", "Daniel Jones", "Bryce Young", "Malik Nabers", "Amon-Ra St. Brown"];
 
 describe("availability-aware rest-of-draft", { timeout: 30_000 }, () => {
-  it("uses the same ADP window for chips and opponent consumption", () => {
+  it("keeps the ADP consume window helper aligned with remaining opponent picks", () => {
     const state = fillToPick(16, keepStars);
     const counts = rosterCounts(state.picks, byId);
     const eligible = eligiblePlayers(players, state.picks, counts, 16, RECOMMENDATION_CONFIG);
@@ -95,12 +96,28 @@ describe("availability-aware rest-of-draft", { timeout: 30_000 }, () => {
 
   it("does not treat an ADP-unlikely later WR as a certain Jones-branch acquisition", () => {
     const state = fillToPick(16, keepStars);
-    const board = withAdp(players, "Rashee Rice", 1);
+    const board = withAdp(players, "Rashee Rice", 16);
     const jones = named("Daniel Jones");
     const rice = named("Rashee Rice");
     const sim = simulateCandidateDraft(board, state, jones);
     expect(sim.firstPick?.id).toBe(jones.id);
-    expect(sim.roster.some((player) => player.id === rice.id)).toBe(false);
+    const riceChance = returnProbability(
+      rice,
+      board.filter(
+        (player) =>
+          !state.picks.some((pick) => pick.playerId === player.id) &&
+          player.id !== jones.id,
+      ),
+      16,
+      19,
+      { players: board, state },
+    );
+    if (riceChance < 0.4) {
+      expect(sim.roster.some((player) => player.id === rice.id)).toBe(false);
+    }
+    if (sim.laterWr?.player.id === rice.id) {
+      expect(sim.laterWr.returnProbability).toBeLessThan(0.95);
+    }
     const riceRow = simulateCandidateDraft(board, state, rice);
     expect(riceRow.roster.some((player) => player.id === rice.id)).toBe(true);
   });

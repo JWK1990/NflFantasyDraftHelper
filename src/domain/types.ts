@@ -92,12 +92,18 @@ export interface LaterPosBreakdown {
   returnProbability: number;
 }
 
-export interface SamePositionInversion {
+export type RobustnessVerdict = "clear-edge" | "lean" | "too-close";
+
+export interface SamePositionComparison {
   otherPlayer: string;
   directEdge: number;
   continuationEdge: number;
   netEdge: number;
+  winRate: number;
+  verdict: RobustnessVerdict;
 }
+
+export type SamePositionInversion = SamePositionComparison;
 
 export interface ScoreBreakdown {
   starterProjection: number;
@@ -114,6 +120,8 @@ export interface ScoreBreakdown {
   directProjection: number;
   continuationEffect: number;
   expectedPassLoss: number;
+  positionalPassLoss: number;
+  rawUtility: number;
   waitPick: number | null;
   laterPlayer?: string;
   laterPos?: Position;
@@ -126,6 +134,11 @@ export interface ScoreBreakdown {
   laterTe?: LaterPosBreakdown;
   alternativePlayer?: string;
   scenarioUtilities?: number[];
+  utilityP25?: number;
+  utilityP75?: number;
+  winsVsAlternative?: number;
+  verdict?: RobustnessVerdict;
+  samePositionComparison?: SamePositionComparison;
   samePositionInversion?: SamePositionInversion;
 }
 

@@ -189,16 +189,49 @@ export function PlayerRow({
                 <span>Recommendation edge</span>
                 <span>{formatSigned(recommendation.breakdown.expectedGain)}</span>
               </div>
+              {recommendation.breakdown.verdict ? (
+                <div className="breakdown-row">
+                  <span>Verdict</span>
+                  <span>
+                    {recommendation.breakdown.verdict === "clear-edge"
+                      ? "Clear edge"
+                      : recommendation.breakdown.verdict === "lean"
+                        ? "Lean"
+                        : "Too close"}
+                  </span>
+                </div>
+              ) : null}
+              {recommendation.breakdown.winsVsAlternative != null ? (
+                <div className="breakdown-row">
+                  <span>Wins matched simulations</span>
+                  <span>
+                    {Math.round(recommendation.breakdown.winsVsAlternative * 100)}%
+                  </span>
+                </div>
+              ) : null}
+              {recommendation.breakdown.utilityP25 != null &&
+              recommendation.breakdown.utilityP75 != null ? (
+                <div className="breakdown-row">
+                  <span>Outcome range (P25–P75)</span>
+                  <span>
+                    {formatPts(recommendation.breakdown.utilityP25)} to{" "}
+                    {formatPts(recommendation.breakdown.utilityP75)}
+                  </span>
+                </div>
+              ) : null}
               <div className="breakdown-row">
                 <span>Candidate direct projection</span>
                 <span>{recommendation.breakdown.directProjection.toFixed(1)}</span>
               </div>
               <div className="breakdown-row">
-                <span>Continuation / timing effect</span>
+                <span>
+                  Continuation / timing versus{" "}
+                  {recommendation.breakdown.alternativePlayer ?? "the alternative"}
+                </span>
                 <span>{formatSigned(recommendation.breakdown.continuationEffect)}</span>
               </div>
               <div className="breakdown-row">
-                <span>Chance candidate returns if passed</span>
+                <span>Return rate across matched streams</span>
                 <span>
                   {Math.round(recommendation.breakdown.returnProbability * 100)}%
                   {recommendation.breakdown.waitPick != null
@@ -207,8 +240,15 @@ export function PlayerRow({
                 </span>
               </div>
               <div className="breakdown-row">
-                <span>Expected pass loss</span>
+                <span>
+                  Action pass loss versus{" "}
+                  {recommendation.breakdown.alternativePlayer ?? "the alternative"}
+                </span>
                 <span>{formatSigned(recommendation.breakdown.expectedPassLoss)}</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Positional / tier drop</span>
+                <span>{formatSigned(recommendation.breakdown.positionalPassLoss)}</span>
               </div>
               {laterLine("Later QB", recommendation.breakdown.laterQb)}
               {laterLine("Later WR", recommendation.breakdown.laterWr)}
@@ -217,21 +257,50 @@ export function PlayerRow({
                 <span>QB2 policy</span>
                 <span>{policyLabel(recommendation.breakdown.laterQbPolicy)}</span>
               </div>
+              {recommendation.breakdown.samePositionComparison ? (
+                <p className="breakdown-note">
+                  Versus {recommendation.breakdown.samePositionComparison.otherPlayer}:
+                  direct{" "}
+                  {formatSigned(
+                    recommendation.breakdown.samePositionComparison.directEdge,
+                  )}
+                  , continuation{" "}
+                  {formatSigned(
+                    recommendation.breakdown.samePositionComparison.continuationEdge,
+                  )}
+                  , net completed-team{" "}
+                  {formatSigned(
+                    recommendation.breakdown.samePositionComparison.netEdge,
+                  )}
+                  . Wins paired scenarios:{" "}
+                  {Math.round(
+                    recommendation.breakdown.samePositionComparison.winRate * 100,
+                  )}
+                  %.
+                </p>
+              ) : null}
               {recommendation.breakdown.samePositionInversion ? (
                 <p className="breakdown-note">
-                  {recommendation.breakdown.samePositionInversion.otherPlayer}{" "}
-                  direct edge:{" "}
+                  Ranked above {recommendation.breakdown.samePositionInversion.otherPlayer}{" "}
+                  because continuation overcame a{" "}
                   {formatSigned(
                     recommendation.breakdown.samePositionInversion.directEdge,
-                  )}
-                  . Continuation/timing:{" "}
-                  {formatSigned(
-                    recommendation.breakdown.samePositionInversion.continuationEdge,
-                  )}
-                  . Net completed-team edge:{" "}
+                  )}{" "}
+                  direct-projection gap. Net completed-team edge:{" "}
                   {formatSigned(
                     recommendation.breakdown.samePositionInversion.netEdge,
                   )}
+                  . Wins paired scenarios:{" "}
+                  {Math.round(
+                    recommendation.breakdown.samePositionInversion.winRate * 100,
+                  )}
+                  %. Verdict:{" "}
+                  {recommendation.breakdown.samePositionInversion.verdict ===
+                  "too-close"
+                    ? "Unstable — keep direct-value order unless the edge is robust"
+                    : recommendation.breakdown.samePositionInversion.verdict === "lean"
+                      ? "Lean"
+                      : "Clear edge"}
                   .
                 </p>
               ) : null}

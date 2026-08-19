@@ -31,8 +31,14 @@ import {
   userPickSchedule,
 } from "./snake.ts";
 import { playerMatchesTagFilter, scoutingTag } from "./tags.ts";
-import { likelyGoneByNextTurn } from "./vona.ts";
 import { LEAGUE } from "../config/leagueSettings.ts";
+import {
+  classifyVerdict,
+  clampSamePositionUtilities,
+  inversionIsAuthoritative,
+  pairedWinRate,
+  percentile,
+} from "./robustness.ts";
 
 function similarSecureQbCount(
   qbs: Player[],
@@ -98,9 +104,10 @@ function collectReasons(
   extras: string[],
   leftInTier: number,
   currentOverallPick: number,
-  likelyGone: Set<string>,
+  returnChance: number,
   counts: RosterCounts,
   starts: boolean,
+  config: RecommendationConfig,
 ): string[] {
   const reasons: string[] = [];
   const tag = scoutingTag(player);
@@ -127,7 +134,7 @@ function collectReasons(
   if (!starts && player.pos !== "K" && player.pos !== "DST") {
     reasons.push("Bench only");
   }
-  if (likelyGone.has(player.id)) {
+  if (returnChance < config.robustness.unlikelyReturn) {
     const next = nextUserPickAfter(currentOverallPick);
     if (next != null) {
       reasons.push(`Unlikely to be available at pick ${next}`);
@@ -187,7 +194,6 @@ function applyLivePins(
 function addLikelyAvailableReasons(
   scored: Recommendation[],
   currentOverallPick: number,
-  likelyGone: Set<string>,
   branch: QbBranchComparison | null,
   config: RecommendationConfig,
 ): Recommendation[] {
@@ -201,7 +207,6 @@ function addLikelyAvailableReasons(
   for (const row of scored.slice(0, config.returnChip.topN)) {
     if (row.player.pos === "K" || row.player.pos === "DST") continue;
     if (row.player.id === reservedNow) continue;
-    if (likelyGone.has(row.player.id)) continue;
     if (row.breakdown.returnProbability < config.returnChip.minProbability) continue;
     if (row.reasons.some((reason) => reason.startsWith("Unlikely to be available"))) {
       continue;
@@ -219,7 +224,7 @@ function addTimingReasons(
     if (row.player.pos === "K" || row.player.pos === "DST") continue;
     if (
       row.breakdown.expectedPassLoss >= config.takeNowPassLoss &&
-      row.breakdown.returnProbability < 0.5
+      row.breakdown.returnProbability < config.robustness.unlikelyReturn
     ) {
       if (!row.reasons.includes("Take now")) row.reasons.push("Take now");
     } else if (
@@ -227,6 +232,9 @@ function addTimingReasons(
       row.breakdown.expectedPassLoss < config.canWaitPassLoss
     ) {
       if (!row.reasons.includes("Can wait")) row.reasons.push("Can wait");
+    }
+    if (row.breakdown.verdict === "too-close" && !row.reasons.includes("Too close")) {
+      row.reasons.push("Too close");
     }
   }
   return scored;
@@ -241,29 +249,73 @@ function laterNote(row: LaterAcquisition | null | undefined): LaterPosBreakdown 
   };
 }
 
-function scenariosAllowInversion(ahead: Recommendation, behind: Recommendation): boolean {
-  const aScen = ahead.breakdown.scenarioUtilities;
-  const bScen = behind.breakdown.scenarioUtilities;
-  if (!aScen || !bScen || aScen.length !== bScen.length || aScen.length === 0) {
-    return false;
+function compareEffectiveUtility(left: Recommendation, right: Recommendation): number {
+  const diff = right.dynamicScore - left.dynamicScore;
+  if (diff !== 0) return diff;
+  return right.player.vorp - left.player.vorp || left.player.modelRank - right.player.modelRank;
+}
+
+function samePositionPeer(
+  row: Recommendation,
+  scored: Recommendation[],
+): Recommendation | undefined {
+  if (row.player.pos === "K" || row.player.pos === "DST") return undefined;
+  const same = scored.filter(
+    (peer) => peer.player.pos === row.player.pos && peer.player.id !== row.player.id,
+  );
+  if (same.length === 0) return undefined;
+  const closerBetter = same
+    .filter((peer) => peer.player.modelPts > row.player.modelPts)
+    .sort((left, right) => left.player.modelPts - right.player.modelPts)[0];
+  if (closerBetter) return closerBetter;
+  return [...same].sort((left, right) => right.player.modelPts - left.player.modelPts)[0];
+}
+
+function nextSamePosition(
+  row: Recommendation,
+  scored: Recommendation[],
+): Recommendation | undefined {
+  if (row.player.pos === "K" || row.player.pos === "DST") return undefined;
+  return scored
+    .filter(
+      (peer) =>
+        peer.player.pos === row.player.pos &&
+        peer.player.id !== row.player.id &&
+        peer.player.modelPts < row.player.modelPts,
+    )
+    .sort((left, right) => right.player.modelPts - left.player.modelPts)[0];
+}
+
+function samePositionBreakdown(
+  row: Recommendation,
+  other: Recommendation,
+  config: RecommendationConfig,
+) {
+  const directEdge = row.player.modelPts - other.player.modelPts;
+  const netEdge = row.breakdown.rawUtility - other.breakdown.rawUtility;
+  const winRate =
+    pairedWinRate(row.breakdown.scenarioUtilities, other.breakdown.scenarioUtilities) ?? 0;
+  return {
+    otherPlayer: other.player.player,
+    directEdge,
+    continuationEdge: netEdge - directEdge,
+    netEdge,
+    winRate,
+    verdict: classifyVerdict(netEdge, winRate, config),
+  };
+}
+
+function annotateSamePositionComparisons(
+  scored: Recommendation[],
+  config: RecommendationConfig,
+): void {
+  for (const row of scored) {
+    const peer = samePositionPeer(row, scored);
+    if (peer) {
+      row.breakdown.samePositionComparison = samePositionBreakdown(row, peer, config);
+    }
   }
-  return aScen.every((utility, index) => utility + 0.01 >= (bScen[index] ?? 0));
-}
 
-function samePositionInversionBlocked(
-  ahead: Recommendation,
-  behind: Recommendation,
-): boolean {
-  if (ahead.player.pos !== behind.player.pos) return false;
-  if (ahead.player.pos === "K" || ahead.player.pos === "DST") return false;
-  if (ahead.player.modelPts >= behind.player.modelPts) return false;
-  const directEdge = behind.player.modelPts - ahead.player.modelPts;
-  const continuation =
-    ahead.dynamicScore - behind.dynamicScore + directEdge;
-  return !(continuation > directEdge + 0.01 && scenariosAllowInversion(ahead, behind));
-}
-
-function annotateInversions(scored: Recommendation[]): void {
   for (let index = 0; index < scored.length; index += 1) {
     const ahead = scored[index];
     if (!ahead) continue;
@@ -274,14 +326,71 @@ function annotateInversions(scored: Recommendation[]): void {
         row.player.modelPts > ahead.player.modelPts,
     );
     if (!behind) continue;
-    if (samePositionInversionBlocked(ahead, behind)) continue;
     const directEdge = behind.player.modelPts - ahead.player.modelPts;
+    const netEdge = ahead.breakdown.rawUtility - behind.breakdown.rawUtility;
+    const winRate =
+      pairedWinRate(
+        ahead.breakdown.scenarioUtilities,
+        behind.breakdown.scenarioUtilities,
+      ) ?? 0;
+    if (
+      !inversionIsAuthoritative(
+        netEdge,
+        netEdge + directEdge,
+        directEdge,
+        winRate,
+        config,
+      )
+    ) {
+      continue;
+    }
     ahead.breakdown.samePositionInversion = {
       otherPlayer: behind.player.player,
       directEdge,
-      continuationEdge: ahead.dynamicScore - behind.dynamicScore + directEdge,
-      netEdge: ahead.dynamicScore - behind.dynamicScore,
+      continuationEdge: netEdge + directEdge,
+      netEdge,
+      winRate,
+      verdict: classifyVerdict(netEdge, winRate, config),
     };
+  }
+}
+
+function annotateAlternatives(
+  scored: Recommendation[],
+  config: RecommendationConfig,
+): void {
+  for (const row of scored) {
+    const alternative =
+      scored.find((peer) => peer.player.id !== row.player.id) ?? row;
+    const raw = row.breakdown.rawUtility;
+    const altRaw = alternative.breakdown.rawUtility;
+    row.breakdown.alternativeUtility = alternative.breakdown.teamUtility;
+    row.breakdown.alternativePlayer = alternative.player.player;
+    row.breakdown.expectedGain = raw - altRaw;
+    row.breakdown.continuationEffect =
+      raw - altRaw - (row.player.modelPts - alternative.player.modelPts);
+    row.breakdown.expectedPassLoss =
+      (1 - row.breakdown.returnProbability) * Math.max(0, raw - altRaw);
+    const nextSame = nextSamePosition(row, scored);
+    row.breakdown.positionalPassLoss = nextSame
+      ? (1 - row.breakdown.returnProbability) *
+        Math.max(0, raw - nextSame.breakdown.rawUtility)
+      : 0;
+    const utilities = row.breakdown.scenarioUtilities ?? [];
+    if (utilities.length > 0) {
+      row.breakdown.utilityP25 = percentile(utilities, 0.25);
+      row.breakdown.utilityP75 = percentile(utilities, 0.75);
+    }
+    row.breakdown.winsVsAlternative =
+      pairedWinRate(
+        row.breakdown.scenarioUtilities,
+        alternative.breakdown.scenarioUtilities,
+      ) ?? undefined;
+    row.breakdown.verdict = classifyVerdict(
+      row.breakdown.expectedGain,
+      row.breakdown.winsVsAlternative ?? null,
+      config,
+    );
   }
 }
 
@@ -307,7 +416,6 @@ export function recommend(
     config,
   );
   const remaining = remainingByPosTier(eligible);
-  const likelyGone = likelyGoneByNextTurn(eligible, currentOverallPick);
   const lookahead = intrinsicLookaheadPool(
     eligible,
     roster,
@@ -341,11 +449,13 @@ export function recommend(
       sim?.candidateLocked && sim.roster.some((row) => row.id === player.id),
     );
     const team = simLocked && sim ? sim.utility : cheap;
+    const rankingScore = simLocked ? team.utility : team.utility - 4000;
     const returnChance = returnProbability(
       player,
       eligible,
       currentOverallPick,
       nextUser,
+      { players, state, config },
     );
 
     const later = sim?.laterAcquisition;
@@ -364,6 +474,8 @@ export function recommend(
       directProjection: player.modelPts,
       continuationEffect: 0,
       expectedPassLoss: 0,
+      positionalPassLoss: 0,
+      rawUtility: rankingScore,
       waitPick: nextUser,
       laterPlayer: later?.player.player,
       laterPos: later?.player.pos,
@@ -379,60 +491,30 @@ export function recommend(
 
     return {
       player,
-      dynamicScore: simLocked ? team.utility : team.utility - 4000,
+      dynamicScore: rankingScore,
       breakdown,
       reasons: collectReasons(
         player,
         qbReasons,
         leftInTier,
         currentOverallPick,
-        likelyGone,
+        returnChance,
         counts,
         starts,
+        config,
       ),
     };
   });
 
-  const compareUtility = (left: Recommendation, right: Recommendation) => {
-    if (samePositionInversionBlocked(left, right)) return 1;
-    if (samePositionInversionBlocked(right, left)) return -1;
-    const diff = right.dynamicScore - left.dynamicScore;
-    if (Math.abs(diff) > config.timingTieTolerance) return diff;
-    const pass =
-      (right.breakdown.expectedPassLoss ?? 0) - (left.breakdown.expectedPassLoss ?? 0);
-    if (pass !== 0) return pass;
-    return right.player.vorp - left.player.vorp || left.player.modelRank - right.player.modelRank;
-  };
-
-  scored.sort((left, right) => {
-    const diff = right.dynamicScore - left.dynamicScore;
-    if (diff !== 0) return diff;
-    return right.player.vorp - left.player.vorp || left.player.modelRank - right.player.modelRank;
-  });
-
-  for (const row of scored) {
-    const alternative =
-      scored.find((peer) => peer.player.id !== row.player.id) ?? row;
-    row.breakdown.alternativeUtility = alternative.dynamicScore;
-    row.breakdown.alternativePlayer = alternative.player.player;
-    row.breakdown.expectedGain = row.dynamicScore - alternative.dynamicScore;
-    row.breakdown.continuationEffect =
-      row.dynamicScore -
-      alternative.dynamicScore -
-      (row.player.modelPts - alternative.player.modelPts);
-    row.breakdown.expectedPassLoss =
-      (1 - row.breakdown.returnProbability) *
-      Math.max(0, row.dynamicScore - alternative.dynamicScore);
-  }
-
-  scored.sort(compareUtility);
-  annotateInversions(scored);
+  clampSamePositionUtilities(scored, config);
+  scored.sort(compareEffectiveUtility);
+  annotateAlternatives(scored, config);
+  annotateSamePositionComparisons(scored, config);
 
   return addTimingReasons(
     addLikelyAvailableReasons(
       applyLivePins(scored, currentOverallPick, counts, branch),
       currentOverallPick,
-      likelyGone,
       branch,
       config,
     ),

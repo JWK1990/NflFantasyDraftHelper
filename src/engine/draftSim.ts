@@ -8,6 +8,12 @@ import { completedTeamUtility, type TeamUtility } from "./teamUtility.ts";
 import { lateRoundReservation } from "./lateRound.ts";
 import { bestQb, isAcceptableQb } from "./qb.ts";
 import { draftedIds, myRosterPlayers, playersById } from "./roster.ts";
+import { mulberry32, scenarioStreamSalt, seedForScenario, weightedSample, type Rng } from "./rng.ts";
+import {
+  marketWeight,
+  opponentPoolSize,
+  opponentTemperature,
+} from "./robustness.ts";
 import {
   isUserPick,
   nextUserPickAfter,
@@ -25,7 +31,20 @@ export const BOARD_SCENARIOS: BoardScenario[] = [
   "early-qb",
   "late-qb",
   "early-wr",
+  "tier-cliff",
 ];
+
+export function availabilityTrialCount(
+  config: RecommendationConfig = RECOMMENDATION_CONFIG,
+): number {
+  return BOARD_SCENARIOS.length * config.robustness.availabilityStreams;
+}
+
+export function utilityTrialCount(
+  config: RecommendationConfig = RECOMMENDATION_CONFIG,
+): number {
+  return BOARD_SCENARIOS.length * config.robustness.utilityStreams;
+}
 
 export const QB2_POLICIES: QbSimPolicy[] = ["qb-next", "cliff", "middle", "punt"];
 
@@ -37,6 +56,8 @@ export interface SimAcquisition {
 export interface SimulateExtras {
   qbPolicy?: QbSimPolicy;
   scenario?: BoardScenario;
+  rngSeed?: number;
+  seedSalt?: number;
   protectUntilPick?: { playerId: string; overallPick: number };
   forcePick?: { playerId: string; overallPick: number };
   removeIds?: Iterable<string>;
@@ -179,6 +200,8 @@ function chooseOpponentPlayer(
   kBySlot: number[],
   dstBySlot: number[],
   cap: number,
+  rng: Rng,
+  config: RecommendationConfig,
 ): Player | null {
   const round = roundForPick(overallPick);
   const remainingRounds = LEAGUE.rounds - round + 1;
@@ -199,13 +222,24 @@ function chooseOpponentPlayer(
     }
   }
 
+  const legal: Player[] = [];
   for (const player of available) {
     if (player.pos === "QB" && qbBySlot[slot] >= cap) continue;
     if (player.pos === "K" && (kBySlot[slot] >= 1 || round < 13)) continue;
     if (player.pos === "DST" && (dstBySlot[slot] >= 1 || round < 13)) continue;
-    return player;
+    legal.push(player);
   }
-  return available[0] ?? null;
+  if (legal.length === 0) return available[0] ?? null;
+
+  const pool = legal.slice(0, opponentPoolSize(round, config));
+  const temperature = opponentTemperature(round, config);
+  return weightedSample(
+    pool.map((player) => ({
+      item: player,
+      weight: marketWeight(player.adp, overallPick, temperature, config),
+    })),
+    rng,
+  );
 }
 
 function greedyPool(eligible: Player[], roster: Player[]): Player[] {
@@ -410,6 +444,10 @@ export function simulateCompletedDraft(
   const qbPolicy = extras.qbPolicy ?? (waitOnQb ? "punt" : "flex");
   const protect = extras.protectUntilPick;
   const forcePick = extras.forcePick;
+  const rng = mulberry32(
+    extras.rngSeed ??
+      seedForScenario(preSelectionStateHash(state), scenario, extras.seedSalt ?? 0),
+  );
   let firstPick: Player | null = null;
   let candidateLocked = reservedId == null;
   let tookForcedQb = false;
@@ -509,6 +547,8 @@ export function simulateCompletedDraft(
         kBySlot,
         dstBySlot,
         cap,
+        rng,
+        config,
       );
     }
     if (!pick) continue;
@@ -544,18 +584,34 @@ export function simulateCompletedDraft(
   };
 }
 
+export interface ReturnSimContext {
+  players: Player[];
+  state: DraftState;
+  config?: RecommendationConfig;
+  seedSalt?: number;
+}
+
 export function returnProbability(
   player: Player,
   available: Player[],
   currentOverallPick: number,
   nextUserPick: number | null,
-  scenarios: readonly BoardScenario[] = BOARD_SCENARIOS,
+  context?: ReturnSimContext,
 ): number {
   if (nextUserPick == null) return 0;
+  if (context) {
+    return sampledReturnProbability(
+      player,
+      available,
+      currentOverallPick,
+      nextUserPick,
+      context,
+    );
+  }
   const intervening = remainingOpponentPicks(currentOverallPick, nextUserPick);
   if (intervening <= 0) return 1;
   let survived = 0;
-  for (const scenario of scenarios) {
+  for (const scenario of BOARD_SCENARIOS) {
     const ordered = [...available].sort((left, right) =>
       compareByScenario(left, right, scenario),
     );
@@ -563,7 +619,64 @@ export function returnProbability(
     if (index < 0) return 0;
     if (index >= intervening) survived += 1;
   }
-  return survived / scenarios.length;
+  return survived / BOARD_SCENARIOS.length;
+}
+
+function sampledReturnProbability(
+  player: Player,
+  available: Player[],
+  currentOverallPick: number,
+  nextUserPick: number,
+  context: ReturnSimContext,
+): number {
+  const config = context.config ?? RECOMMENDATION_CONFIG;
+  const byId = playersById(context.players);
+  const cap = config.branch.opponentQbCap;
+  const hash = preSelectionStateHash(context.state);
+  const userPicks = new Set(userPickSchedule());
+  const streams = config.robustness.availabilityStreams;
+  const baseSalt = context.seedSalt ?? 0;
+  let survived = 0;
+  let trials = 0;
+  for (const scenario of BOARD_SCENARIOS) {
+    for (let stream = 0; stream < streams; stream += 1) {
+      const salt = scenarioStreamSalt(baseSalt, stream);
+      const rng = mulberry32(seedForScenario(hash, scenario, salt));
+      let pool = [...available].sort((left, right) =>
+        compareByScenario(left, right, scenario),
+      );
+      const qbBySlot = slotPosCounts(context.state.picks, byId, "QB");
+      const kBySlot = slotPosCounts(context.state.picks, byId, "K");
+      const dstBySlot = slotPosCounts(context.state.picks, byId, "DST");
+      let taken = false;
+      for (let overall = currentOverallPick; overall < nextUserPick; overall += 1) {
+        if (userPicks.has(overall)) continue;
+        const pick = chooseOpponentPlayer(
+          pool,
+          overall,
+          slotForPick(overall),
+          qbBySlot,
+          kBySlot,
+          dstBySlot,
+          cap,
+          rng,
+          config,
+        );
+        if (!pick) continue;
+        if (pick.id === player.id) {
+          taken = true;
+          break;
+        }
+        pool = removePlayer(pool, pick.id);
+        if (pick.pos === "QB") qbBySlot[slotForPick(overall)] += 1;
+        if (pick.pos === "K") kBySlot[slotForPick(overall)] += 1;
+        if (pick.pos === "DST") dstBySlot[slotForPick(overall)] += 1;
+      }
+      trials += 1;
+      if (!taken && pool.some((row) => row.id === player.id)) survived += 1;
+    }
+  }
+  return trials === 0 ? 0 : survived / trials;
 }
 
 function laterByPos(
@@ -584,6 +697,7 @@ function annotateLater(
   players: Player[],
   state: DraftState,
   qbPolicy: QbSimPolicy,
+  config: RecommendationConfig = RECOMMENDATION_CONFIG,
 ): LaterAcquisition | null {
   if (!row) return null;
   const taken = draftedIds(state.picks);
@@ -594,7 +708,11 @@ function annotateLater(
   return {
     player: row.player,
     overallPick: row.overallPick,
-    returnProbability: returnProbability(row.player, available, current, row.overallPick),
+    returnProbability: returnProbability(row.player, available, current, row.overallPick, {
+      players,
+      state,
+      config,
+    }),
     fallbackPlayer: null,
     qbPolicy,
   };
@@ -614,16 +732,21 @@ export function simulateCandidateDraft(
   state: DraftState,
   candidate: Player,
   config: RecommendationConfig = RECOMMENDATION_CONFIG,
+  seedSalt = 0,
 ): CompletedSim {
   const byId = playersById(players);
   const roster = myRosterPlayers(state.picks, byId);
   const policies = policiesForCandidate(roster, candidate);
+  const stateHash = preSelectionStateHash(state);
+  const streams = config.robustness.utilityStreams;
   let bestPolicy = policies[0] ?? "flex";
   let bestMedian: CompletedSim | null = null;
   for (const policy of policies) {
     const sim = simulateCompletedDraft(players, state, candidate, config, false, {
       qbPolicy: policy,
       scenario: "median",
+      rngSeed: seedForScenario(stateHash, "median", scenarioStreamSalt(seedSalt, 0)),
+      seedSalt: scenarioStreamSalt(seedSalt, 0),
     });
     if (!bestMedian || sim.utility.utility > bestMedian.utility.utility) {
       bestMedian = sim;
@@ -631,21 +754,32 @@ export function simulateCandidateDraft(
     }
   }
 
-  const scenarioSims = BOARD_SCENARIOS.map((scenario) => {
-    if (scenario === "median" && bestMedian) return bestMedian;
-    return simulateCompletedDraft(players, state, candidate, config, false, {
-      qbPolicy: bestPolicy,
-      scenario,
-    });
-  });
+  const scenarioSims: CompletedSim[] = [];
+  for (const scenario of BOARD_SCENARIOS) {
+    for (let stream = 0; stream < streams; stream += 1) {
+      const salt = scenarioStreamSalt(seedSalt, stream);
+      if (scenario === "median" && stream === 0 && bestMedian) {
+        scenarioSims.push(bestMedian);
+        continue;
+      }
+      scenarioSims.push(
+        simulateCompletedDraft(players, state, candidate, config, false, {
+          qbPolicy: bestPolicy,
+          scenario,
+          rngSeed: seedForScenario(stateHash, scenario, salt),
+          seedSalt: salt,
+        }),
+      );
+    }
+  }
   const median = scenarioSims[0] ?? bestMedian;
   if (!median) {
     return simulateCompletedDraft(players, state, candidate, config);
   }
 
-  const laterQb = annotateLater(laterByPos(median, candidate, "QB"), candidate, players, state, bestPolicy);
-  const laterWr = annotateLater(laterByPos(median, candidate, "WR"), candidate, players, state, bestPolicy);
-  const laterTe = annotateLater(laterByPos(median, candidate, "TE"), candidate, players, state, bestPolicy);
+  const laterQb = annotateLater(laterByPos(median, candidate, "QB"), candidate, players, state, bestPolicy, config);
+  const laterWr = annotateLater(laterByPos(median, candidate, "WR"), candidate, players, state, bestPolicy, config);
+  const laterTe = annotateLater(laterByPos(median, candidate, "TE"), candidate, players, state, bestPolicy, config);
   const primary = candidate.pos === "QB" ? laterWr ?? laterTe ?? laterQb : laterQb ?? laterWr ?? laterTe;
 
   return {

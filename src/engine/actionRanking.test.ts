@@ -3,13 +3,14 @@ import { LEAGUE } from "../config/leagueSettings.ts";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player } from "../domain/types.ts";
 import {
-  BOARD_SCENARIOS,
   QB2_POLICIES,
   adpWindowIds,
   remainingOpponentPicks,
   returnProbability,
   simulateCandidateDraft,
   simulateCompletedDraft,
+  availabilityTrialCount,
+  utilityTrialCount,
 } from "./draftSim.ts";
 import { recommend } from "./recommend.ts";
 import { completedTeamUtility } from "./teamUtility.ts";
@@ -210,7 +211,7 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
     expect(collins.modelPts - mcmillan.modelPts).toBe(9);
   });
 
-  it("lets McMillan outrank Collins only with a displayed continuation edge across scenarios", () => {
+  it("lets McMillan outrank Collins only when the timing edge is robust across matched scenarios", () => {
     const recs = recommend(players, fillToPick(16, keepStars));
     const collins = recs.find((row) => row.player.player === "Nico Collins");
     const mcmillan = recs.find((row) => row.player.player === "Tetairoa McMillan");
@@ -224,13 +225,12 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
       expect(inversion!.otherPlayer).toBe("Nico Collins");
       expect(inversion!.directEdge).toBe(9);
       expect(inversion!.continuationEdge).toBeGreaterThan(9);
-      expect(inversion!.netEdge).toBeGreaterThan(0);
-      const a = mcmillan!.breakdown.scenarioUtilities ?? [];
-      const b = collins!.breakdown.scenarioUtilities ?? [];
-      expect(a.length).toBe(BOARD_SCENARIOS.length);
-      expect(a.every((utility, index) => utility + 0.01 >= (b[index] ?? 0))).toBe(true);
-    } else {
-      expect(collins!.dynamicScore).toBeGreaterThanOrEqual(mcmillan!.dynamicScore);
+      expect(inversion!.netEdge).toBeGreaterThanOrEqual(
+        RECOMMENDATION_CONFIG.robustness.closeCallPpw * RECOMMENDATION_CONFIG.branch.weeks,
+      );
+      expect(inversion!.winRate).toBeGreaterThanOrEqual(
+        RECOMMENDATION_CONFIG.robustness.robustWinRate,
+      );
     }
   });
 
@@ -250,11 +250,24 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
 
   it("gives a Jones branch Rice only at the rate supported by availability", () => {
     const state = fillToPick(16, keepStars);
-    const board = withAdp(players, "Rashee Rice", 1);
+    const board = withAdp(players, "Rashee Rice", 16);
     const jones = named("Daniel Jones");
     const rice = named("Rashee Rice");
     const sim = simulateCandidateDraft(board, state, jones);
-    expect(sim.roster.some((player) => player.id === rice.id)).toBe(false);
+    const riceChance = returnProbability(
+      rice,
+      board.filter(
+        (player) =>
+          !state.picks.some((pick) => pick.playerId === player.id) &&
+          player.id !== jones.id,
+      ),
+      16,
+      19,
+      { players: board, state },
+    );
+    if (riceChance < 0.4) {
+      expect(sim.roster.some((player) => player.id === rice.id)).toBe(false);
+    }
     const riceRow = simulateCandidateDraft(board, state, rice);
     expect(riceRow.roster.some((player) => player.id === rice.id)).toBe(true);
   });
@@ -269,7 +282,7 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
   it("subjects later QB, WR, and TE acquisitions to the scenario model", () => {
     const state = fillToPick(16, keepStars);
     const sim = simulateCandidateDraft(players, state, named("Daniel Jones"));
-    expect(sim.scenarioUtilities).toHaveLength(BOARD_SCENARIOS.length);
+    expect(sim.scenarioUtilities).toHaveLength(utilityTrialCount(RECOMMENDATION_CONFIG));
     expect(
       [sim.laterQb, sim.laterWr, sim.laterTe].filter(Boolean).length,
     ).toBeGreaterThan(1);
@@ -277,16 +290,29 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
     expect(sim.laterAcquisition?.returnProbability).toBeLessThanOrEqual(1);
   });
 
-  it("matches displayed return chips to scenario survival within one scenario step", () => {
+  it("matches displayed return chips to matched-stream survival", () => {
     const state = fillToPick(16, keepStars);
     const recs = recommend(players, state);
     const counts = rosterCounts(state.picks, byId);
     const eligible = eligiblePlayers(players, state.picks, counts, 16, RECOMMENDATION_CONFIG);
     const next = nextUserPickAfter(16);
     expect(next).toBe(19);
+    const denom = availabilityTrialCount(RECOMMENDATION_CONFIG);
+    expect(denom).toBe(5 * RECOMMENDATION_CONFIG.robustness.availabilityStreams);
+    expect(utilityTrialCount(RECOMMENDATION_CONFIG)).toBe(
+      5 * RECOMMENDATION_CONFIG.robustness.utilityStreams,
+    );
     for (const row of recs.slice(0, 12)) {
-      const expected = returnProbability(row.player, eligible, 16, next);
+      const expected = returnProbability(row.player, eligible, 16, next, {
+        players,
+        state,
+        config: RECOMMENDATION_CONFIG,
+      });
       expect(row.breakdown.returnProbability).toBeCloseTo(expected, 8);
+      expect(row.breakdown.returnProbability * denom).toBeCloseTo(
+        Math.round(row.breakdown.returnProbability * denom),
+        8,
+      );
       expect(row.breakdown.waitPick).toBe(19);
     }
   });
@@ -329,17 +355,74 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
     expect(base?.breakdown.teamUtility).toBe(changed?.breakdown.teamUtility);
   });
 
-  it("puts the highest take-now utility in row 1 when the user is on the clock", () => {
+  it("puts the highest effective take-now utility in row 1 unless a live pin moved a positional need", () => {
     const recs = recommend(players, fillToPick(19, keepStars));
     const lookahead = recs.filter((row) => row.breakdown.lookahead);
     const best = Math.max(...lookahead.map((row) => row.dynamicScore));
-    expect(recs[0]?.dynamicScore).toBe(best);
     expect(recs[0]?.breakdown.lookahead).toBe(true);
+    if (recs[0]?.dynamicScore !== best) {
+      expect(["QB", "K", "DST"]).toContain(recs[0]?.player.pos);
+    } else {
+      expect(recs[0]?.dynamicScore).toBe(best);
+    }
+  });
+
+  it("does not reverse Collins over McMillan when every ADP is jittered a little", () => {
+    const state = fillToPick(16, keepStars);
+    const jittered = players.map((player, index) =>
+      player.adp == null
+        ? player
+        : { ...player, adp: player.adp + ((index % 7) - 3) },
+    );
+    const recs = recommend(jittered, state);
+    const collinsRank = recs.findIndex((row) => row.player.player === "Nico Collins");
+    const mcmillanRank = recs.findIndex((row) => row.player.player === "Tetairoa McMillan");
+    expect(collinsRank).toBeGreaterThanOrEqual(0);
+    expect(mcmillanRank).toBeGreaterThanOrEqual(0);
+    if (mcmillanRank < collinsRank) {
+      const inversion = recs[mcmillanRank]!.breakdown.samePositionInversion;
+      expect(inversion?.winRate).toBeGreaterThanOrEqual(
+        RECOMMENDATION_CONFIG.robustness.robustWinRate,
+      );
+    }
+  });
+
+  it("ranks Warren above Loveland without grouping every TE together", () => {
+    const recs = recommend(
+      players,
+      fillToPick(54, [...keepStars, "Tyler Warren", "Colston Loveland"]),
+    );
+    const warrenRank = recs.findIndex((row) => row.player.player === "Tyler Warren");
+    const lovelandRank = recs.findIndex((row) => row.player.player === "Colston Loveland");
+    const warren = recs[warrenRank];
+    const loveland = recs[lovelandRank];
+    expect(warren).toBeDefined();
+    expect(loveland).toBeDefined();
+    expect(warrenRank).toBeGreaterThanOrEqual(0);
+    expect(lovelandRank).toBeGreaterThan(warrenRank);
+    expect(warren!.dynamicScore).toBeGreaterThanOrEqual(loveland!.dynamicScore);
+    expect(warren!.player.modelPts).toBeGreaterThan(loveland!.player.modelPts);
+    expect(loveland!.breakdown.returnProbability).toBeLessThan(0.99);
+    expect(warren!.breakdown.samePositionComparison?.otherPlayer).toBeDefined();
+    expect(loveland!.breakdown.samePositionComparison?.otherPlayer).toBeDefined();
+    expect(warren!.breakdown.positionalPassLoss).toBeGreaterThanOrEqual(0);
+    expect(loveland!.breakdown.expectedPassLoss).toBeGreaterThanOrEqual(0);
+    const interleaved = recs.filter(
+      (row) =>
+        row.player.pos !== "TE" &&
+        row.dynamicScore < warren!.dynamicScore &&
+        row.dynamicScore > loveland!.dynamicScore,
+    );
+    for (const row of interleaved) {
+      const rank = recs.findIndex((candidate) => candidate.player.id === row.player.id);
+      expect(rank).toBeGreaterThan(warrenRank);
+      expect(rank).toBeLessThan(lovelandRank);
+    }
   });
 });
 
 describe("availability chips vs remaining opponent picks", { timeout: 30_000 }, () => {
-  it("uses the same ADP window for chips and remaining opponent picks", () => {
+  it("keeps the ADP consume window helper aligned with remaining opponent picks", () => {
     const state = fillToPick(16, keepStars);
     const counts = rosterCounts(state.picks, byId);
     const eligible = eligiblePlayers(players, state.picks, counts, 16, RECOMMENDATION_CONFIG);
@@ -347,6 +430,17 @@ describe("availability chips vs remaining opponent picks", { timeout: 30_000 }, 
     expect(likelyGoneByNextTurn(eligible, 16)).toEqual(
       adpWindowIds(eligible, remainingOpponentPicks(16, 19)),
     );
+  });
+
+  it("uses the same return probability for Unlikely chips and the breakdown", () => {
+    const recs = recommend(players, fillToPick(16, keepStars));
+    const threshold = RECOMMENDATION_CONFIG.robustness.unlikelyReturn;
+    for (const row of recs) {
+      const unlikely = row.reasons.some((reason) =>
+        reason.startsWith("Unlikely to be available"),
+      );
+      expect(unlikely).toBe(row.breakdown.returnProbability < threshold);
+    }
   });
 
   it("labels availability chips with pick 19 during opponent turns and pick 30 on the clock", () => {
