@@ -4,16 +4,12 @@ import { useChipExplain } from "./ChipExplainContext.tsx";
 
 interface RosterStripProps {
   coverage: RosterCoverage;
-  qbCount: number;
-  qbCap: number;
   focusPos: Position | null;
   onFocus: (position: Position) => void;
 }
 
 export function RosterStrip({
   coverage,
-  qbCount,
-  qbCap,
   focusPos,
   onFocus,
 }: RosterStripProps) {
@@ -25,7 +21,8 @@ export function RosterStrip({
     prominent?: boolean;
     pos?: Position;
   }[] = [
-    { key: "qb", label: `QB ${qbCount}/${qbCap}`, filled: qbCount > 0, prominent: true, pos: "QB" },
+    // One QB STARTER slot; a second QB can only go in OP (shown separately).
+    { key: "qb", label: `QB ${coverage.qb}/1`, filled: coverage.qb >= 1, prominent: true, pos: "QB" },
     { key: "rb", label: `RB ${coverage.rb}/2`, filled: coverage.rb >= 2, pos: "RB" },
     { key: "wr", label: `WR ${coverage.wr}/2`, filled: coverage.wr >= 2, pos: "WR" },
     { key: "te", label: `TE ${coverage.te}/1`, filled: coverage.te >= 1, pos: "TE" },

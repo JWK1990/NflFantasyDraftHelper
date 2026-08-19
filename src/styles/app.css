@@ -242,6 +242,13 @@
   color: var(--text-muted);
 }
 
+.qb-card-demand {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
 .roster-strip,
 .tier-strip {
   display: flex;

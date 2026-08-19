@@ -67,6 +67,14 @@ export function QbCardView({ card }: QbCardProps) {
           </div>
         ) : null}
         <p className="qb-card-reason">{capacityLine}</p>
+        <p className="qb-card-demand">
+          <strong>{card.qbsTaken}</strong> QBs drafted so far.{" "}
+          {card.teamsNeedingQb.length === 0
+            ? "No other team can add a QB — the rest are yours to time."
+            : `Still able to draft a QB: ${card.teamsNeedingQb
+                .map((team) => `${team.name} (${team.needs})`)
+                .join(", ")}.`}
+        </p>
       </div>
     </details>
   );

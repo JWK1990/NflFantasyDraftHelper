@@ -156,7 +156,7 @@ export function PlayerRow({
             title={`Drafted by ${pickTeam.teamName}`}
             onClick={() => onDraft("other")}
           >
-            {busy ? <span className="btn-spinner" aria-label="Updating" /> : pickTeam.initials}
+            {busy ? <span className="btn-spinner" aria-label="Updating" /> : pickTeam.label}
           </button>
         </div>
       )}

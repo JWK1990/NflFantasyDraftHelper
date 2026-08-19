@@ -36,7 +36,7 @@ function renderRow(
   );
 }
 
-const USER_PICK = { isUserPick: true, initials: "YOU", teamName: "The Dan Marinehos" };
+const USER_PICK = { isUserPick: true, label: "Josh", teamName: "The Dan Marinehos" };
 
 describe("league winner UI", () => {
   afterEach(() => cleanup());

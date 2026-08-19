@@ -11,8 +11,8 @@ interface ListRow {
 
 export interface PickTeamContext {
   isUserPick: boolean;
-  /** Initials shown on the grey button during an opponent's pick. */
-  initials: string;
+  /** Owning manager's first name, shown on the grey opponent pick button. */
+  label: string;
   /** Full team name, used for the button title/tooltip. */
   teamName: string;
 }

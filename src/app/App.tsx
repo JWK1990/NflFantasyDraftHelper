@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { LEAGUE } from "../config/leagueSettings.ts";
 import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftedBy, DraftState } from "../domain/types.ts";
 import { matchesFilters, recommend } from "../engine/recommend.ts";
-import { draftedIds, myRosterPlayers, playersById, rosterCounts, rosterCoverageFromPlayers } from "../engine/roster.ts";
+import { draftedIds, myRosterPlayers, playersById, rosterCoverageFromPlayers } from "../engine/roster.ts";
 import { remainingByPosTier, currentEdgeTiers } from "../engine/tierScarcity.ts";
 import { isUserPick } from "../engine/snake.ts";
-import { teamInitials, teamSlotForOverallPick } from "../engine/teams.ts";
-import { teamNamesBySlot } from "../config/leagueTeams.ts";
+import { teamSlotForOverallPick } from "../engine/teams.ts";
+import { managerFirstName, teamNamesBySlot } from "../config/leagueTeams.ts";
 import { deriveQbCard } from "../engine/qbCard.ts";
 import { QbCardView } from "../components/QbCard.tsx";
 import { DraftHeader } from "../components/DraftHeader.tsx";
@@ -61,11 +60,10 @@ export default function App() {
     const teamName = teamNamesBySlot().get(slot) ?? `Team ${slot}`;
     return {
       isUserPick: isUserPick(currentOverallPick),
-      initials: teamInitials(teamName),
+      label: managerFirstName(slot),
       teamName,
     };
   }, [currentOverallPick]);
-  const counts = useMemo(() => rosterCounts(state.picks, byId), [state.picks]);
   const roster = useMemo(() => myRosterPlayers(state.picks, byId), [state.picks]);
   const coverage = useMemo(() => rosterCoverageFromPlayers(roster), [roster]);
   const rankingState = useMemo<DraftState>(
@@ -220,8 +218,6 @@ export default function App() {
       {resetBanner ? <div className="banner">{resetBanner}</div> : null}
       <RosterStrip
         coverage={coverage}
-        qbCount={counts.QB}
-        qbCap={LEAGUE.hardCaps.QB}
         focusPos={listFocus?.kind === "pos" ? listFocus.pos : null}
         onFocus={(position) => {
           setListFocus((current) =>

@@ -24,3 +24,26 @@ export const TEAM_NAMES_BY_SLOT: Record<number, string> = {
 export function teamNamesBySlot(): Map<number, string> {
   return new Map(Object.entries(TEAM_NAMES_BY_SLOT).map(([slot, name]) => [Number(slot), name]));
 }
+
+/** Manager (owner) full names by draft slot, used for the pick buttons. */
+export const MANAGER_NAMES_BY_SLOT: Record<number, string> = {
+  1: "Michael Fenwick-Nevin",
+  2: "Hayden Mclennan",
+  3: "Alistair Pascoe",
+  4: "Matt Ellery",
+  5: "Tyler Ellery",
+  [LEAGUE.userSlot]: "Josh K",
+  7: "Alec Baenziger",
+  8: "Jack Lees",
+  9: "James Nearchou",
+  10: "George Priestley",
+  11: "Alex McLaren",
+  12: "David Corbett",
+};
+
+/** First name of the manager owning a slot (button label for opponent picks). */
+export function managerFirstName(slot: number): string {
+  const full = MANAGER_NAMES_BY_SLOT[slot];
+  if (!full) return `Team ${slot}`;
+  return full.split(/\s+/)[0] ?? full;
+}

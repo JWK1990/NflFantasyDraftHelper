@@ -22,7 +22,7 @@ function TapUndoHarness() {
         rank={1}
         expanded={false}
         draftedBy={drafted?.draftedBy}
-        pickTeam={{ isUserPick: true, initials: "YOU", teamName: "The Dan Marinehos" }}
+        pickTeam={{ isUserPick: true, label: "Josh", teamName: "The Dan Marinehos" }}
         onToggle={() => undefined}
         onDraft={(draftedBy: DraftedBy) =>
           dispatch({ type: "DRAFT_PLAYER", playerId: bijan.id, draftedBy })
@@ -56,15 +56,15 @@ describe("critical tap and undo flow", () => {
         player={bijan}
         rank={1}
         expanded={false}
-        pickTeam={{ isUserPick: false, initials: "GRD", teamName: "Gridiron" }}
+        pickTeam={{ isUserPick: false, label: "Alistair", teamName: "The Situation" }}
         onToggle={() => undefined}
         onDraft={(draftedBy) => drafts.push(draftedBy)}
       />,
     );
     // No Mine button off the clock — prevents an accidental off-schedule Mine.
     expect(screen.queryByRole("button", { name: "Mine" })).toBeNull();
-    const teamButton = screen.getByRole("button", { name: "GRD" });
-    expect(teamButton.getAttribute("title")).toContain("Gridiron");
+    const teamButton = screen.getByRole("button", { name: "Alistair" });
+    expect(teamButton.getAttribute("title")).toContain("The Situation");
     fireEvent.click(teamButton);
     expect(drafts).toEqual(["other"]);
   });

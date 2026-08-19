@@ -3,14 +3,16 @@ import {
   type RecommendationConfig,
 } from "../config/recommendationConfig.ts";
 import type { DraftState, Player, Recommendation } from "../domain/types.ts";
-import { buildTeamStates } from "./teams.ts";
+import { buildTeamStates, opponentTeams } from "./teams.ts";
 import {
   guaranteedQbFloor,
   opponentQbCapacityBefore,
+  remainingQbCapacity,
   sortQbsByValue,
 } from "./qbCapacity.ts";
 import { draftedIds, playersById, rosterCounts } from "./roster.ts";
 import { nextUserPickAfter, userPickSchedule } from "./snake.ts";
+import { teamNamesBySlot } from "../config/leagueTeams.ts";
 
 export type QbCardLeader = "qb" | "skill" | "even";
 
@@ -41,6 +43,10 @@ export interface QbCard {
   guaranteedFloor: Player | null;
   bestAvailableQb: Player | null;
   remainingQbCount: number;
+  /** Total QBs already drafted across all 12 teams. */
+  qbsTaken: number;
+  /** Opponents that can still draft a QB, with how many more they can take. */
+  teamsNeedingQb: { name: string; needs: number }[];
   nextUserPick: number | null;
   lastUserPick: number;
 }
@@ -56,7 +62,7 @@ export function deriveQbCard(
   state: DraftState,
   config: RecommendationConfig = RECOMMENDATION_CONFIG,
 ): QbCard | null {
-  const teams = buildTeamStates(state.picks, players);
+  const teams = buildTeamStates(state.picks, players, teamNamesBySlot());
   // User QB count uses the same draftedBy="mine" tally as the rest of the engine
   // (robust to any off-schedule logging); opponent capacity uses the slot model.
   const userQbCount = rosterCounts(state.picks, playersById(players)).QB;
@@ -110,6 +116,12 @@ export function deriveQbCard(
   const capacityToEnd = opponentQbCapacityBefore(teams, currentPick, lastUserPick + 1);
   const floor = guaranteedQbFloor(availableQbs, capacityToEnd);
 
+  const qbsTaken = teams.reduce((sum, team) => sum + team.counts.QB, 0);
+  const teamsNeedingQb = opponentTeams(teams)
+    .map((team) => ({ name: team.displayName, needs: remainingQbCapacity(team) }))
+    .filter((team) => team.needs > 0)
+    .sort((a, b) => b.needs - a.needs);
+
   return {
     bestQb,
     bestSkill,
@@ -122,6 +134,8 @@ export function deriveQbCard(
     guaranteedFloor: floor.guaranteedFloor,
     bestAvailableQb: availableQbs[0] ?? null,
     remainingQbCount: availableQbs.length,
+    qbsTaken,
+    teamsNeedingQb,
     nextUserPick,
     lastUserPick,
   };
