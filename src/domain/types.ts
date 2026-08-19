@@ -49,6 +49,9 @@ export interface Player {
   tag: string;
   note: string;
   leagueWinner?: LeagueWinnerProfile;
+  coverageOnly?: boolean;
+  espnId?: number;
+  espnSfRank?: number;
 }
 
 export interface DraftPick {

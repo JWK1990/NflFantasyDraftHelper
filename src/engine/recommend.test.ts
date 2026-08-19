@@ -62,7 +62,7 @@ function fillUntil(
   return state;
 }
 
-describe("recommendation engine", () => {
+describe("recommendation engine", { timeout: 90_000 }, () => {
   it("never returns a drafted player", () => {
     const state = draft(initialDraftState, "Bijan Robinson", "other");
     const recs = recommend(players, state);

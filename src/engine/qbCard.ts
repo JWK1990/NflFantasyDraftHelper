@@ -77,7 +77,9 @@ export function deriveQbCard(
 
   const taken = draftedIds(state.picks);
   const availableQbs = sortQbsByValue(
-    players.filter((player) => player.pos === "QB" && !taken.has(player.id)),
+    players.filter(
+      (player) => player.pos === "QB" && !player.coverageOnly && !taken.has(player.id),
+    ),
   );
   if (availableQbs.length === 0) return null;
 

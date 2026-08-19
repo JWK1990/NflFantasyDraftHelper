@@ -249,6 +249,33 @@ describe("ESPN pick paste", () => {
     expect(matchEspnPlayer(players, row)?.player).toBe("Texans");
   });
 
+  it("imports matched picks and reports unmatched names instead of aborting", () => {
+    const result = importEspnPicks(
+      `1
+Josh Allen
+BUF
+QB
+The Dan Marinehos
+1
+1
+1
+2
+Nobody McFake
+BUF
+QB
+The Dan Marinehos
+1
+1
+1
+`,
+      players,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.picks).toHaveLength(1);
+    expect(result.unmatched[0]?.player).toBe("Nobody McFake");
+  });
+
   it("refuses a paste with a name that is not in the pool", () => {
     const result = importEspnPicks(
       `1
@@ -396,7 +423,7 @@ The Situation
     );
   });
 
-  it("matches Kenny Gainwell to Kenneth Gainwell", () => {
+  it("matches Kenny Gainwell in the ESPN pool", () => {
     expect(
       matchEspnPlayer(players, {
         overallPick: 104,
@@ -405,6 +432,50 @@ The Situation
         pos: "RB",
         fantasyTeam: "Fentasy Football",
       })?.player,
-    ).toBe("Kenneth Gainwell");
+    ).toBe("Kenny Gainwell");
+  });
+
+  it("matches the previously failing ESPN names including coverage and D/ST", () => {
+    const cases = [
+      { player: "Baker Mayfield", team: "TB", pos: "QB" },
+      { player: "Travis Hunter", team: "JAX", pos: "WRCB" },
+      { player: "Deebo Samuel Sr.", team: "SF", pos: "WR" },
+      { player: "Kenyon Sadiq", team: "NYJ", pos: "TE" },
+      { player: "De'Zhaun Stribling", team: "SF", pos: "WR" },
+      { player: "Lions D/ST", team: "DET", pos: "D/ST" },
+      { player: "Will Reichard", team: "MIN", pos: "K" },
+      { player: "Brian Robinson Jr.", team: "ATL", pos: "RB" },
+      { player: "Caleb Douglas", team: "MIA", pos: "WR" },
+      { player: "Jerry Jeudy", team: "CLE", pos: "WR" },
+      { player: "Zane Gonzalez", team: "MIA", pos: "K" },
+      { player: "Philip Rivers", team: "IND", pos: "QB" },
+    ] as const;
+    for (const row of cases) {
+      expect(
+        matchEspnPlayer(players, {
+          overallPick: 1,
+          ...row,
+          fantasyTeam: "The Dan Marinehos",
+        })?.player,
+      ).toBeTruthy();
+    }
+    expect(
+      matchEspnPlayer(players, {
+        overallPick: 90,
+        player: "Travis Hunter",
+        team: "JAX",
+        pos: "WRCB",
+        fantasyTeam: "Darwin Dishlickers",
+      })?.player,
+    ).toBe("Travis Hunter");
+    expect(
+      matchEspnPlayer(players, {
+        overallPick: 154,
+        player: "Lions D/ST",
+        team: "DET",
+        pos: "D/ST",
+        fantasyTeam: "Mahomes Magic",
+      })?.player,
+    ).toBe("Lions");
   });
 });

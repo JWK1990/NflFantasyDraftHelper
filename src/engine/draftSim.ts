@@ -8,6 +8,7 @@ import { completedTeamUtility, type TeamUtility } from "./teamUtility.ts";
 import { lateRoundReservation } from "./lateRound.ts";
 import { bestQb } from "./qb.ts";
 import { draftedIds, myRosterPlayers, playersById } from "./roster.ts";
+import { rankablePlayers } from "./eligibility.ts";
 import { mulberry32, scenarioStreamSalt, seedForScenario, weightedSample, type Rng } from "./rng.ts";
 import {
   marketWeight,
@@ -416,7 +417,7 @@ export function simulateCompletedDraft(
   const taken = draftedIds(state.picks);
   const remove = new Set(extras.removeIds ?? []);
   const scenario = extras.scenario ?? "median";
-  let available = players
+  let available = rankablePlayers(players)
     .filter((player) => !taken.has(player.id) && !remove.has(player.id))
     .sort((left, right) => compareByScenario(left, right, scenario));
   const roster = [...myRosterPlayers(state.picks, byId)];
@@ -531,6 +532,7 @@ export function returnProbability(
   context?: ReturnSimContext,
 ): number {
   if (nextUserPick == null) return 0;
+  available = available.filter((player) => !player.coverageOnly);
   if (context) {
     return sampledReturnProbability(
       player,
@@ -627,7 +629,7 @@ function annotateLater(
   if (!row) return null;
   const taken = draftedIds(state.picks);
   const current = state.picks.length + 1;
-  const available = players.filter(
+  const available = rankablePlayers(players).filter(
     (player) => !taken.has(player.id) && player.id !== candidate.id,
   );
   return {

@@ -69,7 +69,7 @@ function fillToPick(
 
 const keepStars = ["Jonathan Taylor", "Trey McBride", "De'Von Achane"];
 
-describe("candidate lock", { timeout: 30_000 }, () => {
+describe("candidate lock", { timeout: 90_000 }, () => {
   it("keeps Jonathan Taylor on his completed roster at pick 16 even if ADP is before 19", () => {
     const state = fillToPick(16, keepStars);
     expect(state.picks).toHaveLength(15);

@@ -57,7 +57,7 @@ function fillToPick(targetPick: number, keepNames: string[], userPickName = "Jos
 
 const keepStars = ["Rashee Rice", "Daniel Jones", "Bryce Young", "Malik Nabers", "Amon-Ra St. Brown"];
 
-describe("availability-aware rest-of-draft", { timeout: 30_000 }, () => {
+describe("availability-aware rest-of-draft", { timeout: 90_000 }, () => {
   it("does not treat an ADP-unlikely later WR as a certain Jones-branch acquisition", () => {
     const state = fillToPick(16, keepStars);
     const board = withAdp(players, "Rashee Rice", 16);

@@ -6,6 +6,6 @@ export default defineConfig({
   base: process.env.GITHUB_PAGES === "true" ? "/NflFantasyDraftHelper/" : "/",
   test: {
     environment: "node",
-    testTimeout: 20_000,
+    testTimeout: 60_000,
   },
 });

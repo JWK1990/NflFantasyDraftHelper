@@ -16,7 +16,7 @@ const players = loadPlayers();
  */
 function boardWithEveryTeamOnTwoQbs(): DraftState {
   const qbs = players
-    .filter((player) => player.pos === "QB")
+    .filter((player) => player.pos === "QB" && !player.coverageOnly)
     .sort((a, b) => a.modelRank - b.modelRank)
     .slice(0, 24);
   let state: DraftState = initialDraftState;
@@ -45,7 +45,9 @@ describe("QB capacity — engine integration", () => {
     const state = boardWithEveryTeamOnTwoQbs();
     const taken = draftedIds(state.picks);
     const available = players.filter((player) => !taken.has(player.id));
-    const remainingQbs = available.filter((player) => player.pos === "QB");
+    const remainingQbs = available.filter(
+      (player) => player.pos === "QB" && !player.coverageOnly,
+    );
     expect(remainingQbs.length).toBeGreaterThan(0);
 
     // Current pick is 25; the user's next pick is 30.
@@ -59,7 +61,7 @@ describe("QB capacity — engine integration", () => {
     const state = boardWithEveryTeamOnTwoQbs();
     const taken = draftedIds(state.picks);
     const remainingQbs = players.filter(
-      (player) => player.pos === "QB" && !taken.has(player.id),
+      (player) => player.pos === "QB" && !player.coverageOnly && !taken.has(player.id),
     );
     const floor = guaranteedQbFloor(remainingQbs, 0);
     expect(floor.guaranteedFloor).not.toBeNull();

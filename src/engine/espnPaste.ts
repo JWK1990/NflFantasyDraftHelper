@@ -8,6 +8,7 @@ export interface EspnPasteRow {
   team: string;
   pos: string;
   fantasyTeam: string;
+  espnId?: number;
 }
 
 export interface EspnPasteSuccess {
@@ -15,6 +16,7 @@ export interface EspnPasteSuccess {
   rows: EspnPasteRow[];
   picks: DraftPick[];
   mineCount: number;
+  unmatched: EspnPasteRow[];
 }
 
 export interface EspnPasteFailure {
@@ -43,6 +45,12 @@ const TEAM_ALIASES: Record<string, string> = {
   STL: "LAR",
   OAK: "LV",
   SD: "LAC",
+  BLT: "BAL",
+  BAL: "BAL",
+  CLV: "CLE",
+  CLE: "CLE",
+  HST: "HOU",
+  HOU: "HOU",
 };
 
 export function tokenizeEspnPaste(text: string): string[] {
@@ -189,6 +197,10 @@ export function matchEspnPlayer(
 ): Player | null {
   const pos = parseEspnPosition(row.pos);
   if (!pos) return null;
+  if (row.espnId != null) {
+    const byId = players.filter((player) => player.espnId === row.espnId);
+    if (byId.length === 1) return byId[0]!;
+  }
   const variants = nameVariants(row.player);
   const team = normalizeTeam(row.team);
   const pool = players.filter((player) => player.pos === pos);
@@ -276,16 +288,18 @@ export function importEspnPicks(
     });
   }
 
-  if (unmatched.length > 0) {
+  if (picks.length === 0) {
     const names = unmatched
       .map((row) => `${row.overallPick} ${row.player}`)
       .join(", ");
     return {
       ok: false,
-      error: `Could not match ${unmatched.length} player${unmatched.length === 1 ? "" : "s"}: ${names}. Nothing was imported.`,
+      error: unmatched.length
+        ? `Could not match ${unmatched.length} player${unmatched.length === 1 ? "" : "s"}: ${names}. Nothing was imported.`
+        : "No picks found. Copy the ESPN pick list and paste it here.",
       unmatched,
     };
   }
 
-  return { ok: true, rows, picks, mineCount };
+  return { ok: true, rows, picks, mineCount, unmatched };
 }

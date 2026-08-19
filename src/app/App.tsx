@@ -183,8 +183,15 @@ export default function App() {
     setImportOpen(false);
     setImportError(null);
     setExpandedId(null);
+    const skipped = result.unmatched.length
+      ? ` Skipped ${result.unmatched.length} unmatched: ${result.unmatched
+          .slice(0, 8)
+          .map((row) => `${row.overallPick} ${row.player}`)
+          .join(", ")}${result.unmatched.length > 8 ? "…" : ""}.`
+      : "";
     setToast({
-      message: `Imported ${result.picks.length} pick${result.picks.length === 1 ? "" : "s"} (${result.mineCount} yours).`,
+      message: `Imported ${result.picks.length} pick${result.picks.length === 1 ? "" : "s"} (${result.mineCount} yours).${skipped}`,
+      warning: result.unmatched.length > 0,
     });
   }
 

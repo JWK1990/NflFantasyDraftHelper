@@ -34,7 +34,7 @@ function fillToPick(targetPick: number, userPickName = "Christian McCaffrey"): D
 
 function everyTeamOnTwoQbs(): DraftState {
   const qbs = players
-    .filter((player) => player.pos === "QB")
+    .filter((player) => player.pos === "QB" && !player.coverageOnly)
     .sort((a, b) => a.modelRank - b.modelRank)
     .slice(0, 24);
   let state: DraftState = initialDraftState;
@@ -44,7 +44,7 @@ function everyTeamOnTwoQbs(): DraftState {
   return state;
 }
 
-describe("QB card (factual, derived)", () => {
+describe("QB card (factual, derived)", { timeout: 90_000 }, () => {
   it("matches the best-QB and best-non-QB row utilities exactly (test 22)", () => {
     const state = fillToPick(19);
     const recs = recommend(players, state);

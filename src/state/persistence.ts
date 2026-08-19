@@ -2,7 +2,7 @@ import type { DraftState, TagFilter } from "../domain/types.ts";
 import { initialDraftState } from "./draftReducer.ts";
 import { TAG_FILTER_IDS } from "../engine/tags.ts";
 
-export const STORAGE_KEY = "nfl-draft-assistant:v2";
+export const STORAGE_KEY = "nfl-draft-assistant:v3";
 
 export type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 

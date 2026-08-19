@@ -16,6 +16,7 @@ export function isEligible(
   currentOverallPick: number,
   config: RecommendationConfig = RECOMMENDATION_CONFIG,
 ): boolean {
+  if (player.coverageOnly) return false;
   if (draftedIds(picks).has(player.id)) return false;
   if (counts.total >= LEAGUE.rosterSize) return false;
   if (counts[player.pos] >= LEAGUE.hardCaps[player.pos]) return false;
@@ -35,6 +36,10 @@ export function isEligible(
   }
 
   return true;
+}
+
+export function rankablePlayers(players: Player[]): Player[] {
+  return players.filter((player) => !player.coverageOnly);
 }
 
 export function eligiblePlayers(

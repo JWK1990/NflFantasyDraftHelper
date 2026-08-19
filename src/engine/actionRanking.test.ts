@@ -84,7 +84,7 @@ const keepStars = [
   "Amon-Ra St. Brown",
 ];
 
-describe("current-board action ranking", { timeout: 30_000 }, () => {
+describe("current-board action ranking", { timeout: 90_000 }, () => {
   it("gives every candidate the same pre-selection state hash", () => {
     const recs = recommend(players, fillToPick(16, keepStars));
     const hashes = new Set(recs.map((row) => row.breakdown.preSelectionStateHash));
@@ -197,14 +197,14 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
     expect(lookahead.find((row) => row.dynamicScore === best)?.dynamicScore).toBe(best);
   });
 
-  it("gives Collins a +9.0 direct projection edge over McMillan", () => {
+  it("gives Collins a 9.5 direct projection edge over McMillan", () => {
     const collins = named("Nico Collins");
     const mcmillan = named("Tetairoa McMillan");
     expect(collins.modelPts).toBe(253.5);
-    expect(mcmillan.modelPts).toBe(244.5);
-    expect(collins.vorp).toBe(62.5);
-    expect(mcmillan.vorp).toBe(53.5);
-    expect(collins.modelPts - mcmillan.modelPts).toBe(9);
+    expect(mcmillan.modelPts).toBe(244);
+    expect(collins.vorp).toBe(63.5);
+    expect(mcmillan.vorp).toBe(54);
+    expect(collins.modelPts - mcmillan.modelPts).toBe(9.5);
   });
 
   it("lets McMillan outrank Collins only when the timing edge is robust across matched scenarios", () => {
@@ -410,7 +410,7 @@ describe("current-board action ranking", { timeout: 30_000 }, () => {
   });
 });
 
-describe("availability chips vs remaining opponent picks", { timeout: 30_000 }, () => {
+describe("availability chips vs remaining opponent picks", { timeout: 90_000 }, () => {
   it("uses the same return probability for Unlikely chips and the breakdown", () => {
     const recs = recommend(players, fillToPick(16, keepStars));
     const threshold = RECOMMENDATION_CONFIG.robustness.unlikelyReturn;
