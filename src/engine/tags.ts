@@ -8,6 +8,7 @@ export const TAG_FILTERS = [
   { id: "risk", label: "Risk" },
   { id: "injury", label: "Injury watch" },
   { id: "anchor", label: "Anchor" },
+  { id: "watchlist", label: "Watchlist" },
   { id: "league-winner", label: "Potential League Winner" },
 ] as const;
 
@@ -34,6 +35,8 @@ export function playerMatchesTagFilter(
 ): boolean {
   if (filter === "ALL") return true;
   if (filter === "league-winner") return Boolean(player.leagueWinner);
+  if (filter === "watchlist") return Boolean(player.watchlist);
+  if (filter === "value") return Boolean(player.value);
   const tag = normalizedTag(player);
   if (!tag) return false;
   switch (filter) {
@@ -41,8 +44,6 @@ export function playerMatchesTagFilter(
       return tag.includes("DEEP SLEEPER");
     case "sleeper":
       return tag.includes("SLEEPER") && !tag.includes("DEEP SLEEPER");
-    case "value":
-      return tag.includes("VALUE");
     case "upside":
       return tag.includes("UPSIDE");
     case "risk":

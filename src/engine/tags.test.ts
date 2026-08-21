@@ -29,22 +29,30 @@ describe("scouting tags", () => {
     expect(playerMatchesTagFilter(deep!, "sleeper")).toBe(false);
   });
 
-  it("matches compound value and risk tags", () => {
+  it("matches risk from the scouting tag and value from the value profile", () => {
     const cmc = named("Christian McCaffrey");
     expect(playerMatchesTagFilter(cmc, "risk")).toBe(true);
-    expect(playerMatchesTagFilter(cmc, "value")).toBe(false);
     const valueRisk = players.find((player) => player.tag === "VALUE/RISK");
     expect(valueRisk).toBeDefined();
-    expect(playerMatchesTagFilter(valueRisk!, "value")).toBe(true);
     expect(playerMatchesTagFilter(valueRisk!, "risk")).toBe(true);
+    // Value is now driven by the ValueProfile, not the scouting tag.
+    const murray = named("Kyler Murray");
+    expect(murray.value).toBeDefined();
+    expect(playerMatchesTagFilter(murray, "value")).toBe(true);
+    expect(playerMatchesTagFilter(named("Saquon Barkley"), "value")).toBe(false);
   });
 
-  it("matches Potential League Winner from leagueWinner metadata, not the scouting tag", () => {
+  it("matches Potential League Winner and Watchlist from metadata, not the scouting tag", () => {
     const murray = named("Kyler Murray");
-    const taylor = named("Jonathan Taylor");
+    const plain = named("Saquon Barkley");
     expect(murray.leagueWinner).toBeDefined();
     expect(playerMatchesTagFilter(murray, "league-winner")).toBe(true);
-    expect(playerMatchesTagFilter(taylor, "league-winner")).toBe(false);
+    expect(plain.leagueWinner).toBeUndefined();
+    expect(playerMatchesTagFilter(plain, "league-winner")).toBe(false);
+    // Watchlist is its own independent flag.
+    expect(murray.watchlist).toBe(true);
+    expect(playerMatchesTagFilter(murray, "watchlist")).toBe(true);
+    expect(playerMatchesTagFilter(plain, "watchlist")).toBe(false);
     expect(playerMatchesTagFilter(named("Josh Allen"), "anchor")).toBe(true);
   });
 });

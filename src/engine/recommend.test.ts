@@ -315,7 +315,7 @@ describe("recommendation engine", { timeout: 90_000 }, () => {
   it("filters the board to Potential League Winner candidates", () => {
     const state = { ...initialDraftState, tagFilter: "league-winner" as const };
     const winners = players.filter((player) => matchesFilters(player, state));
-    expect(winners).toHaveLength(37);
+    expect(winners).toHaveLength(27);
     expect(winners.every((player) => player.leagueWinner)).toBe(true);
     expect(winners.some((player) => player.player === "Kyler Murray")).toBe(true);
   });

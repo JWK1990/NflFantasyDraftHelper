@@ -3,6 +3,7 @@ import { normalizeName, normalizeTeam } from "../engine/espnPaste.ts";
 import draftModel from "./draft_model_data.json";
 import specialTeams from "./specialTeams.json";
 import { parseLeagueWinner } from "./leagueWinner.ts";
+import { parseValue } from "./value.ts";
 
 const POSITIONS = new Set<Position>(["QB", "RB", "WR", "TE", "K", "DST"]);
 const AGE_SOURCES = new Set<AgeSource>(["DraftSharks", "Sleeper", "ESPN"]);
@@ -21,6 +22,8 @@ interface RawPlayer {
   tag?: unknown;
   note?: unknown;
   leagueWinner?: unknown;
+  watchlist?: unknown;
+  value?: unknown;
   espnId?: unknown;
   birthDate?: unknown;
   age?: unknown;
@@ -187,6 +190,8 @@ function toPlayer(raw: RawPlayer): Player {
     tag,
     note: typeof raw.note === "string" ? raw.note : "",
     leagueWinner: parseLeagueWinner(raw.leagueWinner, raw.player),
+    watchlist: raw.watchlist === true ? true : undefined,
+    value: parseValue(raw.value, raw.player),
     ...ageFields(raw),
     cbsPprProjection: optionalNumber(raw.cbsPprProjection),
     fantasyProsPprProjection: optionalNumber(raw.fantasyProsPprProjection),

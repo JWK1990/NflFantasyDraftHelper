@@ -1,21 +1,21 @@
 import type { QbCard } from "../engine/qbCard.ts";
 import {
   lastNameFromPlayer,
-  type LeagueWinnerTip,
-} from "../engine/leagueWinnerTips.ts";
+  type WatchlistTip,
+} from "../engine/watchlistTips.ts";
 import { formatPickLabel } from "../engine/snake.ts";
 
 interface QbCardProps {
   card: QbCard | null;
-  leagueWinnerTips?: LeagueWinnerTip[];
+  watchlistTips?: WatchlistTip[];
 }
 
 function formatPts(value: number): string {
   return Math.round(value).toLocaleString("en-US");
 }
 
-export function QbCardView({ card, leagueWinnerTips = [] }: QbCardProps) {
-  const tips = [...leagueWinnerTips].sort(
+export function QbCardView({ card, watchlistTips = [] }: QbCardProps) {
+  const tips = [...watchlistTips].sort(
     (a, b) =>
       a.expectedPick - b.expectedPick ||
       a.rank - b.rank ||
@@ -34,7 +34,7 @@ export function QbCardView({ card, leagueWinnerTips = [] }: QbCardProps) {
         : "A skill player is your strongest next pick";
 
   const deltaLabel = !card
-    ? "LW watch"
+    ? "Watchlist"
     : card.leader === "even"
       ? "About even"
       : card.leader === "qb"
@@ -62,7 +62,7 @@ export function QbCardView({ card, leagueWinnerTips = [] }: QbCardProps) {
       : card?.leader === "qb"
         ? "qb-now"
         : "skill";
-  const title = primaryTip ? "Upcoming LW players" : verdictLabel;
+  const title = primaryTip ? "Upcoming watchlist players" : verdictLabel;
 
   return (
     <details className={`qb-card verdict-${verdictClass}${primaryTip ? " has-lw-tip" : ""}`}>

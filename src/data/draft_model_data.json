@@ -54,7 +54,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/bijan-robinson/13541",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 189.88
+      "modelRankScore": 189.88,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "elite-positional-edge"
+        ],
+        "reasons": [
+          "RB1 receiving profile plus an improved goal-line share point to a genuine overall-RB1 path.",
+          "Three-down workload with elite efficiency separates him from replacement backs."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Jahmyr Gibbs",
@@ -103,7 +125,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jahmyr-gibbs/13542",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 193.46
+      "modelRankScore": 193.46,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Elite efficiency paired with an expanding receiving workload supports a top-overall finish.",
+          "Explosive-play rate gives week-winning ceiling outcomes."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Puka Nacua",
@@ -152,7 +196,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/puka-nacua/13680",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 148.24
+      "modelRankScore": 148.24,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "Reigning WR1 with extraordinary yardage volume.",
+          "Elite target share in a pass-heavy offense supports another overall-WR1 season."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Ja'Marr Chase",
@@ -201,7 +267,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/ja-marr-chase/10771",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 144.74
+      "modelRankScore": 144.74,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "elite-positional-edge"
+        ],
+        "reasons": [
+          "Overall WR1 ceiling inside an elite passing offense.",
+          "Target-and-touchdown profile can win weeks single-handedly."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Josh Allen",
@@ -250,7 +338,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/josh-allen/9962",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 115.36
+      "modelRankScore": 115.36,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "rushing-qb"
+        ],
+        "reasons": [
+          "Overall QB1 ceiling with unmatched touchdown production at the most valuable Superflex position.",
+          "Elite dual-threat rushing volume gives one of the highest floor-plus-ceiling combinations in the game."
+        ],
+        "sources": [
+          {
+            "label": "Scott Barrett - Upside Wins Championships",
+            "url": "https://www.fantasypoints.com/nfl/articles/upside-wins-championships"
+          },
+          {
+            "label": "FantasyPros 2026 Superflex Strategy",
+            "url": "https://www.fantasypros.com/2026/06/fantasy-football-draft-strategy-for-superflex-leagues-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Jaxon Smith-Njigba",
@@ -348,7 +458,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jonathan-taylor/10500",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 129.82
+      "modelRankScore": 129.82,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Potential overall RB1 through sheer volume and touchdown equity.",
+          "Workhorse role with goal-line dominance."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Amon-Ra St. Brown",
@@ -446,7 +578,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/christian-mccaffrey/7750",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 138.56
+      "modelRankScore": 138.56,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "elite-positional-edge"
+        ],
+        "reasons": [
+          "Reigning RB1 points-per-game with a 21.3% target share when healthy.",
+          "FantasyPros' best upside selection given his receiving-back workload."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "De'Von Achane",
@@ -518,7 +672,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/de-von-achane/13563",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 110.68
+      "modelRankScore": 110.68,
+      "watchlist": true
     },
     {
       "player": "James Cook",
@@ -635,7 +790,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/chase-brown/13586",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 97.08
+      "modelRankScore": 97.08,
+      "watchlist": true
     },
     {
       "player": "Lamar Jackson",
@@ -684,7 +840,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/lamar-jackson/9964",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 77.74
+      "modelRankScore": 77.74,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "rushing-qb",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "One of the few active quarterbacks with a 400-point fantasy season on his resume.",
+          "Rushing floor plus improved passing efficiency create a league-defining Superflex ceiling."
+        ],
+        "sources": [
+          {
+            "label": "Scott Barrett - Upside Wins Championships",
+            "url": "https://www.fantasypoints.com/nfl/articles/upside-wins-championships"
+          },
+          {
+            "label": "FantasyPros 2026 Superflex Strategy",
+            "url": "https://www.fantasypros.com/2026/06/fantasy-football-draft-strategy-for-superflex-leagues-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Derrick Henry",
@@ -831,7 +1009,35 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jayden-daniels/34982",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 70.18
+      "modelRankScore": 70.18,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "rushing-qb",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "FantasyPros' highest-upside quarterback; an elite rushing ceiling is tier-breaking in Superflex.",
+          "Konami-code rushing production stacks on top of a growing passing role."
+        ],
+        "sources": [
+          {
+            "label": "Scott Barrett - Upside Wins Championships",
+            "url": "https://www.fantasypoints.com/nfl/articles/upside-wins-championships"
+          },
+          {
+            "label": "FantasyPros 2026 Superflex Strategy",
+            "url": "https://www.fantasypros.com/2026/06/fantasy-football-draft-strategy-for-superflex-leagues-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      },
+      "value": {
+        "fairValue": 6,
+        "valueFrom": 7,
+        "strongValueFrom": 19,
+        "note": "Value from Pick 7; strong value from 19. Pick 6 is fair price rather than value; Pick 19 would be an automatic selection if available."
+      }
     },
     {
       "player": "Jalen Hurts",
@@ -899,7 +1105,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jalen-hurts/10490",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 69.02
+      "modelRankScore": 69.02,
+      "watchlist": true
     },
     {
       "player": "CeeDee Lamb",
@@ -1118,7 +1325,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/omarion-hampton/35318",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 60.48
+      "modelRankScore": 60.48,
+      "watchlist": true
     },
     {
       "player": "Saquon Barkley",
@@ -1216,7 +1424,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/justin-jefferson/10586",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 71.68
+      "modelRankScore": 71.68,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "power-law-ceiling",
+          "elite-positional-edge"
+        ],
+        "reasons": [
+          "Elite target share plus a major quarterback upgrade.",
+          "Perennial overall-WR1 ceiling through target dominance."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Joe Burrow",
@@ -1412,7 +1642,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/kenneth-walker-iii/12579",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 66.72
+      "modelRankScore": 66.72,
+      "leagueWinner": {
+        "confidence": "high",
+        "archetypes": [
+          "breakout-role",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Projected workhorse role with receiving growth creates an overall-RB1 path.",
+          "Efficient runner with every-down upside."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Brock Bowers",
@@ -1430,29 +1682,6 @@
       "posRank": 2,
       "posTier": 1,
       "tier": 1,
-      "leagueWinner": {
-        "confidence": "high",
-        "archetypes": [
-          "elite-positional-edge",
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Multiple 2026 sources identify him as capable of recreating a prime-Travis-Kelce-style positional advantage.",
-          "NFL.com outlines a path to 150-plus targets and position-leading production as Las Vegas' unquestioned top target.",
-          "A truly elite tight-end outcome adds points without consuming an RB/WR flex slot."
-        ],
-        "sources": [
-          {
-            "label": "NFL.com 2026 Top 10 League-Winners",
-            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
-          },
-          {
-            "label": "FantasyPros 2026 League-Winners",
-            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4432665,
       "birthDate": "2002-12-13",
       "age": 23,
@@ -1484,7 +1713,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/brock-bowers/35006",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 69.54
+      "modelRankScore": 69.54,
+      "watchlist": true
     },
     {
       "player": "Dak Prescott",
@@ -1582,7 +1812,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jaxson-dart/35312",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 59.6
+      "modelRankScore": 59.6,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "rushing-qb",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Rushing production creates a potential top-five quarterback outcome.",
+          "Mobile young passer with a Konami-code Superflex ceiling."
+        ],
+        "sources": [
+          {
+            "label": "Scott Barrett - Upside Wins Championships",
+            "url": "https://www.fantasypoints.com/nfl/articles/upside-wins-championships"
+          },
+          {
+            "label": "FantasyPros 2026 Superflex Strategy",
+            "url": "https://www.fantasypros.com/2026/06/fantasy-football-draft-strategy-for-superflex-leagues-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Breece Hall",
@@ -1680,7 +1932,13 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/brock-purdy/12737",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 60.16
+      "modelRankScore": 60.16,
+      "value": {
+        "fairValue": 19,
+        "valueFrom": 20,
+        "strongValueFrom": 32,
+        "note": "Value from Pick 20; strong value from 32. Consider at Pick 30 if you need a quarterback; waiting until 43 carries availability risk."
+      }
     },
     {
       "player": "Chris Olave",
@@ -2090,29 +2348,6 @@
       "posRank": 11,
       "posTier": 2,
       "tier": 2,
-      "leagueWinner": {
-        "confidence": "high",
-        "archetypes": [
-          "ascending-offense",
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Multiple sources identify a path back to the elite receiver tier through greater passing volume and touchdown opportunity in New England.",
-          "He pairs an established high-end target-earning history with Drake Maye's downfield efficiency.",
-          "The ceiling case is a career-best season as the clear top target of an ascending offense."
-        ],
-        "sources": [
-          {
-            "label": "NFL.com 2026 Top 10 League-Winners",
-            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
-          },
-          {
-            "label": "FantasyPros 2026 League-Winners",
-            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4047646,
       "birthDate": "1997-06-30",
       "age": 29,
@@ -2144,7 +2379,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/a-j-brown/10198",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 64.78
+      "modelRankScore": 64.78,
+      "watchlist": true
     },
     {
       "player": "Caleb Williams",
@@ -2242,7 +2478,13 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/justin-herbert/10488",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 52.68
+      "modelRankScore": 52.68,
+      "value": {
+        "fairValue": 16,
+        "valueFrom": 17,
+        "strongValueFrom": 29,
+        "note": "Value from Pick 17; strong value from 29. Pick 19 is justified and Pick 30 would be exceptional."
+      }
     },
     {
       "player": "Matthew Stafford",
@@ -2389,7 +2631,34 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/devonta-smith/10773",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 43.2
+      "modelRankScore": 43.2,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "Clearer No. 1 role after A.J. Brown's departure.",
+          "A target-share spike opens a top-five WR ceiling."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      },
+      "value": {
+        "fairValue": 44,
+        "valueFrom": 45,
+        "note": "Value from Pick 45. Pick 54 represents clear value and is close to market price."
+      }
     },
     {
       "player": "Garrett Wilson",
@@ -2634,7 +2903,12 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/zay-flowers/13550",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 46.48
+      "modelRankScore": 46.48,
+      "value": {
+        "fairValue": 48,
+        "valueFrom": 49,
+        "note": "Value from Pick 49. Pick 54 represents moderate value; Pick 67 would be strong value but is unlikely."
+      }
     },
     {
       "player": "Tee Higgins",
@@ -2799,25 +3073,6 @@
       "posRank": 3,
       "posTier": 1,
       "tier": 1,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "elite-positional-edge",
-          "breakout-role"
-        ],
-        "reasons": [
-          "FantasyPros' league-winner panel identified him as a value route to elite tight-end production.",
-          "His late-2025 target share, first-read involvement and efficiency support a path to becoming Chicago's leading receiver.",
-          "The ceiling is a genuine positional advantage rather than merely a modest TE1 finish."
-        ],
-        "sources": [
-          {
-            "label": "FantasyPros 2026 League-Winners",
-            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4723086,
       "birthDate": "2004-04-09",
       "age": 22,
@@ -2849,7 +3104,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/colston-loveland/35360",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 48.78
+      "modelRankScore": 48.78,
+      "watchlist": true
     },
     {
       "player": "Malik Nabers",
@@ -2921,7 +3177,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/malik-nabers/34977",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 30.4
+      "modelRankScore": 30.4,
+      "watchlist": true
     },
     {
       "player": "Jared Goff",
@@ -2988,33 +3245,6 @@
       "posRank": 24,
       "posTier": 3,
       "tier": 3,
-      "leagueWinner": {
-        "confidence": "high",
-        "archetypes": [
-          "ascending-offense",
-          "breakout-role"
-        ],
-        "reasons": [
-          "NFL.com, FantasyPros and Ryan Heath independently identify his 2026 league-winning path.",
-          "His multi-year per-route efficiency has remained elite, while Denver offers substantially more projected route and dropback volume.",
-          "A true WR1 role in Sean Payton's offense could convert that efficiency into top-eight or better PPR production."
-        ],
-        "sources": [
-          {
-            "label": "NFL.com 2026 Top 10 League-Winners",
-            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
-          },
-          {
-            "label": "FantasyPros 2026 League-Winners",
-            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
-          },
-          {
-            "label": "Fantasy Points 2026 Draft Guide and Anatomy Roundup",
-            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4372016,
       "birthDate": "1998-11-25",
       "age": 27,
@@ -3046,7 +3276,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jaylen-waddle/10772",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 18.7
+      "modelRankScore": 18.7,
+      "watchlist": true
     },
     {
       "player": "Terry McLaurin",
@@ -3064,27 +3295,6 @@
       "posRank": 21,
       "posTier": 3,
       "tier": 3,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "ascending-offense",
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Reunites with Jayden Daniels and faces little target competition at the top of Washington's receiver room.",
-          "A rebound to WR1-level weekly production at his current cost would create surplus most mid-round receivers cannot match."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 Terry McLaurin Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/terry-mclaurin/10269"
-          }
-        ],
-        "reviewedAt": "2026-08-19"
-      },
       "espnId": 3121422,
       "birthDate": "1995-09-15",
       "age": 30,
@@ -3116,7 +3326,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/terry-mclaurin/10269",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 26.42
+      "modelRankScore": 26.42,
+      "watchlist": true
     },
     {
       "player": "D'Andre Swift",
@@ -3389,7 +3600,14 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/kyler-murray/10217",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 33.14
+      "modelRankScore": 33.14,
+      "watchlist": true,
+      "value": {
+        "fairValue": 45,
+        "valueFrom": 46,
+        "strongValueFrom": 58,
+        "note": "Value from Pick 46; strong value from 58. Pick 67 is the ideal target if your QB2 slot remains open."
+      }
     },
     {
       "player": "Cam Skattebo",
@@ -3407,29 +3625,6 @@
       "posRank": 16,
       "posTier": 3,
       "tier": 3,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role",
-          "contingent-upside",
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Displayed RB1-caliber tackle-breaking and receiving production as a rookie before a severe ankle injury ended the season.",
-          "If the Giants role holds, that pre-injury profile can separate from typical mid-round running backs.",
-          "Health and early-season role remain separate risk chips and do not cancel the ceiling case."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 Cam Skattebo Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/cameron-skattebo/35382"
-          }
-        ],
-        "reviewedAt": "2026-08-22"
-      },
       "espnId": 4696981,
       "birthDate": "2002-02-05",
       "age": 24,
@@ -3461,7 +3656,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/cameron-skattebo/35382",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 45.26
+      "modelRankScore": 45.26,
+      "watchlist": true
     },
     {
       "player": "Emeka Egbuka",
@@ -3510,7 +3706,29 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/emeka-egbuka/35335",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 26.96
+      "modelRankScore": 26.96,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "Multiple analysts see a path to a top-five WR season.",
+          "Expanded role in an ascending offense."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      }
     },
     {
       "player": "Jadarian Price",
@@ -3528,30 +3746,6 @@
       "posRank": 27,
       "posTier": 4,
       "tier": 4,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role",
-          "contingent-upside",
-          "ascending-offense"
-        ],
-        "reasons": [
-          "ESPN identifies him as one of the players capable of defining the 2026 fantasy season.",
-          "His upside comes from a potentially major role in Seattle's run-focused offense.",
-          "The ceiling remains conditional on backfield allocation, making the profile valuable but not equivalent to median certainty."
-        ],
-        "sources": [
-          {
-            "label": "ESPN Fantasy Focus 2026 League-Winners Discussion",
-            "url": "https://podcastrex.com/shows/fantasy-focus-football/10-fantasy-football-league-winners-who-will-define-the-2026-season-fantasy-focus"
-          },
-          {
-            "label": "ESPN 2026 Post-Draft Fantasy Winners",
-            "url": "https://www.espn.com/fantasy/football/story/_/id/48606629/fantasy-football-winners-losers-nfl-draft"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4685512,
       "birthDate": "2003-10-09",
       "age": 22,
@@ -3583,7 +3777,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jadarian-price/35926",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 3.24
+      "modelRankScore": 3.24,
+      "watchlist": true
     },
     {
       "player": "DJ Moore",
@@ -3699,30 +3894,6 @@
       "posRank": 20,
       "posTier": 4,
       "tier": 4,
-      "leagueWinner": {
-        "confidence": "high",
-        "archetypes": [
-          "rushing-qb",
-          "breakout-role",
-          "ascending-offense"
-        ],
-        "reasons": [
-          "Finished 2025 with a sustained QB1-level stretch and added useful rushing production.",
-          "Both ESPN's season-defining-player discussion and FantasyPros' Superflex analysis identify a meaningful 2026 ceiling at a QB2 price.",
-          "His affordable cost makes the upside especially relevant to the optional late-QB2 branch."
-        ],
-        "sources": [
-          {
-            "label": "ESPN Fantasy Focus 2026 League-Winners Discussion",
-            "url": "https://podcastrex.com/shows/fantasy-focus-football/10-fantasy-football-league-winners-who-will-define-the-2026-season-fantasy-focus"
-          },
-          {
-            "label": "FantasyPros 2026 Superflex QB2 Targets",
-            "url": "https://www.fantasypros.com/2026/08/superflex-fantasy-football-draft-strategy-qb2-targets-2026/"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4360689,
       "birthDate": "1999-09-28",
       "age": 26,
@@ -3754,7 +3925,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/tyler-shough/35510",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 25.78
+      "modelRankScore": 25.78,
+      "watchlist": true
     },
     {
       "player": "TreVeyon Henderson",
@@ -3919,27 +4091,6 @@
       "posRank": 18,
       "posTier": 3,
       "tier": 3,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role",
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Rookie-year target quality remains the ceiling path despite a 2025 dip in share and efficiency.",
-          "A return to that every-week WR role in Los Angeles would create surplus above a typical WR24 cost."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 Ladd McConkey Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/ladd-mcconkey/35015"
-          }
-        ],
-        "reviewedAt": "2026-08-22"
-      },
       "espnId": 4612826,
       "birthDate": "2001-11-11",
       "age": 24,
@@ -3971,7 +4122,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/ladd-mcconkey/35015",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 32.1
+      "modelRankScore": 32.1,
+      "watchlist": true
     },
     {
       "player": "Harold Fannin Jr.",
@@ -3989,25 +4141,6 @@
       "posRank": 6,
       "posTier": 2,
       "tier": 2,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "elite-positional-edge",
-          "breakout-role"
-        ],
-        "reasons": [
-          "Finished as the TE6 as a rookie despite unstable quarterback play and veteran target competition.",
-          "NFL.com identifies a path to Cleveland's top target share after the departure of David Njoku.",
-          "His collegiate receiving profile and potential focal-point role create a top-two tight-end ceiling."
-        ],
-        "sources": [
-          {
-            "label": "NFL.com 2026 Top 10 League-Winners",
-            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 5083076,
       "birthDate": "2004-07-20",
       "age": 22,
@@ -4039,7 +4172,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/harold-fannin/35361",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 16.72
+      "modelRankScore": 16.72,
+      "watchlist": true
     },
     {
       "player": "Rome Odunze",
@@ -4106,25 +4240,6 @@
       "posRank": 7,
       "posTier": 2,
       "tier": 2,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "elite-positional-edge",
-          "breakout-role"
-        ],
-        "reasons": [
-          "Has averaged approximately TE2-level scoring when running a route on at least 75% of team dropbacks.",
-          "Ryan Heath connects the 2026 coordinator change to the sustained high route participation previously given to Trey McBride.",
-          "A restored full-time route role offers a discounted path back to an elite tight-end advantage."
-        ],
-        "sources": [
-          {
-            "label": "Fantasy Points 2026 Draft Guide and Targets Roundup",
-            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4430027,
       "birthDate": "2001-01-12",
       "age": 25,
@@ -4156,7 +4271,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/sam-laporta/13576",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 14.22
+      "modelRankScore": 14.22,
+      "watchlist": true
     },
     {
       "player": "Kyle Pitts",
@@ -4323,7 +4439,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/bhayshul-tuten/35322",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 6.66
+      "modelRankScore": 6.66,
+      "watchlist": true
     },
     {
       "player": "Jameson Williams",
@@ -4390,25 +4507,6 @@
       "posRank": 8,
       "posTier": 2,
       "tier": 2,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "elite-positional-edge",
-          "breakout-role"
-        ],
-        "reasons": [
-          "Averaged 16.2 PPR points per game through seven games in 2025 before injury.",
-          "NFL.com identifies him as a dark-horse top-two tight end and a possible leading target in Green Bay.",
-          "His draft cost leaves room for substantial surplus if that pre-injury role and efficiency return."
-        ],
-        "sources": [
-          {
-            "label": "NFL.com 2026 Top 10 League-Winners",
-            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4572680,
       "birthDate": "2000-11-03",
       "age": 25,
@@ -4440,7 +4538,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/tucker-kraft/13575",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 13.42
+      "modelRankScore": 13.42,
+      "watchlist": true
     },
     {
       "player": "Rhamondre Stevenson",
@@ -4489,7 +4588,13 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/rhamondre-stevenson/10763",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -0.18
+      "modelRankScore": -0.18,
+      "value": {
+        "fairValue": 86,
+        "valueFrom": 87,
+        "strongValueFrom": 99,
+        "note": "Value from Pick 87; strong value from 99. Pick 91 is reasonable; Pick 102 would be excellent if he survives."
+      }
     },
     {
       "player": "Courtland Sutton",
@@ -4605,27 +4710,6 @@
       "posRank": 19,
       "posTier": 4,
       "tier": 4,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "rushing-qb",
-          "breakout-role"
-        ],
-        "reasons": [
-          "Dual-threat starter in Miami with a rushing ceiling that can separate from replacement Superflex quarterbacks.",
-          "At a typical QB2 price the upside is usable every week if the starting job holds, not only in spike weeks."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 Malik Willis Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/malik-willis/12572"
-          }
-        ],
-        "reviewedAt": "2026-08-19"
-      },
       "espnId": 4242512,
       "birthDate": "1999-05-25",
       "age": 27,
@@ -4657,7 +4741,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/malik-willis/12572",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 25.98
+      "modelRankScore": 25.98,
+      "watchlist": true
     },
     {
       "player": "Luther Burden III",
@@ -4675,29 +4760,6 @@
       "posRank": 25,
       "posTier": 3,
       "tier": 3,
-      "leagueWinner": {
-        "confidence": "high",
-        "archetypes": [
-          "breakout-role",
-          "ascending-offense"
-        ],
-        "reasons": [
-          "Scott Barrett identifies him as an acquire-at-all-costs Exodia target at his ESPN price.",
-          "ESPN's 2026 breakout analysis highlights his elite ability after the catch and a large pool of vacated targets in Chicago.",
-          "A Year 2 role expansion in Ben Johnson's offense provides a plausible every-week WR1/WR2 outcome well above cost."
-        ],
-        "sources": [
-          {
-            "label": "Fantasy Points 2026 Exodia Roundup",
-            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
-          },
-          {
-            "label": "ESPN 2026 Sleepers, Breakouts and Busts",
-            "url": "https://www.espn.com/fantasy/football/story/_/page/FFSleepBustBreak26-49030808/fantasy-football-2026-rankings-nfl-sleepers-breakouts-busts"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4685278,
       "birthDate": "2003-12-12",
       "age": 22,
@@ -4729,7 +4791,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/luther-burden/35334",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 16.96
+      "modelRankScore": 16.96,
+      "watchlist": true
     },
     {
       "player": "Sam Darnold",
@@ -4845,27 +4908,6 @@
       "posRank": 23,
       "posTier": 3,
       "tier": 3,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role",
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Houston traded draft capital to acquire him and is signaling a lead-back role.",
-          "Touchdown volume in that offense can create a weekly RB advantage beyond his median projection."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 David Montgomery Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/david-montgomery/10194"
-          }
-        ],
-        "reviewedAt": "2026-08-19"
-      },
       "espnId": 4035538,
       "birthDate": "1997-06-07",
       "age": 29,
@@ -4897,7 +4939,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/david-montgomery/10194",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 15.92
+      "modelRankScore": 15.92,
+      "watchlist": true
     },
     {
       "player": "Christian Watson",
@@ -4965,7 +5008,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/christian-watson/12607",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 2.9
+      "modelRankScore": 2.9,
+      "watchlist": true
     },
     {
       "player": "Aaron Jones Sr.",
@@ -5081,25 +5125,6 @@
       "posRank": 22,
       "posTier": 3,
       "tier": 3,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "power-law-ceiling",
-          "ascending-offense"
-        ],
-        "reasons": [
-          "Scott Barrett identifies him as a 2026 Exodia value relative to his WR26-30 market price.",
-          "His established touchdown and downfield ceiling offers a larger payoff than a typical receiver drafted in the same range.",
-          "The existing risk information remains separate and does not lower the display-only League Winner designation."
-        ],
-        "sources": [
-          {
-            "label": "Fantasy Points 2026 Exodia Roundup",
-            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 16737,
       "birthDate": "1993-08-21",
       "age": 33,
@@ -5131,7 +5156,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/mike-evans/6938",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 16.64
+      "modelRankScore": 16.64,
+      "watchlist": true
     },
     {
       "player": "Marvin Harrison Jr.",
@@ -5149,27 +5175,6 @@
       "posRank": 30,
       "posTier": 3,
       "tier": 3,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role",
-          "contingent-upside"
-        ],
-        "reasons": [
-          "Post-hype price leaves room for a true alpha-receiver outcome if the role stabilizes.",
-          "The ceiling still sits well above replacement even with added target competition in Arizona."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 Marvin Harrison Jr. Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/marvin-harrison-jr/34975"
-          }
-        ],
-        "reviewedAt": "2026-08-19"
-      },
       "espnId": 4432708,
       "birthDate": "2002-08-11",
       "age": 24,
@@ -5201,7 +5206,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/marvin-harrison-jr/34975",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 1.92
+      "modelRankScore": 1.92,
+      "watchlist": true
     },
     {
       "player": "Bryce Young",
@@ -5366,28 +5372,6 @@
       "posRank": 9,
       "posTier": 2,
       "tier": 2,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "elite-positional-edge",
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Per-game production still separates from the tight-end field when he is healthy.",
-          "A full-season run at that ceiling would create a weekly TE advantage most rosters cannot match.",
-          "Health and age remain separate risk chips and do not cancel the ceiling case."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 George Kittle Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/george-kittle/9540"
-          }
-        ],
-        "reviewedAt": "2026-08-19"
-      },
       "espnId": 3040151,
       "birthDate": "1993-10-09",
       "age": 32,
@@ -5419,7 +5403,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/george-kittle/9540",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 8.3
+      "modelRankScore": 8.3,
+      "watchlist": true
     },
     {
       "player": "Michael Pittman Jr.",
@@ -5633,28 +5618,6 @@
       "posRank": 15,
       "posTier": 3,
       "tier": 3,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "elite-positional-edge",
-          "breakout-role"
-        ],
-        "reasons": [
-          "DraftSharks highlights elite per-route production after an injury-riddled 2025 that pushed him onto many do-not-draft lists.",
-          "A restored Bills receiving role at a Round 10-11 price would create a weekly tight-end advantage most rosters cannot match.",
-          "Injury remains a separate risk assessment and does not cancel this ceiling case."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 Dalton Kincaid Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/dalton-kincaid/13573"
-          }
-        ],
-        "reviewedAt": "2026-08-22"
-      },
       "espnId": 4385690,
       "birthDate": "1999-10-18",
       "age": 26,
@@ -5686,7 +5649,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/dalton-kincaid/13573",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -12.0
+      "modelRankScore": -12.0,
+      "watchlist": true
     },
     {
       "player": "Mark Andrews",
@@ -5855,7 +5819,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/rachaad-white/12583",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -33.4
+      "modelRankScore": -33.4,
+      "watchlist": true
     },
     {
       "player": "Cam Ward",
@@ -5976,7 +5941,13 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/parker-washington/13551",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -0.58
+      "modelRankScore": -0.58,
+      "watchlist": true,
+      "value": {
+        "fairValue": 87,
+        "valueFrom": 88,
+        "note": "Value from Pick 88. Pick 91 is a modest value and the last safe opportunity before his ADP."
+      }
     },
     {
       "player": "Michael Wilson",
@@ -6092,24 +6063,6 @@
       "posRank": 45,
       "posTier": 4,
       "tier": 4,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role"
-        ],
-        "reasons": [
-          "Ryan Heath highlights a rare early-career target-per-route profile shared by players normally drafted much earlier.",
-          "Personnel changes create a plausible first full-time role after prior route limitations kept his production below his efficiency.",
-          "The ceiling is a featured PPR role at a substantially discounted market price."
-        ],
-        "sources": [
-          {
-            "label": "Fantasy Points 2026 Draft Guide and Targets Roundup",
-            "url": "https://newsletter.fantasypoints.com/p/roundup-aug8"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4688813,
       "birthDate": "2001-08-12",
       "age": 25,
@@ -6141,7 +6094,14 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/josh-downs/13548",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -17.26
+      "modelRankScore": -17.26,
+      "watchlist": true,
+      "value": {
+        "fairValue": 108,
+        "valueFrom": 109,
+        "strongValueFrom": 121,
+        "note": "Value from Pick 109; strong value from 121. Pick 126 is an appropriate target."
+      }
     },
     {
       "player": "RJ Harvey",
@@ -6208,26 +6168,6 @@
       "posRank": 36,
       "posTier": 4,
       "tier": 4,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role",
-          "contingent-upside",
-          "ascending-offense"
-        ],
-        "reasons": [
-          "FantasyPros identifies a realistic path to a larger rushing share and the most valuable goal-line work in Chicago.",
-          "Ben Johnson's running-game design raises the value of a potential role expansion.",
-          "The ceiling is tied to gaining high-value work, not to his current median projection."
-        ],
-        "sources": [
-          {
-            "label": "FantasyPros 2026 League-Winners",
-            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4608686,
       "birthDate": "2002-03-15",
       "age": 24,
@@ -6259,7 +6199,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/kyle-monangai/35326",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -28.62
+      "modelRankScore": -28.62,
+      "watchlist": true
     },
     {
       "player": "Jonathon Brooks",
@@ -6327,7 +6268,14 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jonathon-brooks/34987",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -33.0
+      "modelRankScore": -33.0,
+      "watchlist": true,
+      "value": {
+        "fairValue": 103,
+        "valueFrom": 104,
+        "strongValueFrom": 116,
+        "note": "Value from Pick 104; strong value from 116. Current market may let you wait until Pick 150."
+      }
     },
     {
       "player": "Brian Thomas Jr.",
@@ -6541,24 +6489,6 @@
       "posRank": 56,
       "posTier": 5,
       "tier": 5,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role"
-        ],
-        "reasons": [
-          "FantasyPros' league-winner panel identifies him as a late-round bet on Green Bay's changing target hierarchy.",
-          "Encouraging efficiency and a clearer path to routes create room to outperform his current cost materially.",
-          "He does not need to become the team WR1 for the selection to return meaningful surplus."
-        ],
-        "sources": [
-          {
-            "label": "FantasyPros 2026 League-Winners",
-            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4701936,
       "birthDate": "2003-08-01",
       "age": 23,
@@ -6590,7 +6520,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/matthew-golden/35515",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -40.88
+      "modelRankScore": -40.88,
+      "watchlist": true
     },
     {
       "player": "Isaiah Likely",
@@ -6853,27 +6784,6 @@
       "posRank": 42,
       "posTier": 4,
       "tier": 4,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role",
-          "contingent-upside"
-        ],
-        "reasons": [
-          "Late-round value with a path to every-week WR production in Washington.",
-          "If the role holds, the surplus versus a typical ninth-round receiver is championship-relevant."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 Stefon Diggs Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/stefon-diggs/7280"
-          }
-        ],
-        "reviewedAt": "2026-08-19"
-      },
       "espnId": 2976212,
       "birthDate": "1993-11-29",
       "age": 32,
@@ -6905,7 +6815,14 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/stefon-diggs/7280",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -17.68
+      "modelRankScore": -17.68,
+      "watchlist": true,
+      "value": {
+        "fairValue": 122,
+        "valueFrom": 123,
+        "strongValueFrom": 135,
+        "note": "Value from Pick 123; strong value from 135. Pick 139 is attractive, but his ADP may move following the Washington signing."
+      }
     },
     {
       "player": "Xavier Worthy",
@@ -7123,7 +7040,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/blake-corum/34990",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -48.92
+      "modelRankScore": -48.92,
+      "watchlist": true
     },
     {
       "player": "Wan'Dale Robinson",
@@ -7221,7 +7139,13 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jayden-reed/13557",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -19.14
+      "modelRankScore": -19.14,
+      "value": {
+        "fairValue": 111,
+        "valueFrom": 112,
+        "strongValueFrom": 124,
+        "note": "Value from Pick 112; strong value from 124. Pick 126 is an appropriate target."
+      }
     },
     {
       "player": "Hunter Henry",
@@ -7613,7 +7537,13 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jordan-mason/13153",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -34.5
+      "modelRankScore": -34.5,
+      "value": {
+        "fairValue": 121,
+        "valueFrom": 122,
+        "strongValueFrom": 134,
+        "note": "Value from Pick 122; strong value from 134. Pick 139 is an appropriate bench-RB target."
+      }
     },
     {
       "player": "Brenton Strange",
@@ -8446,7 +8376,35 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/de-zhaun-stribling/36057",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -71.48
+      "modelRankScore": -71.48,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "contingent-upside",
+          "ascending-offense"
+        ],
+        "reasons": [
+          "Emerges from San Francisco's unsettled wide receiver room.",
+          "Deep late-round dart with real target-share upside if the role opens."
+        ],
+        "sources": [
+          {
+            "label": "Ryan Heath - 2026 Anatomy of a League Winner",
+            "url": "https://www.fantasypoints.com/nfl/articles/2026/anatomy-of-a-league-winner"
+          },
+          {
+            "label": "FantasyPros 2026 League-Winners",
+            "url": "https://www.fantasypros.com/2026/06/12-fantasy-football-league-winners-2026/"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      },
+      "value": {
+        "fairValue": 149,
+        "valueFrom": 150,
+        "strongValueFrom": 162,
+        "note": "Value from Pick 150; strong value from 162. Target around Pick 187, with Pick 198 carrying greater availability risk."
+      }
     },
     {
       "player": "Jerry Jeudy",
@@ -8954,27 +8912,6 @@
       "posRank": 58,
       "posTier": 5,
       "tier": 5,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "breakout-role",
-          "contingent-upside"
-        ],
-        "reasons": [
-          "Landed in a shallow Saints receiver room with a pass-friendly staff and a path to immediate usage.",
-          "If the hamstring concern clears, the role can expand into every-week WR production at a late-round cost."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 Jordyn Tyson Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/jordyn-tyson/35947"
-          }
-        ],
-        "reviewedAt": "2026-08-19"
-      },
       "espnId": 4880281,
       "birthDate": "2004-08-12",
       "age": 22,
@@ -9006,7 +8943,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jordyn-tyson/35947",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -45.28
+      "modelRankScore": -45.28,
+      "watchlist": true
     },
     {
       "player": "Gunnar Helm",
@@ -9367,27 +9305,6 @@
       "posRank": 23,
       "posTier": 4,
       "tier": 4,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "elite-positional-edge",
-          "breakout-role"
-        ],
-        "reasons": [
-          "Young receiver profile at tight end with a path into the Chargers' lead-TE conversation.",
-          "A late-round TE who becomes a weekly starter would create surplus most managers cannot find on waivers."
-        ],
-        "sources": [
-          {
-            "label": "User-designated 2026 league-winner watchlist"
-          },
-          {
-            "label": "DraftSharks 2026 Oronde Gadsden II Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/oronde-gadsden/35532"
-          }
-        ],
-        "reviewedAt": "2026-08-19"
-      },
       "espnId": 4595342,
       "birthDate": "2003-06-25",
       "age": 23,
@@ -9419,7 +9336,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/oronde-gadsden/35532",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -50.9
+      "modelRankScore": -50.9,
+      "watchlist": true
     },
     {
       "player": "Tyrone Tracy Jr.",
@@ -9566,7 +9484,13 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/chris-rodriguez/13677",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -70.72
+      "modelRankScore": -70.72,
+      "value": {
+        "fairValue": 142,
+        "valueFrom": 143,
+        "strongValueFrom": 155,
+        "note": "Value from Pick 143; strong value from 155. Pick 150 is reasonable, although the expert consensus is less settled."
+      }
     },
     {
       "player": "Deshaun Watson",

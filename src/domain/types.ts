@@ -11,6 +11,7 @@ export type TagFilter =
   | "risk"
   | "injury"
   | "anchor"
+  | "watchlist"
   | "league-winner";
 export type LeagueWinnerConfidence = "high" | "medium" | "low";
 export type LeagueWinnerArchetype =
@@ -32,6 +33,17 @@ export interface LeagueWinnerProfile {
   reasons: string[];
   sources: LeagueWinnerSource[];
   reviewedAt?: string;
+}
+
+export interface ValueProfile {
+  /** Blended Superflex/model rank — our fair valuation. Stable. */
+  fairValue: number;
+  /** Earliest pick where expected value exceeds selection cost. Stable. */
+  valueFrom: number;
+  /** Roughly one full 12-team round after fair value. Optional. */
+  strongValueFrom?: number;
+  /** Concise draft-day note (value/strong-value picks + trigger guidance). */
+  note: string;
 }
 
 export type AgeSource = "DraftSharks" | "Sleeper" | "ESPN";
@@ -59,6 +71,8 @@ export interface Player {
   tag: string;
   note: string;
   leagueWinner?: LeagueWinnerProfile;
+  watchlist?: boolean;
+  value?: ValueProfile;
   coverageOnly?: boolean;
   espnId?: number;
   birthDate?: string;

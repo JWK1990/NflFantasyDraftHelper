@@ -3,11 +3,11 @@ import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player, Recommendation } from "../domain/types.ts";
 import { initialDraftState } from "../state/draftReducer.ts";
 import {
-  formatLeagueWinnerTipShort,
+  formatWatchlistTipShort,
   lastNameFromPlayer,
-  upcomingLeagueWinnerTips,
+  upcomingWatchlistTips,
   userPicksBeforeExpected,
-} from "./leagueWinnerTips.ts";
+} from "./watchlistTips.ts";
 
 const players = loadPlayers();
 
@@ -48,12 +48,12 @@ function stateAtPick(overallPick: number, drafted: Player[] = []): DraftState {
   };
 }
 
-describe("league winner tip bar", () => {
+describe("watchlist tip bar", () => {
   it("formats upcoming players as ADP, rank and picks-before shorthand", () => {
     expect(lastNameFromPlayer("Josh Allen")).toBe("Allen");
     expect(lastNameFromPlayer("Marvin Harrison Jr.")).toBe("Harrison Jr.");
     expect(
-      formatLeagueWinnerTipShort({
+      formatWatchlistTipShort({
         player: named("Parker Washington"),
         expectedPick: 94,
         picksBefore: 1,
@@ -61,7 +61,7 @@ describe("league winner tip bar", () => {
       }),
     ).toBe("Washington (ADP 94, Rank 8, Picks Before 1)");
     expect(
-      formatLeagueWinnerTipShort({
+      formatWatchlistTipShort({
         player: named("Josh Allen"),
         expectedPick: 3,
         picksBefore: 0,
@@ -77,7 +77,7 @@ describe("league winner tip bar", () => {
     expect(userPicksBeforeExpected(80, 138)).toBe(4);
   });
 
-  it("surfaces league winners within the next 3 user picks, sorted by ADP", () => {
+  it("surfaces watchlist players within the next 3 user picks, sorted by ADP", () => {
     const recs = [
       rec(named("Bijan Robinson")),
       rec(named("Josh Downs")),
@@ -85,7 +85,7 @@ describe("league winner tip bar", () => {
       rec(named("Jadarian Price")),
       rec(named("Matthew Golden")),
     ];
-    const tips = upcomingLeagueWinnerTips(recs, stateAtPick(80));
+    const tips = upcomingWatchlistTips(recs, stateAtPick(80));
     expect(tips.map((tip) => tip.player.player)).toEqual([
       "Jadarian Price",
       "Parker Washington",
@@ -101,7 +101,7 @@ describe("league winner tip bar", () => {
       rec(named("Parker Washington")),
       rec(named("Matthew Golden")),
     ];
-    const tips = upcomingLeagueWinnerTips(
+    const tips = upcomingWatchlistTips(
       recs,
       stateAtPick(80, [named("Parker Washington")]),
     );

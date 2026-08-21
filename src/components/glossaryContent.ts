@@ -161,17 +161,22 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
     ],
   },
   {
-    title: "League Winner",
+    title: "Watchlist, Value & League Winner",
     entries: [
       {
-        term: "League Winner Candidate",
+        term: "Watchlist (gold row)",
         definition:
-          "A player with a credible path to producing a championship-shifting advantage over positional replacement. This may be an established early-round player with a power-law ceiling or a later selection with breakout or contingent upside. The label is informational. It does not affect the recommendation score or ranking and is not a guarantee. Consider it alongside projections, VORP, tiers, roster construction, draft cost and the separate risk/injury chips.",
+          "Your own curated shortlist. Watchlist players get the gold row highlight, and when one is expected within your next 3 picks the tip bar at the top names them so you can reach if you need to. Filter by Watchlist in Search / filter. Display only — it does not change ranking. A player can be on your Watchlist and also carry the Value and/or LW chips.",
       },
       {
-        term: "LW pill",
+        term: "Value chip",
         definition:
-          "Gold row plus a gold LW tag in the same row as the other chips. League-winning players are frequently found early because early picks have the highest hit rates. Upside becomes more decisive later because safe but replaceable bench production has little value and failed late picks can usually be replaced through waivers. Tap LW to open the research on that player. Filter by Potential League Winner in Search / filter. When an available candidate is expected within your next 3 picks, the tip bar at the top names them so you can reach if you need to.",
+          "A teal 'Value N+' chip. It means the market is letting this player slide past our blended Superflex/model ranking, so they are good value once the board reaches pick N — fine to take around there, but don't reach up for them. Expand the row for the full value note (fair value, value-from, strong-value-from) and draft-day timing. Filter by Value in Search / filter. Display only — it does not change ranking.",
+      },
+      {
+        term: "LW chip (Potential League Winner)",
+        definition:
+          "A gold LW chip marking players identified through the Upside-Wins-Championships methodology as having a credible path to a championship-shifting advantage over positional replacement — a power-law ceiling early, or breakout/contingent upside later. Tap LW to open the research in the expanded row. Filter by Potential League Winner in Search / filter. Informational only; it does not affect the recommendation score or ranking and is not a guarantee.",
       },
       {
         term: "Draft note",

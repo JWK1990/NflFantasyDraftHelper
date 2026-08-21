@@ -253,6 +253,16 @@ export function explainChip(label: string): ChipExplanation {
     };
   }
 
+  const valueChip = label.match(/^Value (\d+)\+$/);
+  if (valueChip) {
+    return {
+      title: "Value Target",
+      definition:
+        "The market is letting them slide past our ranking, so they are good value once the board reaches this pick.",
+      detail: `Fine to take around pick ${valueChip[1]} or later — don't reach up for them. Expand the row for the full value note and draft-day timing. Display only; it does not change the ranking.`,
+    };
+  }
+
   if (label === "LW" || label.toLowerCase().startsWith("league winner")) {
     return {
       title: "League Winner Candidate",

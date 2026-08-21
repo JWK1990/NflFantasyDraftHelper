@@ -8,7 +8,7 @@ import { isUserPick } from "../engine/snake.ts";
 import { teamSlotForOverallPick } from "../engine/teams.ts";
 import { managerFirstName, teamNamesBySlot } from "../config/leagueTeams.ts";
 import { deriveQbCard } from "../engine/qbCard.ts";
-import { upcomingLeagueWinnerTips } from "../engine/leagueWinnerTips.ts";
+import { upcomingWatchlistTips } from "../engine/watchlistTips.ts";
 import { QbCardView } from "../components/QbCard.tsx";
 import { DraftHeader } from "../components/DraftHeader.tsx";
 import { DraftLogDrawer } from "../components/DraftLogDrawer.tsx";
@@ -81,7 +81,7 @@ export default function App() {
     return {
       recs,
       qbCard: deriveQbCard(recs, players, draftState),
-      leagueWinnerTips: upcomingLeagueWinnerTips(recs, draftState),
+      watchlistTips: upcomingWatchlistTips(recs, draftState),
       picksLength: draftState.picks.length,
     };
   };
@@ -119,7 +119,7 @@ export default function App() {
   }, [displayedOverallPick]);
   const recs = ranking.recs;
   const qbCard = ranking.qbCard;
-  const leagueWinnerTips = ranking.leagueWinnerTips;
+  const watchlistTips = ranking.watchlistTips;
   const recById = useMemo(
     () => new Map(recs.map((row) => [row.player.id, row])),
     [recs],
@@ -245,8 +245,8 @@ export default function App() {
           );
         }}
       />
-      {qbCard || leagueWinnerTips.length > 0 ? (
-        <QbCardView card={qbCard} leagueWinnerTips={leagueWinnerTips} />
+      {qbCard || watchlistTips.length > 0 ? (
+        <QbCardView card={qbCard} watchlistTips={watchlistTips} />
       ) : null}
       <TierPressureStrip
         tiers={endingTiers}

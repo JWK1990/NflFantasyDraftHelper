@@ -77,29 +77,17 @@ function expectInvariant(state: DraftState) {
 }
 
 describe("league winner data", () => {
-  it("loads 37 display-only candidates from JSON without adding unmatched names", () => {
+  it("loads the Upside-list display-only candidates from JSON without adding unmatched names", () => {
     const offensive = players.filter(
       (player) =>
         player.pos !== "K" && player.pos !== "DST" && !player.coverageOnly,
     );
     const winners = players.filter((player) => player.leagueWinner);
     expect(offensive).toHaveLength(196);
-    expect(winners).toHaveLength(37);
-    expect(winners.filter((player) => player.leagueWinner?.confidence === "high")).toHaveLength(9);
-    expect(winners.filter((player) => player.leagueWinner?.confidence === "medium")).toHaveLength(28);
+    expect(winners).toHaveLength(27);
+    expect(winners.filter((player) => player.leagueWinner?.confidence === "high")).toHaveLength(15);
+    expect(winners.filter((player) => player.leagueWinner?.confidence === "medium")).toHaveLength(12);
     expect(winners.filter((player) => player.leagueWinner?.confidence === "low")).toHaveLength(0);
-    expect(winners.every((player) => player.adp == null || player.adp > 10)).toBe(true);
-    for (const name of [
-      "Bijan Robinson",
-      "Jahmyr Gibbs",
-      "Josh Allen",
-      "Ja'Marr Chase",
-      "Puka Nacua",
-      "Jaxon Smith-Njigba",
-      "Christian McCaffrey",
-    ]) {
-      expect(named(name).leagueWinner).toBeUndefined();
-    }
     expect(LEAGUE_WINNER_METHODOLOGY?.mode).toBe("display-only");
     expect(LEAGUE_WINNER_METHODOLOGY?.rankingImpact).toBe(0);
     expect(offensive.some((player) => player.player === "Demond Claiborne")).toBe(
@@ -114,25 +102,34 @@ describe("league winner data", () => {
     expect(winners.some((player) => player.player === "Ricky Pearsall")).toBe(
       false,
     );
+    // Kyler kept his original curated profile through the split.
     expect(named("Kyler Murray").leagueWinner?.reasons[0]).toContain(
       "NFL.com identifies a realistic 3,600-passing-yard",
     );
+    // On the Upside list (kept an existing profile or gained a new one).
     for (const name of [
-      "George Kittle",
-      "Jordyn Tyson",
-      "David Montgomery",
-      "Terry McLaurin",
-      "Marvin Harrison Jr.",
-      "Oronde Gadsden II",
-      "Malik Willis",
-      "Stefon Diggs",
-      "Cam Skattebo",
-      "Ladd McConkey",
-      "Dalton Kincaid",
-      "Blake Corum",
+      "Kyler Murray",
+      "Bijan Robinson",
+      "Josh Allen",
+      "Jonathan Taylor",
+      "De'Von Achane",
       "Rachaad White",
+      "Blake Corum",
+      "De'Zhaun Stribling",
     ]) {
       expect(named(name).leagueWinner).toBeDefined();
+    }
+    // Dropped from the LW chip (kept as Watchlist) or never on the Upside list.
+    for (const name of [
+      "George Kittle",
+      "Marvin Harrison Jr.",
+      "Stefon Diggs",
+      "Josh Downs",
+      "Terry McLaurin",
+      "Jaxon Smith-Njigba",
+      "Saquon Barkley",
+    ]) {
+      expect(named(name).leagueWinner).toBeUndefined();
     }
   });
 });

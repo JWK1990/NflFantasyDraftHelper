@@ -9,8 +9,12 @@ import type { DraftedBy, Player } from "../domain/types.ts";
 const players = loadPlayers();
 const murray = players.find((player) => player.player === "Kyler Murray");
 const taylor = players.find((player) => player.player === "Jonathan Taylor");
+const plain = players.find((player) => player.player === "Jaxon Smith-Njigba");
 if (!murray?.leagueWinner) throw new Error("Expected Kyler Murray leagueWinner");
 if (!taylor) throw new Error("Expected Jonathan Taylor");
+if (!plain || plain.leagueWinner || plain.watchlist || plain.value) {
+  throw new Error("Expected a plain (non-watchlist/value/LW) control player");
+}
 
 function renderRow(
   player: Player,
@@ -41,17 +45,17 @@ const USER_PICK = { isUserPick: true, label: "Josh", teamName: "The Dan Marineho
 describe("league winner UI", () => {
   afterEach(() => cleanup());
 
-  it("gold-highlights league winner rows and leaves others unchanged", () => {
+  it("gold-highlights watchlist rows and leaves others unchanged", () => {
     const winner = renderRow(murray);
-    expect(winner.container.querySelector(".player-row.league-winner")).toBeTruthy();
+    expect(winner.container.querySelector(".player-row.watchlist")).toBeTruthy();
     cleanup();
     const other = renderRow(taylor);
-    expect(other.container.querySelector(".player-row.league-winner")).toBeNull();
+    expect(other.container.querySelector(".player-row.watchlist")).toBeNull();
   });
 
   it("renders exactly one LW pill on configured players and none otherwise", () => {
     const winners = players.filter((player) => player.leagueWinner);
-    expect(winners).toHaveLength(37);
+    expect(winners).toHaveLength(27);
     for (const player of winners) {
       const view = renderRow(player);
       expect(screen.getAllByRole("button", { name: /League Winner candidate/i })).toHaveLength(1);
@@ -70,7 +74,7 @@ describe("league winner UI", () => {
       expect(screen.getAllByRole("button", { name: /League Winner candidate/i })).toHaveLength(1);
       cleanup();
     }
-    renderRow(taylor);
+    renderRow(plain);
     expect(screen.queryByRole("button", { name: /League Winner candidate/i })).toBeNull();
   });
 

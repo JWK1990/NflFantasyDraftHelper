@@ -413,7 +413,7 @@ button.roster-chip {
   background: var(--bg-row-alt);
 }
 
-.player-row.league-winner {
+.player-row.watchlist {
   background: linear-gradient(90deg, #6b5414 0%, #3d3214 72%);
   border-bottom-color: #c9a227;
   box-shadow: inset 3px 0 0 #e4b429;
@@ -527,6 +527,13 @@ button.roster-chip {
   color: #ffe7a3;
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+
+.reason.value-chip {
+  background: #1f5c3a;
+  color: #b8f5cf;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .reason.outlook-chip {
@@ -668,6 +675,27 @@ button.roster-chip {
 
 .lw-detail a {
   color: #ffe7a3;
+}
+
+.value-detail {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.value-detail h3 {
+  margin: 0 0 4px;
+  font-size: 0.82rem;
+}
+
+.value-note {
+  margin: 6px 0 2px;
+}
+
+.value-dynamic {
+  margin: 2px 0;
+  font-weight: 700;
+  color: #b8f5cf;
 }
 
 .player-research {

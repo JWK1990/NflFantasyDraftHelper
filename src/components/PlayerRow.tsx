@@ -13,6 +13,7 @@ import { scoutingTag } from "../engine/tags.ts";
 import { scarcityLevel } from "../config/leagueSettings.ts";
 import { useChipExplain } from "./ChipExplainContext.tsx";
 import { LeagueWinnerDetail } from "./LeagueWinnerDetail.tsx";
+import { ValueDetail, type ValueAvailability } from "./ValueDetail.tsx";
 
 interface PlayerRowProps {
   player: Player;
@@ -72,6 +73,15 @@ function reasonClassName(reason: string): string {
 function isScoutingChip(reason: string, player: Player): boolean {
   const tag = scoutingTag(player);
   return (tag != null && reason === tag) || /^Model #\d+$/.test(reason);
+}
+
+/** Reuse the row's own stream-survival chips to time a value pick. */
+function valueAvailability(reasons: string[]): ValueAvailability {
+  for (const reason of reasons) {
+    if (/^Likely at pick \d+$/.test(reason)) return "likely";
+    if (/^Unlikely at pick \d+$/.test(reason)) return "unlikely";
+  }
+  return null;
 }
 
 function OutlookDetail({ outlook }: { outlook: PlayerOutlook }) {
@@ -191,7 +201,7 @@ export function PlayerRow({
   return (
     <article
       className={`player-row${dimmed ? " dimmed" : ""}${
-        player.leagueWinner ? " league-winner" : ""
+        player.watchlist ? " watchlist" : ""
       }`}
     >
       <div className="player-main">
@@ -228,7 +238,7 @@ export function PlayerRow({
           {", "}
           <strong>ADP {formatAdp(player.sfConsensusAdp ?? player.adp)}</strong>
         </button>
-        {reasons.length > 0 || player.leagueWinner ? (
+        {reasons.length > 0 || player.leagueWinner || player.value ? (
           <div className="reasons">
             {player.leagueWinner ? (
               <button
@@ -241,6 +251,16 @@ export function PlayerRow({
                 }}
               >
                 LW
+              </button>
+            ) : null}
+            {player.value ? (
+              <button
+                className="reason value-chip"
+                type="button"
+                aria-label={`Value target from pick ${player.value.valueFrom}`}
+                onClick={() => explain(`Value ${player.value!.valueFrom}+`)}
+              >
+                Value {player.value.valueFrom}+
               </button>
             ) : null}
             {reasons.map((reason) => (
@@ -292,6 +312,12 @@ export function PlayerRow({
           ) : null}
           {player.outlook ? <OutlookDetail outlook={player.outlook} /> : null}
           <PlayerResearch player={player} onExplain={explain} />
+          {player.value ? (
+            <ValueDetail
+              profile={player.value}
+              availability={valueAvailability(recommendation?.reasons ?? [])}
+            />
+          ) : null}
           {player.leagueWinner ? (
             <LeagueWinnerDetail profile={player.leagueWinner} />
           ) : null}

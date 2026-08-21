@@ -2,10 +2,10 @@ import type { DraftState, Player, Recommendation } from "../domain/types.ts";
 import { draftedIds } from "./roster.ts";
 import { userPickSchedule } from "./snake.ts";
 
-/** Show an LW tip when the user still has this many of their own picks before ADP. */
-export const LEAGUE_WINNER_TIP_USER_PICKS = 3;
+/** Show a watchlist tip when the user still has this many of their own picks before ADP. */
+export const WATCHLIST_TIP_USER_PICKS = 3;
 
-export interface LeagueWinnerTip {
+export interface WatchlistTip {
   player: Player;
   expectedPick: number;
   picksBefore: number;
@@ -36,21 +36,21 @@ export function userPicksBeforeExpected(
   return schedule.filter((pick) => pick >= currentPick && pick < expectedPick).length;
 }
 
-export function formatLeagueWinnerTipShort(tip: LeagueWinnerTip): string {
+export function formatWatchlistTipShort(tip: WatchlistTip): string {
   return `${lastNameFromPlayer(tip.player.player)} (ADP ${tip.expectedPick}, Rank ${tip.rank}, Picks Before ${tip.picksBefore})`;
 }
 
-export function upcomingLeagueWinnerTips(
+export function upcomingWatchlistTips(
   recs: Recommendation[],
   state: DraftState,
-  userPickWindow: number = LEAGUE_WINNER_TIP_USER_PICKS,
-): LeagueWinnerTip[] {
+  userPickWindow: number = WATCHLIST_TIP_USER_PICKS,
+): WatchlistTip[] {
   const currentPick = state.picks.length + 1;
   const taken = draftedIds(state.picks);
   const schedule = userPickSchedule();
-  const tips: LeagueWinnerTip[] = [];
+  const tips: WatchlistTip[] = [];
   recs.forEach((row, index) => {
-    if (!row.player.leagueWinner || taken.has(row.player.id)) return;
+    if (!row.player.watchlist || taken.has(row.player.id)) return;
     const expectedPick = expectedPickFor(row.player);
     if (expectedPick == null || expectedPick < currentPick) return;
     const picksBefore = userPicksBeforeExpected(currentPick, expectedPick, schedule);
