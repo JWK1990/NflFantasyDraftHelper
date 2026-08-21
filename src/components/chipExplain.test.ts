@@ -19,11 +19,11 @@ describe("chip explanations", () => {
   });
 
   it("adds pick-number detail to availability chips", () => {
-    const unlikely = explainChip("Unlikely to be available at pick 47");
+    const unlikely = explainChip("Unlikely at pick 47");
     expect(unlikely.definition.toLowerCase()).toMatch(/gone|fallen|stream/);
     expect(unlikely.detail).toContain("47");
 
-    const likely = explainChip("likely to be available at pick 30");
+    const likely = explainChip("Likely at pick 30");
     expect(likely.detail).toContain("30");
   });
 

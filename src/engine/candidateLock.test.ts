@@ -113,7 +113,7 @@ describe("candidate lock", { timeout: 90_000 }, () => {
     const row = recs.find((item) => item.player.player === "Jonathan Taylor");
     expect(row).toBeDefined();
     expect(
-      row!.reasons.some((reason) => reason.startsWith("Unlikely to be available at pick 19")),
+      row!.reasons.some((reason) => reason.startsWith("Unlikely at pick 19")),
     ).toBe(true);
   });
 
@@ -179,15 +179,15 @@ describe("candidate lock", { timeout: 90_000 }, () => {
       recs.flatMap((row) => row.reasons.filter((reason) => reason.startsWith(prefix)));
 
     const at16 = recommend(players, fillToPick(16, keepStars));
-    const unlikely16 = chips(at16, "Unlikely to be available");
-    const likely16 = chips(at16, "likely to be available");
+    const unlikely16 = chips(at16, "Unlikely at pick");
+    const likely16 = chips(at16, "Likely at pick");
     expect(unlikely16.length + likely16.length).toBeGreaterThan(0);
     expect(unlikely16.every((reason) => reason.includes("pick 19"))).toBe(true);
     expect(likely16.every((reason) => reason.includes("pick 19"))).toBe(true);
 
     const at19 = recommend(players, fillToPick(19, keepStars));
-    const unlikely19 = chips(at19, "Unlikely to be available");
-    const likely19 = chips(at19, "likely to be available");
+    const unlikely19 = chips(at19, "Unlikely at pick");
+    const likely19 = chips(at19, "Likely at pick");
     expect(unlikely19.length + likely19.length).toBeGreaterThan(0);
     expect(unlikely19.every((reason) => reason.includes("pick 30"))).toBe(true);
     expect(likely19.every((reason) => reason.includes("pick 30"))).toBe(true);

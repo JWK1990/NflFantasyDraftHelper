@@ -23,24 +23,6 @@
       "posRank": 2,
       "posTier": 1,
       "tier": 1,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Has finished as a top-three fantasy running back in consecutive seasons and remains in his prime with a workhorse role.",
-          "Draft Sharks describes him as one of the safest elite picks while retaining league-winning upside.",
-          "He owns the largest median-projection VORP in this league model, so a further ceiling outcome would create a major cross-positional advantage."
-        ],
-        "sources": [
-          {
-            "label": "Draft Sharks 2026 Bijan Robinson Outlook",
-            "url": "https://www.draftsharks.com/fantasy/points-outlook/bijan-robinson/13541"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4430807,
       "birthDate": "2002-01-30",
       "age": 24,
@@ -90,24 +72,6 @@
       "posRank": 1,
       "posTier": 1,
       "tier": 1,
-      "leagueWinner": {
-        "confidence": "high",
-        "archetypes": [
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Has already exceeded 360 PPR points in consecutive seasons despite sharing substantial backfield work.",
-          "NFL.com identifies a plausible 2,000-scrimmage-yard and 20-touchdown outcome after Detroit's backfield change.",
-          "A first-round price does not prevent a player from being a league winner when the ceiling can separate from the entire position."
-        ],
-        "sources": [
-          {
-            "label": "NFL.com 2026 Top 10 League-Winners",
-            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4429795,
       "birthDate": "2002-03-20",
       "age": 24,
@@ -157,28 +121,6 @@
       "posRank": 1,
       "posTier": 1,
       "tier": 1,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Combines elite target volume with a realistic path to the overall WR1 finish in full PPR.",
-          "Current 2026 WR analysis places him in the small top tier explicitly labelled as league winners.",
-          "The upside case is based on dominant usable weekly volume rather than unpredictable spike weeks."
-        ],
-        "sources": [
-          {
-            "label": "SI 2026 Wide Receiver Tiers",
-            "url": "https://www.si.com/onsi/fantasy/news/fantasy-football-2026-wide-receiver-tiers-ja-marr-chase-ranks-with-the-best-of-the-bunch"
-          },
-          {
-            "label": "PFF 2026 Overall WR1 Contenders",
-            "url": "https://www.pff.com/news/fantasy-football-2026-3-contenders-for-the-overall-wr1-finish"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4426515,
       "birthDate": "2001-05-29",
       "age": 25,
@@ -228,28 +170,6 @@
       "posRank": 2,
       "posTier": 1,
       "tier": 1,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Owns an established elite target and touchdown profile with a credible overall WR1 outcome.",
-          "Current 2026 WR analysis places him in the small top tier explicitly labelled as league winners.",
-          "His ceiling would create an every-week starting advantage even without an ADP discount."
-        ],
-        "sources": [
-          {
-            "label": "SI 2026 Wide Receiver Tiers",
-            "url": "https://www.si.com/onsi/fantasy/news/fantasy-football-2026-wide-receiver-tiers-ja-marr-chase-ranks-with-the-best-of-the-bunch"
-          },
-          {
-            "label": "PFF 2026 Overall WR1 Contenders",
-            "url": "https://www.pff.com/news/fantasy-football-2026-3-contenders-for-the-overall-wr1-finish"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4362628,
       "birthDate": "2000-03-01",
       "age": 26,
@@ -299,26 +219,6 @@
       "posRank": 1,
       "posTier": 1,
       "tier": 1,
-      "leagueWinner": {
-        "confidence": "high",
-        "archetypes": [
-          "power-law-ceiling",
-          "rushing-qb",
-          "elite-positional-edge"
-        ],
-        "reasons": [
-          "Has repeatedly separated from the normal QB1 baseline rather than merely finishing as a top quarterback.",
-          "NFL.com reports that he has beaten the QB1 median by more than 2.0 points per game in every season since 2020, averaging a 3.35-point advantage.",
-          "That ceiling is especially valuable in this 12-team Superflex league, where the second quarterback slot and two-QB roster cap lower replacement quality."
-        ],
-        "sources": [
-          {
-            "label": "NFL.com 2026 Top 10 League-Winners",
-            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 3918298,
       "birthDate": "1996-05-21",
       "age": 30,
@@ -368,28 +268,6 @@
       "posRank": 3,
       "posTier": 1,
       "tier": 1,
-      "leagueWinner": {
-        "confidence": "medium",
-        "archetypes": [
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Has already produced a top-two positional season and retains an overall WR1 path.",
-          "Current 2026 WR analysis places him in the small top tier explicitly labelled as league winners.",
-          "His target-driven PPR profile is likely to be usable weekly rather than dependent on unpredictable deep touchdowns."
-        ],
-        "sources": [
-          {
-            "label": "SI 2026 Wide Receiver Tiers",
-            "url": "https://www.si.com/onsi/fantasy/news/fantasy-football-2026-wide-receiver-tiers-ja-marr-chase-ranks-with-the-best-of-the-bunch"
-          },
-          {
-            "label": "PFF 2026 Overall WR1 Contenders",
-            "url": "https://www.pff.com/news/fantasy-football-2026-3-contenders-for-the-overall-wr1-finish"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 4430878,
       "birthDate": "2002-02-14",
       "age": 24,
@@ -537,28 +415,6 @@
       "posRank": 3,
       "posTier": 1,
       "tier": 1,
-      "leagueWinner": {
-        "confidence": "high",
-        "archetypes": [
-          "power-law-ceiling"
-        ],
-        "reasons": [
-          "Demonstrated the methodology directly in 2025 by creating a large PPR scoring gap when healthy.",
-          "ESPN's 2026 league-winner discussion continued to identify him as a season-defining player and defended his unique receiving-plus-rushing ceiling.",
-          "This label describes the ceiling only; his separate injury/risk chip remains the place for discretionary downside assessment."
-        ],
-        "sources": [
-          {
-            "label": "ESPN Fantasy Focus 2026 League-Winners Discussion",
-            "url": "https://podcastrex.com/shows/fantasy-focus-football/10-fantasy-football-league-winners-who-will-define-the-2026-season-fantasy-focus"
-          },
-          {
-            "label": "NFL.com 2026 Top 10 League-Winners Methodology",
-            "url": "https://www.nfl.com/news/2026-nfl-fantasy-football-top-10-league-winners"
-          }
-        ],
-        "reviewedAt": "2026-08-18"
-      },
       "espnId": 3117251,
       "birthDate": "1996-06-07",
       "age": 30,
@@ -3551,6 +3407,29 @@
       "posRank": 16,
       "posTier": 3,
       "tier": 3,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "contingent-upside",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Displayed RB1-caliber tackle-breaking and receiving production as a rookie before a severe ankle injury ended the season.",
+          "If the Giants role holds, that pre-injury profile can separate from typical mid-round running backs.",
+          "Health and early-season role remain separate risk chips and do not cancel the ceiling case."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Cam Skattebo Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/cameron-skattebo/35382"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      },
       "espnId": 4696981,
       "birthDate": "2002-02-05",
       "age": 24,
@@ -4040,6 +3919,27 @@
       "posRank": 18,
       "posTier": 3,
       "tier": 3,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "breakout-role",
+          "power-law-ceiling"
+        ],
+        "reasons": [
+          "Rookie-year target quality remains the ceiling path despite a 2025 dip in share and efficiency.",
+          "A return to that every-week WR role in Los Angeles would create surplus above a typical WR24 cost."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Ladd McConkey Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/ladd-mcconkey/35015"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      },
       "espnId": 4612826,
       "birthDate": "2001-11-11",
       "age": 24,
@@ -5733,6 +5633,28 @@
       "posRank": 15,
       "posTier": 3,
       "tier": 3,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "elite-positional-edge",
+          "breakout-role"
+        ],
+        "reasons": [
+          "DraftSharks highlights elite per-route production after an injury-riddled 2025 that pushed him onto many do-not-draft lists.",
+          "A restored Bills receiving role at a Round 10-11 price would create a weekly tight-end advantage most rosters cannot match.",
+          "Injury remains a separate risk assessment and does not cancel this ceiling case."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Dalton Kincaid Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/dalton-kincaid/13573"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      },
       "espnId": 4385690,
       "birthDate": "1999-10-18",
       "age": 26,
@@ -5880,6 +5802,28 @@
       "posRank": 37,
       "posTier": 4,
       "tier": 4,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "contingent-upside",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Enters 2026 as the biggest name in Washington's backfield with a documented PPR receiving profile.",
+          "If the role expands beyond a committee, that receiving usage can create weekly surplus far above a late-round cost.",
+          "Committee risk remains separate from this ceiling case."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Rachaad White Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/rachaad-white/12583"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      },
       "espnId": 4697815,
       "birthDate": "1999-01-12",
       "age": 27,
@@ -7126,6 +7070,28 @@
       "posRank": 42,
       "posTier": 5,
       "tier": 5,
+      "leagueWinner": {
+        "confidence": "medium",
+        "archetypes": [
+          "contingent-upside",
+          "breakout-role"
+        ],
+        "reasons": [
+          "Closed 2025 by narrowing the usage gap with Kyren Williams and matching him in several key rushing metrics.",
+          "If that momentum becomes every-week Rams work, the late-round handcuff price leaves room for championship surplus.",
+          "This is a contingent ceiling case; the current committee projection remains unchanged."
+        ],
+        "sources": [
+          {
+            "label": "User-designated 2026 league-winner watchlist"
+          },
+          {
+            "label": "DraftSharks 2026 Blake Corum Outlook",
+            "url": "https://www.draftsharks.com/fantasy/points-outlook/blake-corum/34990"
+          }
+        ],
+        "reviewedAt": "2026-08-22"
+      },
       "espnId": 4429096,
       "birthDate": "2000-11-25",
       "age": 25,
@@ -11519,10 +11485,10 @@
   ],
   "leagueWinnerMethodology": {
     "schemaVersion": 1,
-    "reviewedAt": "2026-08-19",
+    "reviewedAt": "2026-08-22",
     "mode": "display-only",
     "rankingImpact": 0,
-    "candidateCount": 39,
+    "candidateCount": 37,
     "leagueContext": {
       "teams": 12,
       "scoring": "full PPR",
@@ -11559,7 +11525,7 @@
       "Most source lists assume one-QB home leagues; quarterback rationales were adjusted qualitatively for this league's Superflex replacement level, but source rankings were not copied.",
       "Expert candidate lists are not calibrated probabilities and have substantial miss rates.",
       "Projection-source disagreement is epistemic uncertainty and was not treated as a player ceiling.",
-      "The 39 candidates are a curated union of strong current cases plus a user watchlist, not a claim that 39 players will become league winners.",
+      "The 37 candidates are a curated union of strong current cases plus a user watchlist, not a claim that 37 players will become league winners. Obvious top-10 ADP names are omitted so the label stays useful later in the draft.",
       "News, depth charts and injuries remain time-sensitive and should be reviewed again immediately before the draft."
     ],
     "methodologySources": [

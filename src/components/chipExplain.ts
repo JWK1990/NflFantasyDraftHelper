@@ -52,7 +52,7 @@ function explainTag(label: string): ChipExplanation {
 }
 
 export function explainChip(label: string): ChipExplanation {
-  const unlikely = label.match(/^Unlikely to be available at pick (\d+)$/i);
+  const unlikely = label.match(/^Unlikely at pick (\d+)$/i);
   if (unlikely) {
     return {
       title: label,
@@ -62,7 +62,7 @@ export function explainChip(label: string): ChipExplanation {
     };
   }
 
-  const likely = label.match(/^likely to be available at pick (\d+)$/i);
+  const likely = label.match(/^Likely at pick (\d+)$/i);
   if (likely) {
     return {
       title: label,
@@ -269,7 +269,7 @@ export function explainChip(label: string): ChipExplanation {
       definition:
         "A short draft-day reminder for this player. It is not the full DraftSharks write-up.",
       detail:
-        "Tap Outlook to read the note. Tap the player name or VORP/ADP line to expand the full research, including the DraftSharks outlook. Display only — it does not change ranking.",
+        "Expand the player row to read the note alongside the DraftSharks outlook. Display only — it does not change ranking.",
     };
   }
 

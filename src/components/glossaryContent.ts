@@ -48,12 +48,12 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
     title: "Timing chips",
     entries: [
       {
-        term: "Unlikely to be available at pick 19",
+        term: "Unlikely at pick 19",
         definition:
           "ADP says this player will probably be gone before your next pick. That is a timing warning, not a rank penalty — this named player is still scored as if you get them. Other players the sim hopes to add later are weighted by that same chance.",
       },
       {
-        term: "likely to be available at pick 19",
+        term: "Likely at pick 19",
         definition:
           "This player is high on your list, and ADP says they should still be there at your next pick. You can often take someone more urgent first. Availability never swaps in a different player under this name.",
       },
@@ -147,7 +147,7 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
       {
         term: "RISK / ELITE/RISK / VALUE/RISK",
         definition:
-          "Injury, age, role, or volatility concern. Shown so you can fade them; not used in the score.",
+          "Injury, age, role, or volatility concern. Filterable in Search — not used in the score.",
       },
       {
         term: "INJURY WATCH / RED WATCH",
@@ -174,9 +174,9 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
           "Gold row plus a gold LW tag in the same row as the other chips. League-winning players are frequently found early because early picks have the highest hit rates. Upside becomes more decisive later because safe but replaceable bench production has little value and failed late picks can usually be replaced through waivers. Tap LW to open the research on that player. Filter by Potential League Winner in Search / filter. When an available candidate is expected within your next 3 picks, the tip bar at the top names them so you can reach if you need to.",
       },
       {
-        term: "Outlook pill",
+        term: "Draft note",
         definition:
-          "Opens this player's Quick Draft note. Tap the player name or VORP/ADP line to expand the full research, including the DraftSharks outlook and source link. Display only — it does not change ranking.",
+          "A short draft-day reminder for this player. Tap the player name or VORP/ADP line to expand the row and read it alongside the DraftSharks outlook. Display only — it does not change ranking.",
       },
       {
         term: "1 projection source",

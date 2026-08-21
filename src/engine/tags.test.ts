@@ -40,11 +40,11 @@ describe("scouting tags", () => {
   });
 
   it("matches Potential League Winner from leagueWinner metadata, not the scouting tag", () => {
-    const allen = named("Josh Allen");
+    const murray = named("Kyler Murray");
     const taylor = named("Jonathan Taylor");
-    expect(allen.leagueWinner).toBeDefined();
-    expect(playerMatchesTagFilter(allen, "league-winner")).toBe(true);
+    expect(murray.leagueWinner).toBeDefined();
+    expect(playerMatchesTagFilter(murray, "league-winner")).toBe(true);
     expect(playerMatchesTagFilter(taylor, "league-winner")).toBe(false);
-    expect(playerMatchesTagFilter(allen, "anchor")).toBe(true);
+    expect(playerMatchesTagFilter(named("Josh Allen"), "anchor")).toBe(true);
   });
 });

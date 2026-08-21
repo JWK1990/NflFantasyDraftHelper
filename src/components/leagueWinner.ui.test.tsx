@@ -7,9 +7,9 @@ import { ChipExplainProvider } from "./ChipExplainContext.tsx";
 import type { DraftedBy, Player } from "../domain/types.ts";
 
 const players = loadPlayers();
-const allen = players.find((player) => player.player === "Josh Allen");
+const murray = players.find((player) => player.player === "Kyler Murray");
 const taylor = players.find((player) => player.player === "Jonathan Taylor");
-if (!allen?.leagueWinner) throw new Error("Expected Josh Allen leagueWinner");
+if (!murray?.leagueWinner) throw new Error("Expected Kyler Murray leagueWinner");
 if (!taylor) throw new Error("Expected Jonathan Taylor");
 
 function renderRow(
@@ -42,7 +42,7 @@ describe("league winner UI", () => {
   afterEach(() => cleanup());
 
   it("gold-highlights league winner rows and leaves others unchanged", () => {
-    const winner = renderRow(allen);
+    const winner = renderRow(murray);
     expect(winner.container.querySelector(".player-row.league-winner")).toBeTruthy();
     cleanup();
     const other = renderRow(taylor);
@@ -51,7 +51,7 @@ describe("league winner UI", () => {
 
   it("renders exactly one LW pill on configured players and none otherwise", () => {
     const winners = players.filter((player) => player.leagueWinner);
-    expect(winners).toHaveLength(39);
+    expect(winners).toHaveLength(37);
     for (const player of winners) {
       const view = renderRow(player);
       expect(screen.getAllByRole("button", { name: /League Winner candidate/i })).toHaveLength(1);
@@ -74,19 +74,17 @@ describe("league winner UI", () => {
     expect(screen.queryByRole("button", { name: /League Winner candidate/i })).toBeNull();
   });
 
-  it("keeps risk chips alongside the LW pill", () => {
+  it("does not render scouting tags next to the LW pill", () => {
     const risky = winnersWithRisk();
     renderRow(risky);
-    const lw = screen.getByRole("button", { name: /League Winner candidate/i });
-    expect(lw).toBeTruthy();
-    expect(lw.className).toContain("reason");
-    expect(screen.getByRole("button", { name: risky.tag })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /League Winner candidate/i })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: risky.tag })).toBeNull();
   });
 
   it("opens the breakdown from LW without drafting", () => {
     const drafted: DraftedBy[] = [];
     let expanded = false;
-    renderRow(allen, {
+    renderRow(murray, {
       onDraft: (draftedBy) => drafted.push(draftedBy),
       onToggle: () => {
         expanded = true;
@@ -101,14 +99,14 @@ describe("league winner UI", () => {
   });
 
   it("renders confidence, archetypes, reasons and sources from JSON", () => {
-    renderRow(allen, { expanded: true });
+    renderRow(murray, { expanded: true });
     expect(screen.getByText("League Winner Candidate")).toBeTruthy();
     expect(screen.getByText("Confidence: High")).toBeTruthy();
-    expect(screen.getByText("Power-law ceiling")).toBeTruthy();
     expect(screen.getByText("Rushing QB")).toBeTruthy();
-    expect(screen.getByText("Elite positional edge")).toBeTruthy();
+    expect(screen.getByText("Ascending offense")).toBeTruthy();
+    expect(screen.getByText("Breakout role")).toBeTruthy();
     expect(
-      screen.getByText(/Has repeatedly separated from the normal QB1 baseline/),
+      screen.getByText(/NFL.com identifies a realistic 3,600-passing-yard/),
     ).toBeTruthy();
     const source = screen.getByRole("link", { name: "NFL.com 2026 Top 10 League-Winners" });
     expect(source.getAttribute("href")).toContain("nfl.com");

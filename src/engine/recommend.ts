@@ -72,7 +72,7 @@ function collectReasons(
   if (returnChance < config.robustness.unlikelyReturn) {
     const next = nextUserPickAfter(currentOverallPick);
     if (next != null) {
-      reasons.push(`Unlikely to be available at pick ${next}`);
+      reasons.push(`Unlikely at pick ${next}`);
     }
   }
 
@@ -129,12 +129,12 @@ function addLikelyAvailableReasons(
   const next = nextUserPickAfter(currentOverallPick);
   if (next == null) return scored;
 
-  const label = `likely to be available at pick ${next}`;
+  const label = `Likely at pick ${next}`;
 
   for (const row of scored.slice(0, config.returnChip.topN)) {
     if (row.player.pos === "K" || row.player.pos === "DST") continue;
     if (row.breakdown.returnProbability < config.returnChip.minProbability) continue;
-    if (row.reasons.some((reason) => reason.startsWith("Unlikely to be available"))) {
+    if (row.reasons.some((reason) => reason.startsWith("Unlikely at pick"))) {
       continue;
     }
     if (!row.reasons.includes(label)) row.reasons.push(label);

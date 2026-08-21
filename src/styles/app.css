@@ -1,6 +1,6 @@
 .app-shell {
   height: 100svh;
-  max-width: 520px;
+  max-width: var(--app-max);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -319,6 +319,7 @@
 .roster-strip,
 .tier-strip {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   overflow-x: auto;
   padding: 8px 10px 6px;
@@ -369,12 +370,14 @@ button.roster-chip {
   color: #14532d;
 }
 
-.tier-chip.scarcity-mid {
+.tier-chip.scarcity-mid,
+.reason.scarcity-mid {
   background: #fb923c;
   color: #7c2d12;
 }
 
-.tier-chip.scarcity-low {
+.tier-chip.scarcity-low,
+.reason.scarcity-low {
   background: #f87171;
   color: #7f1d1d;
 }
@@ -396,20 +399,24 @@ button.roster-chip {
 .player-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: 6px;
   align-items: stretch;
-  padding: 8px 6px;
+  padding: 4px 6px;
   border-bottom: 1px solid var(--line);
+}
+
+.player-row:nth-child(odd) {
+  background: var(--bg-row);
+}
+
+.player-row:nth-child(even) {
+  background: var(--bg-row-alt);
 }
 
 .player-row.league-winner {
   background: linear-gradient(90deg, #6b5414 0%, #3d3214 72%);
   border-bottom-color: #c9a227;
   box-shadow: inset 3px 0 0 #e4b429;
-}
-
-.player-main {
-  min-height: var(--tap);
 }
 
 .player-ident,
@@ -427,16 +434,15 @@ button.roster-chip {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   flex: 1;
   min-width: 0;
-  min-height: var(--tap);
 }
 
 .player-top {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
@@ -448,34 +454,43 @@ button.roster-chip {
 .rank {
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
-  font-size: 0.8rem;
-  min-width: 2rem;
+  font-size: 0.75rem;
+  min-width: 1.6rem;
+  line-height: 1.2;
 }
 
 .name {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
+  line-height: 1.15;
 }
 
 .meta {
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  line-height: 1.15;
+}
+
+.meta .age {
+  font-weight: 700;
 }
 
 .pos-chip {
   border: 0;
-  border-radius: 6px;
-  padding: 1px 6px;
-  font-size: 0.68rem;
+  border-radius: 5px;
+  padding: 0 5px;
+  font-size: 0.62rem;
   font-weight: 800;
-  min-height: 24px;
+  min-height: 18px;
+  line-height: 1.2;
 }
 
 .stats {
   width: 100%;
-  margin-top: 2px;
+  margin-top: 0;
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
 }
 
@@ -491,8 +506,8 @@ button.roster-chip {
 .reasons {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
+  gap: 3px;
+  margin-top: 2px;
 }
 
 .reason {
@@ -501,9 +516,10 @@ button.roster-chip {
   background: #243246;
   color: #d5deea;
   border-radius: 999px;
-  padding: 4px 8px;
+  padding: 1px 6px;
   font: inherit;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
+  line-height: 1.35;
 }
 
 .reason.lw-chip {
@@ -523,6 +539,11 @@ button.roster-chip {
   background: #2a3340;
   color: #9aa7b5;
   font-weight: 600;
+}
+
+.reason.scarcity-mid,
+.reason.scarcity-low {
+  font-weight: 700;
 }
 
 .reason-likely {
@@ -650,9 +671,9 @@ button.roster-chip {
 }
 
 .player-research {
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
 }
 
 .research-chips {
@@ -666,6 +687,13 @@ button.roster-chip {
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px solid var(--line);
+}
+
+.breakdown > .outlook-detail:first-child,
+.breakdown > .player-research:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .outlook-detail h3 {
@@ -708,7 +736,7 @@ button.roster-chip {
   left: 0;
   right: 0;
   bottom: 0;
-  max-width: 520px;
+  max-width: var(--app-max);
   margin: 0 auto;
   max-height: 42svh;
   background: var(--bg-elevated);

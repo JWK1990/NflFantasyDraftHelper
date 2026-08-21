@@ -1,8 +1,8 @@
 :root {
   --bg: #10151c;
   --bg-elevated: #18212c;
-  --bg-row: #1c2633;
-  --bg-row-alt: #1a2330;
+  --bg-row: #141c26;
+  --bg-row-alt: #1c2633;
   --text: #f3f6fa;
   --text-muted: #9aa7b5;
   --line: #2a3646;
@@ -21,6 +21,7 @@
   --tier-6: #e7e6e6;
   --radius: 10px;
   --tap: 44px;
+  --app-max: 780px;
   --sans: "Segoe UI", system-ui, sans-serif;
 }
 

@@ -426,7 +426,7 @@ describe("availability chips vs remaining opponent picks", { timeout: 90_000 }, 
     const threshold = RECOMMENDATION_CONFIG.robustness.unlikelyReturn;
     for (const row of recs) {
       const unlikely = row.reasons.some((reason) =>
-        reason.startsWith("Unlikely to be available"),
+        reason.startsWith("Unlikely at pick"),
       );
       expect(unlikely).toBe(row.breakdown.returnProbability < threshold);
     }

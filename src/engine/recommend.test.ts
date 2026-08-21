@@ -169,10 +169,10 @@ describe("recommendation engine", { timeout: 90_000 }, () => {
     expect(jsn).toBeDefined();
     expect(puka).toBeDefined();
     expect(
-      jsn!.reasons.some((reason) => reason.startsWith("Unlikely to be available")),
+      jsn!.reasons.some((reason) => reason.startsWith("Unlikely at pick")),
     ).toBe(true);
     expect(
-      puka!.reasons.some((reason) => reason.startsWith("Unlikely to be available")),
+      puka!.reasons.some((reason) => reason.startsWith("Unlikely at pick")),
     ).toBe(true);
   });
 
@@ -193,20 +193,20 @@ describe("recommendation engine", { timeout: 90_000 }, () => {
         row.breakdown.returnProbability >= 0.7 &&
         row.player.pos !== "K" &&
         row.player.pos !== "DST" &&
-        !row.reasons.some((reason) => reason.startsWith("Unlikely to be available")),
+        !row.reasons.some((reason) => reason.startsWith("Unlikely at pick")),
     );
     expect(
       topWait.every((row) =>
-        row.reasons.some((reason) => reason.startsWith("likely to be available")),
+        row.reasons.some((reason) => reason.startsWith("Likely at pick")),
       ),
     ).toBe(true);
     expect(
       recs.every((row) => {
         const likely = row.reasons.some((reason) =>
-          reason.startsWith("likely to be available"),
+          reason.startsWith("Likely at pick"),
         );
         const unlikely = row.reasons.some((reason) =>
-          reason.startsWith("Unlikely to be available"),
+          reason.startsWith("Unlikely at pick"),
         );
         return !(likely && unlikely);
       }),
@@ -315,9 +315,9 @@ describe("recommendation engine", { timeout: 90_000 }, () => {
   it("filters the board to Potential League Winner candidates", () => {
     const state = { ...initialDraftState, tagFilter: "league-winner" as const };
     const winners = players.filter((player) => matchesFilters(player, state));
-    expect(winners).toHaveLength(39);
+    expect(winners).toHaveLength(37);
     expect(winners.every((player) => player.leagueWinner)).toBe(true);
-    expect(winners.some((player) => player.player === "Josh Allen")).toBe(true);
+    expect(winners.some((player) => player.player === "Kyler Murray")).toBe(true);
   });
 
   it("gives bench-only players diminishing value rather than full starter points", () => {
