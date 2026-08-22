@@ -4,9 +4,8 @@ import {
   type RecommendationConfig,
 } from "../config/recommendationConfig.ts";
 import type { Player, RosterCounts } from "../domain/types.ts";
-import { draftedIds, offensiveGoalsMet } from "./roster.ts";
-import { roundForPick } from "./snake.ts";
-import { specialTeamsWindowOpen } from "./lateRound.ts";
+import { draftedIds } from "./roster.ts";
+import { specialTeamsSlotOpen } from "./lateRound.ts";
 import type { DraftPick } from "../domain/types.ts";
 
 export function isEligible(
@@ -14,7 +13,7 @@ export function isEligible(
   picks: DraftPick[],
   counts: RosterCounts,
   currentOverallPick: number,
-  config: RecommendationConfig = RECOMMENDATION_CONFIG,
+  _config: RecommendationConfig = RECOMMENDATION_CONFIG,
 ): boolean {
   if (player.coverageOnly) return false;
   if (draftedIds(picks).has(player.id)) return false;
@@ -24,15 +23,9 @@ export function isEligible(
   if (player.pos === "K" && counts.K >= 1) return false;
   if (player.pos === "DST" && counts.DST >= 1) return false;
 
-  const round = roundForPick(currentOverallPick);
+  // Deterministic: K only on the 2nd-to-last pick, D/ST only on the final pick.
   if (player.pos === "K" || player.pos === "DST") {
-    if (
-      round < config.specialTeams.suppressBeforeRound &&
-      !offensiveGoalsMet(counts) &&
-      !specialTeamsWindowOpen(currentOverallPick, counts)
-    ) {
-      return false;
-    }
+    if (!specialTeamsSlotOpen(currentOverallPick, player.pos, counts)) return false;
   }
 
   return true;

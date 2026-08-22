@@ -16,6 +16,28 @@ export const RECOMMENDATION_CONFIG = {
   },
   benchScale: 0.12,
   benchCap: 48,
+  // Bench-phase shaping (§bench). Applied ONLY once all offensive starters are
+  // filled, so starter-phase picks stay display-only for league-winner/value.
+  bench: {
+    // Diminishing multiplier on a bench player's modelPts base, indexed by their
+    // rank among same-position bench players (0 = best). Models positional
+    // redundancy; TE collapses fast so a 3rd TE is worth almost nothing.
+    redundancy: {
+      QB: [1, 0.3, 0.1],
+      RB: [1, 0.9, 0.75, 0.55],
+      WR: [1, 0.9, 0.75, 0.55],
+      TE: [0.5, 0.1],
+    } as Record<"QB" | "RB" | "WR" | "TE", number[]>,
+    redundancyFloor: 0.1,
+    // Additive season-point bonuses that tilt the bench toward championship
+    // upside once starters are set. Not capped by benchCap (kept separate).
+    upside: {
+      leagueWinnerHigh: 14,
+      leagueWinnerMedium: 9,
+      value: 6,
+    },
+    upsideCap: 45,
+  },
   emptySlotEarly: 35,
   emptySlotLate: 70,
   emptySlotCritical: 140,
@@ -27,9 +49,6 @@ export const RECOMMENDATION_CONFIG = {
     actionableTopN: 15, // row 1 + actionable rows must all be full simulations
     maxSimulations: 46, // safety cap on full sims per recommend() call
     approxMargin: 1, // gap placing approximate rows just below the simmed set
-  },
-  specialTeams: {
-    suppressBeforeRound: 13,
   },
   returnChip: {
     topN: 8,

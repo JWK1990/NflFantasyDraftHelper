@@ -8,20 +8,18 @@ function remainingUserPickCount(overallPick: number): number {
   return userPickSchedule().filter((pick) => pick >= overallPick).length;
 }
 
-/** Unfilled legally-mandatory positions: QB1, K and D/ST (never QB2). */
-function unfilledMandatory(qbCount: number, hasK: boolean, hasDst: boolean): number {
-  return Number(qbCount === 0) + Number(!hasK) + Number(!hasDst);
-}
 
 /**
- * General roster-feasibility reservation (§13.1). Force a mandatory position
- * (QB1, K or D/ST) only when delaying it would make a legal roster impossible —
- * i.e. when the user has no more picks to spare than unfilled mandatory slots.
- * QB2 is never mandatory. Priority when forced: QB1 (has value) > D/ST > K.
+ * Late-round reservation. QB1 stays a feasibility reservation (it has real
+ * value, so it is only forced when delaying it would make a legal roster
+ * impossible). K and D/ST are now deterministic, decoupled from feasibility:
  *
- * This replaces the old fixed 139/150/163/174 table: feasibility is now the
- * source of truth, so mandatory fillers are taken as late as legally safe and
- * the unified ranking is free to prefer value until then.
+ *   - D/ST is taken on the user's **final** pick (2 remaining → never; 1 → yes).
+ *   - K is taken on the user's **second-to-last** pick.
+ *
+ * They are never recommended earlier, which also keeps every pick up to ~150
+ * free for a QB2 or upside value pick. Priority when several coincide: QB1
+ * (feasibility) > K (2nd-last slot) > D/ST (last slot).
  */
 export function lateRoundReservation(
   overallPick: number,
@@ -34,23 +32,28 @@ export function lateRoundReservation(
   const needK = !hasK;
   const mandatory = Number(needQb) + Number(needDst) + Number(needK);
   if (mandatory === 0) return null;
-  if (remainingUserPickCount(overallPick) > mandatory) return null; // room to wait
-  if (needQb) return "QB";
-  if (needDst) return "DST";
-  if (needK) return "K";
+
+  const remaining = remainingUserPickCount(overallPick);
+  // QB1 must still physically fit; force it only with no room left to spare.
+  if (needQb && remaining <= mandatory) return "QB";
+  // Deterministic special-teams slots.
+  if (remaining <= 2 && needK) return "K"; // second-to-last (or last) pick
+  if (remaining <= 1 && needDst) return "DST"; // final pick
   return null;
 }
 
 /**
- * Whether K/D/ST should become selectable in the live list — when the user is
- * within one pick of specials being feasibility-forced. Keeps them hidden while
- * there is still comfortable room to draft value first.
+ * Whether a specific special-teams position should be selectable/recommended in
+ * the live list. Deterministic: K opens on the user's second-to-last pick, D/ST
+ * only on the final pick. Hidden from the board before then (opponents' early
+ * K/D/ST picks are still recorded via import/search).
  */
-export function specialTeamsWindowOpen(
+export function specialTeamsSlotOpen(
   overallPick: number,
+  pos: "K" | "DST",
   counts: RosterCounts,
 ): boolean {
-  const mandatory = unfilledMandatory(counts.QB, counts.K >= 1, counts.DST >= 1);
-  if (mandatory === 0) return false;
-  return remainingUserPickCount(overallPick) <= mandatory + 1;
+  const remaining = remainingUserPickCount(overallPick);
+  if (pos === "DST") return counts.DST < 1 && remaining <= 1;
+  return counts.K < 1 && remaining <= 2;
 }
