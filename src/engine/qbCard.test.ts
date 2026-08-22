@@ -3,7 +3,7 @@ import { loadPlayers } from "../data/loadPlayers.ts";
 import type { DraftState, Player } from "../domain/types.ts";
 import { draftReducer, initialDraftState } from "../state/draftReducer.ts";
 import { recommend } from "./recommend.ts";
-import { deriveQbCard } from "./qbCard.ts";
+import { deriveQbCard, deriveQbSummary } from "./qbCard.ts";
 import { draftedIds } from "./roster.ts";
 
 const players = loadPlayers();
@@ -89,5 +89,23 @@ describe("QB card (factual, derived)", { timeout: 90_000 }, () => {
     state = draftReducer(state, { type: "DRAFT_PLAYER", playerId: named("Lamar Jackson").id, draftedBy: "mine" });
     const recs = recommend(players, state);
     expect(deriveQbCard(recs, players, state)).toBeNull();
+  });
+});
+
+describe("QB draft summary (always available)", () => {
+  it("reports zero QBs taken and every opponent needing one on an empty board", () => {
+    expect(deriveQbSummary(players, initialDraftState)).toEqual({
+      qbsTaken: 0,
+      teamsNeedingQb: 11,
+    });
+  });
+
+  it("counts drafted QBs and stays available even when the QB verdict card is gone", () => {
+    const state = everyTeamOnTwoQbs();
+    // deriveQbCard bails (no QBs left / slots full) but the tracker still reports.
+    expect(deriveQbSummary(players, state)).toEqual({
+      qbsTaken: 24,
+      teamsNeedingQb: 0,
+    });
   });
 });

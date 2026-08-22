@@ -51,6 +51,23 @@ export interface QbCard {
   lastUserPick: number;
 }
 
+/** Always-available QB draft tracker, independent of the QB verdict card. */
+export interface QbSummary {
+  /** Total QBs drafted across all 12 teams. */
+  qbsTaken: number;
+  /** Opponent teams that can still draft a QB (fewer than 2). */
+  teamsNeedingQb: number;
+}
+
+export function deriveQbSummary(players: Player[], state: DraftState): QbSummary {
+  const teams = buildTeamStates(state.picks, players, teamNamesBySlot());
+  const qbsTaken = teams.reduce((sum, team) => sum + team.counts.QB, 0);
+  const teamsNeedingQb = opponentTeams(teams).filter(
+    (team) => remainingQbCapacity(team) > 0,
+  ).length;
+  return { qbsTaken, teamsNeedingQb };
+}
+
 function bestRowUtility(row: Recommendation | undefined): QbCardSide | null {
   if (!row) return null;
   return { player: row.player, utility: row.breakdown.teamUtility };

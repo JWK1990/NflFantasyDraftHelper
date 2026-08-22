@@ -73,4 +73,19 @@ describe("draft tip bar", () => {
       "Washington (ADP 94, Rank 8, Picks Before 14)",
     ]);
   });
+
+  it("always shows the QB draft tracker line, even with no card and no tips", () => {
+    render(
+      <QbCardView card={null} qbSummary={{ qbsTaken: 7, teamsNeedingQb: 4 }} />,
+    );
+    expect(screen.getByText("QBs drafted = 7, Teams Needing QB = 4")).toBeTruthy();
+    expect(screen.getByText("QB tracker")).toBeTruthy();
+  });
+
+  it("shows the tracker alongside the QB verdict card", () => {
+    render(
+      <QbCardView card={qbCard} qbSummary={{ qbsTaken: 6, teamsNeedingQb: 5 }} />,
+    );
+    expect(screen.getByText("QBs drafted = 6, Teams Needing QB = 5")).toBeTruthy();
+  });
 });

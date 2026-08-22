@@ -1425,6 +1425,7 @@
         "asOf": "2026-08-19"
       },
       "modelRankScore": 71.68,
+      "watchlist": true,
       "leagueWinner": {
         "confidence": "high",
         "archetypes": [
@@ -1593,7 +1594,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/drake-london/12594",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": 95.06
+      "modelRankScore": 95.06,
+      "watchlist": true
     },
     {
       "player": "Kenneth Walker III",
@@ -7739,7 +7741,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/jalen-coker/35137",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -37.26
+      "modelRankScore": -37.26,
+      "watchlist": true
     },
     {
       "player": "Fernando Mendoza",
@@ -8377,6 +8380,7 @@
         "asOf": "2026-08-19"
       },
       "modelRankScore": -71.48,
+      "watchlist": true,
       "leagueWinner": {
         "confidence": "medium",
         "archetypes": [
@@ -9287,7 +9291,8 @@
         "sourceUrl": "https://www.draftsharks.com/fantasy/points-outlook/adonai-mitchell/35018",
         "asOf": "2026-08-19"
       },
-      "modelRankScore": -85.06
+      "modelRankScore": -85.06,
+      "watchlist": true
     },
     {
       "player": "Oronde Gadsden II",

@@ -1,4 +1,4 @@
-import type { QbCard } from "../engine/qbCard.ts";
+import type { QbCard, QbSummary } from "../engine/qbCard.ts";
 import {
   lastNameFromPlayer,
   type WatchlistTip,
@@ -8,13 +8,14 @@ import { formatPickLabel } from "../engine/snake.ts";
 interface QbCardProps {
   card: QbCard | null;
   watchlistTips?: WatchlistTip[];
+  qbSummary?: QbSummary;
 }
 
 function formatPts(value: number): string {
   return Math.round(value).toLocaleString("en-US");
 }
 
-export function QbCardView({ card, watchlistTips = [] }: QbCardProps) {
+export function QbCardView({ card, watchlistTips = [], qbSummary }: QbCardProps) {
   const tips = [...watchlistTips].sort(
     (a, b) =>
       a.expectedPick - b.expectedPick ||
@@ -22,7 +23,7 @@ export function QbCardView({ card, watchlistTips = [] }: QbCardProps) {
       a.player.player.localeCompare(b.player.player),
   );
   const primaryTip = tips[0];
-  if (!card && !primaryTip) return null;
+  if (!card && !primaryTip && !qbSummary) return null;
 
   const edgePts = card ? Math.abs(card.edge) : 0;
   const verdictLabel = !card
@@ -34,7 +35,9 @@ export function QbCardView({ card, watchlistTips = [] }: QbCardProps) {
         : "A skill player is your strongest next pick";
 
   const deltaLabel = !card
-    ? "Watchlist"
+    ? primaryTip
+      ? "Watchlist"
+      : null
     : card.leader === "even"
       ? "About even"
       : card.leader === "qb"
@@ -62,15 +65,23 @@ export function QbCardView({ card, watchlistTips = [] }: QbCardProps) {
       : card?.leader === "qb"
         ? "qb-now"
         : "skill";
-  const title = primaryTip ? "Upcoming watchlist players" : verdictLabel;
+  const title = primaryTip
+    ? "Upcoming watchlist players"
+    : (verdictLabel ?? "QB tracker");
 
   return (
     <details className={`qb-card verdict-${verdictClass}${primaryTip ? " has-lw-tip" : ""}`}>
       <summary>
         <div className="qb-card-summary-row">
           <span className="qb-card-title">{title}</span>
-          <span className="qb-card-delta">{deltaLabel}</span>
+          {deltaLabel ? <span className="qb-card-delta">{deltaLabel}</span> : null}
         </div>
+        {qbSummary ? (
+          <div className="qb-card-qbcounts">
+            QBs drafted = {qbSummary.qbsTaken}, Teams Needing QB ={" "}
+            {qbSummary.teamsNeedingQb}
+          </div>
+        ) : null}
         {tips.length > 0 ? (
           <ul className="qb-card-lw-list">
             {tips.map((tip) => (

@@ -229,6 +229,14 @@
   color: #ffe7a3;
 }
 
+.qb-card-qbcounts {
+  margin-top: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .qb-card-hint {
   margin: 0 0 6px;
   color: var(--text-muted);
